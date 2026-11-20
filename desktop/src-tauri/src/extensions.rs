@@ -58,8 +58,8 @@ pub async fn install_extension_from_wheel(
 
     // Two accepted inputs: a single ``.whl``, or a ``.zip`` containing
     // one or more wheels (the bundle format that GAT's ``make
-    // meridian-bundle`` emits). Bundle case lets us install both
-    // ``gat`` and ``meridian-gat`` in a single click — uv resolves the
+    // gridsight-bundle`` emits). Bundle case lets us install both
+    // ``gat`` and ``gridsight-gat`` in a single click — uv resolves the
     // dependency order from wheel metadata when passed multiple wheels
     // in one invocation.
     let lower = path.to_ascii_lowercase();

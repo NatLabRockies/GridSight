@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Meridian — production compose file.
+# GridSight — production compose file.
 #
 # Both images are built ahead of time by `scripts/docker-build.sh`.
 # Compose just runs them. The server image installs deps (including
@@ -16,7 +16,7 @@
 
 services:
   server:
-    image: meridian-server:${IMAGE_TAG:-local}
+    image: gridsight-server:${IMAGE_TAG:-local}
     env_file:
       - path: .env
         required: false
@@ -25,7 +25,7 @@ services:
       # otherwise win unconditionally over env_file). Useful when DB_PATH
       # is set to an s3:// URI to back the DB on object storage.
       DATA_DIR: ${DATA_DIR:-/data}
-      DB_PATH: ${DB_PATH:-/data/meridian.db}
+      DB_PATH: ${DB_PATH:-/data/gridsight.db}
       # Map operator-facing SEAWEEDFS_* into the standard AWS_* chain so
       # the storage helper (and anything else using boto3) works out of
       # the box without bespoke env-var handling. Empty defaults mean
@@ -43,7 +43,7 @@ services:
       DEMANDTLDR_S3_ENDPOINT_URL: ${SEAWEEDFS_ENDPOINT:-${AWS_ENDPOINT_URL_S3:-}}
       DEMANDTLDR_S3_REGION: ${AWS_REGION:-us-east-1}
     volumes:
-      - meridian-data:/data
+      - gridsight-data:/data
     expose:
       - "5001"
     # Optional dependency: only takes effect when the s3-local profile
@@ -101,7 +101,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: meridian-web:${IMAGE_TAG:-local}
+    image: gridsight-web:${IMAGE_TAG:-local}
     env_file:
       - path: .env
         required: false
@@ -115,5 +115,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  meridian-data:
+  gridsight-data:
   seaweedfs-data:

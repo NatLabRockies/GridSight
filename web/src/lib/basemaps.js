@@ -161,7 +161,7 @@ export function applyFeatureVisibility(map, hiddenSet) {
 // ── Persistence ─────────────────────────────────────────────────────────────
 // The decluttered look is a per-operator preference (esp. on the wall), so
 // persist the hidden set across reloads.
-const HIDDEN_KEY = 'meridian.basemapHiddenCategories';
+const HIDDEN_KEY = 'gridsight.basemapHiddenCategories';
 
 export function loadHiddenCategories() {
   try {

@@ -1,5 +1,5 @@
 /**
- * Meridian – Bun API Server
+ * GridSight – Bun API Server
  *
  * Responsibilities:
  *  1. Cookie-based session auth (login / logout / session-check)
@@ -1045,7 +1045,7 @@ const server = Bun.serve({
 });
 
 console.log(
-  `✅ Meridian API server running on http://localhost:${server.port}`,
+  `✅ GridSight API server running on http://localhost:${server.port}`,
 );
 console.log(`   Mode      : ${IS_PROD ? "production" : "development"}`);
 console.log(`   Backend   : ${BACKEND_URL}`);

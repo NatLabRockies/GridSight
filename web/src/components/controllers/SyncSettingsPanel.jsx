@@ -300,7 +300,7 @@ export default function SyncSettingsPanel({ onClose }) {
               <TextField
                 size="small"
                 label="Wall host"
-                placeholder="meridian.example.org"
+                placeholder="gridsight.example.org"
                 value={hostInput}
                 onChange={handleHostChange}
                 onBlur={handleHostBlur}

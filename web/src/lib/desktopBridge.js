@@ -35,8 +35,8 @@ const API_PREFIX = '/api/';
 // platform-agnostic.
 const API_SCHEME_HOST = (() => {
   const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
-  if (/windows/i.test(ua)) return 'http://meridian-api.localhost';
-  return 'meridian-api://localhost';
+  if (/windows/i.test(ua)) return 'http://gridsight-api.localhost';
+  return 'gridsight-api://localhost';
 })();
 
 let _installed = false;
@@ -44,13 +44,13 @@ let _installed = false;
 // Verbose log forwarding (every console.log/info/debug + every XHR
 // open/send/load) is invaluable during desktop debugging but spams
 // ``backend.log`` in steady state. Default off; flip with
-// ``localStorage.setItem('meridian.verbose', '1')`` and reload.
+// ``localStorage.setItem('gridsight.verbose', '1')`` and reload.
 // warn/error and abnormal XHR terminal states (error/abort/timeout) are
 // always forwarded — those are the signals you actually want to find.
 function isVerbose() {
   try {
     return typeof localStorage !== 'undefined'
-      && localStorage.getItem('meridian.verbose') === '1';
+      && localStorage.getItem('gridsight.verbose') === '1';
   } catch (_) {
     return false;
   }
@@ -139,7 +139,7 @@ export async function initDesktopBridge({ onProgress } = {}) {
   const apiKey = await invoke('get_api_key');
   installMcpSseListener(backendUrl, apiKey);
 
-  window.__MERIDIAN__ = { backendUrl, apiKey };
+  window.__GRIDSIGHT__ = { backendUrl, apiKey };
 
   _installed = true;
   return { tauri: true, backendUrl };
@@ -199,7 +199,7 @@ function installAuthMock() {
       if (mocked) return mocked;
     }
 
-    // Rewrite same-origin /api/* requests to the meridian-api:// scheme so
+    // Rewrite same-origin /api/* requests to the gridsight-api:// scheme so
     // the Rust protocol handler proxies them to the sidecar. Works in dev
     // and packaged builds with the same wiring — replaces the Vite proxy.
     // We force credentials:'omit' because (a) auth is via API key header,
@@ -260,7 +260,7 @@ function jsonResponse(body, init = {}) {
 // mirrored to the Rust side, which logs them to the same ``backend.log``
 // file the sidecar writes to. Same goes for uncaught errors and
 // unhandled promise rejections. The point is debuggability: a single
-// ``tail -f ~/Library/Logs/Meridian/backend.log`` shows everything that
+// ``tail -f ~/Library/Logs/GridSight/backend.log`` shows everything that
 // happened across the three processes during an interaction.
 //
 // We intentionally don't strip arguments — JSON-serialize when we can,
@@ -437,7 +437,7 @@ function installWindowOpenOverride(invoke) {
     invoke('open_window', {
       label,
       url: new URL(urlStr, window.location.href).toString(),
-      title: 'Meridian',
+      title: 'GridSight',
       width: 1200,
       height: 800,
     }).catch((e) => console.error('[desktopBridge] open_window failed:', e));
@@ -453,7 +453,7 @@ function installWindowOpenOverride(invoke) {
 //
 // Claude Desktop pushes bus commands via POST /internal/bus/inject. The
 // server fans those out over a Server-Sent Events stream that the frontend
-// subscribes to here. Each event is dispatched as a 'meridian:mcp-bus'
+// subscribes to here. Each event is dispatched as a 'gridsight:mcp-bus'
 // CustomEvent; stateBus.js calls bus.receive() on it so the local UI
 // updates exactly as if the message came from a WebSocket sync peer.
 //
@@ -479,7 +479,7 @@ function installMcpSseListener(backendUrl, apiKey) {
     es.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
-        window.dispatchEvent(new CustomEvent('meridian:mcp-bus', { detail: msg }));
+        window.dispatchEvent(new CustomEvent('gridsight:mcp-bus', { detail: msg }));
       } catch (e) {
         console.warn('[desktopBridge] bad MCP SSE message:', event.data, e);
       }
@@ -508,7 +508,7 @@ function installWebSocketOverride(backendUrl) {
         // this marker — leave it pointed at the real remote host instead of
         // rewriting it to our local sidecar. Without this, a dev wall on
         // localhost:3001 would be hijacked back to the desktop's own backend.
-        if (parsed.searchParams.get('meridian_passthrough') === '1') {
+        if (parsed.searchParams.get('gridsight_passthrough') === '1') {
           return new RealWebSocket(rawUrl, ...rest);
         }
         if (

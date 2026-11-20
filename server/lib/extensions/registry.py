@@ -1,5 +1,5 @@
 """
-ExtensionRegistry — discovers, loads, and manages Meridian extensions.
+ExtensionRegistry — discovers, loads, and manages GridSight extensions.
 """
 
 from __future__ import annotations
@@ -8,22 +8,22 @@ import importlib.metadata
 import logging
 from typing import Iterator
 
-from meridian.extensions import (
+from gridsight.extensions import (
     ExtensionManifest,
-    MeridianExtensionBase,
+    GridSightExtensionBase,
     ExtensionContext,
 )
 
 logger = logging.getLogger(__name__)
 
-ENTRY_POINT_GROUP = "meridian.extensions"
+ENTRY_POINT_GROUP = "gridsight.extensions"
 
 
 class ExtensionRegistry:
     """Central registry for all discovered extensions."""
 
     def __init__(self) -> None:
-        self._extensions: dict[str, MeridianExtensionBase] = {}
+        self._extensions: dict[str, GridSightExtensionBase] = {}
         self._manifests: dict[str, ExtensionManifest] = {}
 
     # -- Discovery & lifecycle --
@@ -37,7 +37,7 @@ class ExtensionRegistry:
         for ep in group_eps:
             try:
                 ext_class = ep.load()
-                ext: MeridianExtensionBase = ext_class()
+                ext: GridSightExtensionBase = ext_class()
                 manifest = ext.get_manifest()
 
                 if manifest.name in self._extensions:
@@ -62,7 +62,7 @@ class ExtensionRegistry:
 
         logger.info("Extension discovery complete: %d loaded", len(self._extensions))
 
-    def register(self, ext: MeridianExtensionBase, context: ExtensionContext) -> None:
+    def register(self, ext: GridSightExtensionBase, context: ExtensionContext) -> None:
         """Register a directly-instantiated extension (no entry_point).
 
         Used for built-in demo extensions that ship inside the server
@@ -90,7 +90,7 @@ class ExtensionRegistry:
 
     # -- Accessors --
 
-    def get(self, name: str) -> MeridianExtensionBase | None:
+    def get(self, name: str) -> GridSightExtensionBase | None:
         return self._extensions.get(name)
 
     def get_manifest(self, name: str) -> ExtensionManifest | None:
@@ -99,7 +99,7 @@ class ExtensionRegistry:
     def list_manifests(self) -> list[ExtensionManifest]:
         return list(self._manifests.values())
 
-    def items(self) -> Iterator[tuple[str, MeridianExtensionBase]]:
+    def items(self) -> Iterator[tuple[str, GridSightExtensionBase]]:
         yield from self._extensions.items()
 
     def __len__(self) -> int:

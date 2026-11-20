@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import duckdb
 
 if TYPE_CHECKING:
-    from meridian.extensions import DuckDBTableInfo, MeridianExtensionBase
+    from gridsight.extensions import DuckDBTableInfo, GridSightExtensionBase
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class DuckDBEngine:
         self.lock = lock if lock is not None else threading.RLock()
         self._table_catalog: list[DuckDBTableInfo] = []
 
-    def register_extension(self, name: str, ext: MeridianExtensionBase) -> None:
+    def register_extension(self, name: str, ext: GridSightExtensionBase) -> None:
         """Create a schema for the extension and let it register tables."""
         safe_name = name.replace("-", "_")
         schema = f"ext_{safe_name}"
@@ -59,7 +59,7 @@ class DuckDBEngine:
         except Exception:
             logger.exception("Failed to register DuckDB tables for %s", name)
 
-    def refresh_extension(self, name: str, ext: MeridianExtensionBase) -> None:
+    def refresh_extension(self, name: str, ext: GridSightExtensionBase) -> None:
         """Re-run an extension's table registration after data changes.
 
         Called after a scenario upload or delete so any new schema is
@@ -110,7 +110,7 @@ class DuckDBEngine:
         import os
         import tempfile
 
-        from meridian.extensions import DuckDBTableInfo
+        from gridsight.extensions import DuckDBTableInfo
 
         safe_table = self._safe_identifier(table)
         suffix = ".csv" if fmt == "csv" else ".parquet"

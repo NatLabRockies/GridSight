@@ -10,7 +10,7 @@ from lib.responses import make_response
 from lib.state import storage
 from models.orm import Project, Scenario
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 

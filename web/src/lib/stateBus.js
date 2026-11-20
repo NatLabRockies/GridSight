@@ -26,14 +26,14 @@ let _seq = 0;
  * don't churn tabIds on every dev edit.
  */
 const _tabId = (() => {
-  const alreadyInit = !!window.__meridianTabIdInitialized__;
+  const alreadyInit = !!window.__gridsightTabIdInitialized__;
   const isFreshPopup = !alreadyInit && !!window.opener;
-  let id = sessionStorage.getItem('meridian-tab-id');
+  let id = sessionStorage.getItem('gridsight-tab-id');
   if (!id || isFreshPopup) {
     id = `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    sessionStorage.setItem('meridian-tab-id', id);
+    sessionStorage.setItem('gridsight-tab-id', id);
   }
-  window.__meridianTabIdInitialized__ = true;
+  window.__gridsightTabIdInitialized__ = true;
   return id;
 })();
 
@@ -125,7 +125,7 @@ function pickSessionColor(sessionId) {
 
 // ─── Discovery ────────────────────────────────────────────────────────────
 
-const DISCOVERY_CHANNEL_NAME = 'meridian-discovery';
+const DISCOVERY_CHANNEL_NAME = 'gridsight-discovery';
 const HEARTBEAT_INTERVAL = 2000;
 const TAB_TIMEOUT = 6000; // consider tab dead if no heartbeat for this long
 
@@ -254,7 +254,7 @@ class TabDiscovery {
 class SessionBroadcastChannel {
   constructor(sessionId, onMessage) {
     this.type = 'local';
-    this._channel = new BroadcastChannel(`meridian-session-${sessionId}`);
+    this._channel = new BroadcastChannel(`gridsight-session-${sessionId}`);
     this._channel.onmessage = (e) => {
       if (e.data && typeof e.data === 'object' && e.data.channel) {
         onMessage(e.data);
@@ -281,7 +281,7 @@ class SessionWebSocket {
     this._ticket = opts.ticket || null;
     this._ticketRefresh = typeof opts.ticketRefresh === 'function'
       ? opts.ticketRefresh : null;
-    // Optional explicit backend base (e.g. "https://meridian.example.org" or
+    // Optional explicit backend base (e.g. "https://gridsight.example.org" or
     // "http://localhost:5001") for joining a session hosted on a DIFFERENT
     // backend. When unset, the socket targets this page's origin (the
     // same-origin / dev-port-5001 default below).
@@ -353,7 +353,7 @@ class SessionWebSocket {
     // otherwise rewrites every localhost target to its own sidecar port —
     // lets this one through to the actual remote host (e.g. a wall on
     // localhost:3001 in dev). Harmless elsewhere; the server ignores it.
-    if (this._wsBase) params.set('meridian_passthrough', '1');
+    if (this._wsBase) params.set('gridsight_passthrough', '1');
     const qs = params.toString();
     const url = `${wsProto}//${host}/ws/sync/${encodeURIComponent(this._sessionKey)}${qs ? `?${qs}` : ''}`;
 
@@ -509,7 +509,7 @@ class StateBus {
    * @param {Function} [opts.ticketRefresh] — async () => ticket; invoked on
    *   each (re)connect because tickets are single-use.
    * @param {string} [opts.wsBase] — backend base URL when the session is
-   *   hosted on a DIFFERENT backend (e.g. "https://meridian.example.org" or, in
+   *   hosted on a DIFFERENT backend (e.g. "https://gridsight.example.org" or, in
    *   dev, "http://localhost:5001"). Omit for a same-origin session.
    */
   joinRemoteSession(sessionKey, opts = {}) {
@@ -892,7 +892,7 @@ export function decodeJoinCode(code) {
 
 /**
  * Pull { host, token } out of a scanned control deep-link, e.g.
- * `https://meridian.example.org/control/AbC123`. The QR shown in Give Control
+ * `https://gridsight.example.org/control/AbC123`. The QR shown in Give Control
  * encodes exactly this URL, so a desktop scanner gets host + token for free.
  */
 export function parseControlUrl(str) {
@@ -939,7 +939,7 @@ export function parseJoinInput(input, hostHint) {
 }
 
 // Remember the last wall host the desktop joined so it's pre-filled next time.
-const LAST_REMOTE_HOST_KEY = 'meridian.lastRemoteHost';
+const LAST_REMOTE_HOST_KEY = 'gridsight.lastRemoteHost';
 
 export function getLastRemoteHost() {
   try { return localStorage.getItem(LAST_REMOTE_HOST_KEY) || ''; }
@@ -964,7 +964,7 @@ export function normalizeHost(host) {
 // SSE inject stream. desktopBridge.js fires this event; we call receive()
 // so the message travels through the normal channel dispatch path.
 if (typeof window !== 'undefined') {
-  window.addEventListener('meridian:mcp-bus', (e) => {
+  window.addEventListener('gridsight:mcp-bus', (e) => {
     const msg = e.detail;
     if (!msg) return;
     bus.receive(msg);          // apply to this client's local UI

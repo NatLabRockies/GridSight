@@ -22,7 +22,7 @@ import db
 from lib.serializers import file_suffix
 from lib.state import storage
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 
 _SAMPLE_ROWS = 50
 _VALUES_PER_COL = 5

@@ -72,7 +72,7 @@ const MENU_Z_INDEX = 1500;
 // Custom drag MIME type used by the drag-to-combine flow so we don't collide
 // with native text / file drops. The payload value is the source frame's
 // `frameKey` (the App-level entry key).
-const DRAG_MIME = 'application/x-meridian-chart-frame';
+const DRAG_MIME = 'application/x-gridsight-chart-frame';
 
 // Fraction of the frame's height, measured from the top, that counts as the
 // header's hover zone. Scrubbing or reading the plot below it must NOT summon

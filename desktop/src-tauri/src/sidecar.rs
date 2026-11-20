@@ -115,23 +115,23 @@ pub fn spawn(paths: &Paths) -> Result<(BackendHandle, u16)> {
         &port.to_string(),
     ])
     .current_dir(&paths.server_dir)
-    .env("MERIDIAN_DESKTOP", "1")
+    .env("GRIDSIGHT_DESKTOP", "1")
     // The webview reaches the protocol handler via different URL forms
     // depending on the host OS (see desktopBridge.js for the same logic).
     // The server uses this base to assemble URLs it hands to the webview
     // (extension icons, etc.).
     .env(
-        "MERIDIAN_API_BASE",
+        "GRIDSIGHT_API_BASE",
         if cfg!(target_os = "windows") {
-            "http://meridian-api.localhost"
+            "http://gridsight-api.localhost"
         } else {
-            "meridian-api://localhost"
+            "gridsight-api://localhost"
         },
     )
-    .env("MERIDIAN_DATA_DIR", &paths.data_dir)
+    .env("GRIDSIGHT_DATA_DIR", &paths.data_dir)
     .env("DATA_DIR", &paths.data_dir)
-    .env("DB_PATH", paths.data_dir.join("meridian.db"))
-    // Co-locate GAT data with Meridian's per-install data dir instead
+    .env("DB_PATH", paths.data_dir.join("gridsight.db"))
+    // Co-locate GAT data with GridSight's per-install data dir instead
     // of GAT's user-home default (~/.gat/server/...). Backups, resets,
     // and uninstalls then target a single tree, and parallel desktop
     // installs don't accidentally share scenarios.
@@ -248,13 +248,13 @@ fn write_dev_backend_file(port: u16, desktop_dir: &std::path::Path) -> Result<()
 
 /// Write backend connection info to the user config dir so the MCP server
 /// subprocess can discover the ephemeral port without the desktop source tree.
-/// Path: <config_dir>/meridian/backend.json
+/// Path: <config_dir>/gridsight/backend.json
 fn write_backend_config_file(port: u16) -> Result<()> {
     let Some(config_dir) = dirs::config_dir() else {
         log::warn!("could not determine user config dir; MCP discovery will fall back to .dev-backend.json");
         return Ok(());
     };
-    let dir = config_dir.join("meridian");
+    let dir = config_dir.join("gridsight");
     std::fs::create_dir_all(&dir)
         .with_context(|| format!("create {}", dir.display()))?;
     let path = dir.join("backend.json");

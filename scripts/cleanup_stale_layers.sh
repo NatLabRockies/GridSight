@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # scripts/cleanup_stale_layers.sh
 #
-# Removes orphan layer / geometry / dataset rows from meridian.db. Two classes
+# Removes orphan layer / geometry / dataset rows from gridsight.db. Two classes
 # of orphan are cleaned up:
 #
 #   1. Deprecated layer types — e.g. the legacy ScatterplotLayer-based
 #      `*__generation` layer that was superseded by the dual-radius
 #      GeneratorLayer-based `*__renewable` + `*__thermal` pair. These rows
 #      never serve real geometry once the extension is restarted (the
-#      registration was removed in code) but they sit in meridian.db until
+#      registration was removed in code) but they sit in gridsight.db until
 #      explicitly deleted.
 #
-#   2. Stale extension references — meridian.db rows whose
+#   2. Stale extension references — gridsight.db rows whose
 #      `(extension_name, project, scenario)` triple doesn't appear in the
 #      extension's current scenario registry. Most common cause: ingest data
 #      moved (e.g. switching GAT_DB_PATH from S3 to local) leaves rows
@@ -23,13 +23,13 @@
 # Usage:
 #   ./scripts/cleanup_stale_layers.sh                # dry-run (default)
 #   ./scripts/cleanup_stale_layers.sh --apply        # actually delete
-#   MERIDIAN_DB=/path/to/meridian.db ./scripts/cleanup_stale_layers.sh
+#   GRIDSIGHT_DB=/path/to/gridsight.db ./scripts/cleanup_stale_layers.sh
 #   GAT_DB=/path/to/gat_server.duckdb ./scripts/cleanup_stale_layers.sh
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MERIDIAN_DB="${MERIDIAN_DB:-./data/meridian.db}"
+GRIDSIGHT_DB="${GRIDSIGHT_DB:-./data/gridsight.db}"
 GAT_DB="${GAT_DB:-${HOME}/.gat/server/gat_server.duckdb}"
 APPLY=0
 
@@ -47,8 +47,8 @@ for arg in "$@"; do
   esac
 done
 
-if [ ! -f "$MERIDIAN_DB" ]; then
-  echo "meridian.db not found at $MERIDIAN_DB" >&2
+if [ ! -f "$GRIDSIGHT_DB" ]; then
+  echo "gridsight.db not found at $GRIDSIGHT_DB" >&2
   exit 1
 fi
 
@@ -57,11 +57,11 @@ if [ ! -x "$PYTHON" ]; then
   PYTHON=python3
 fi
 
-APPLY="$APPLY" MERIDIAN_DB="$MERIDIAN_DB" GAT_DB="$GAT_DB" "$PYTHON" - <<'PYEOF'
+APPLY="$APPLY" GRIDSIGHT_DB="$GRIDSIGHT_DB" GAT_DB="$GAT_DB" "$PYTHON" - <<'PYEOF'
 import os, sqlite3, sys
 
 apply = os.environ.get("APPLY") == "1"
-mer_path = os.environ["MERIDIAN_DB"]
+mer_path = os.environ["GRIDSIGHT_DB"]
 gat_path = os.environ["GAT_DB"]
 
 mer = sqlite3.connect(mer_path)
@@ -86,7 +86,7 @@ deprecated_geom_rows = list(mer.execute(
 
 # ── 2. Stale GAT extension refs ───────────────────────────────────────────
 # Read the GAT registry's currently-valid (project, scenario) pairs and
-# treat anything in meridian.db with a `gat` extension and a different
+# treat anything in gridsight.db with a `gat` extension and a different
 # `prefix__` as stale.
 valid_prefixes = set()
 try:

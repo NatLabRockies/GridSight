@@ -11,7 +11,7 @@ exercise that code path.
 
 from __future__ import annotations
 
-from meridian.extensions import (
+from gridsight.extensions import (
     Capability,
     ExtensionManifest,
     GraphEdge,
@@ -19,7 +19,7 @@ from meridian.extensions import (
     GraphStratum,
     GraphTopology,
     GraphTopologyDescriptor,
-    MeridianExtensionBase,
+    GridSightExtensionBase,
 )
 
 
@@ -108,15 +108,15 @@ def _make_topology() -> GraphTopology:
     return GraphTopology(nodes=nodes, edges=edges, strata=_STRATA)
 
 
-class DemoGraphExtension(MeridianExtensionBase):
+class DemoGraphExtension(GridSightExtensionBase):
     """Synthetic stratified transmission topology for the GraphPanel."""
 
     def get_manifest(self) -> ExtensionManifest:
         return ExtensionManifest(
-            name="meridian_demo",
+            name="gridsight_demo",
             display_name="Demo (built-in)",
             version="0.1.0",
-            description="Built-in demonstration topologies for Meridian's "
+            description="Built-in demonstration topologies for GridSight's "
                         "non-geospatial views.",
             capabilities=[Capability.GRAPH_PROVIDER],
             icon="hub",

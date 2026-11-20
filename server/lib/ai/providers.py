@@ -3,7 +3,7 @@ LLM provider registry — loads provider config from JSON, resolves env vars, bu
 
 Providers are auto-discovered from environment variables. Set API keys to enable
 cloud providers; Ollama is probed automatically if configured. Set
-MERIDIAN_DISABLE_AI=true to force-disable all AI functionality.
+GRIDSIGHT_DISABLE_AI=true to force-disable all AI functionality.
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ _ollama_reachable: bool | None = None
 
 def is_ai_disabled() -> bool:
     """Check if AI is force-disabled via environment variable."""
-    val = os.environ.get("MERIDIAN_DISABLE_AI", "").lower()
+    val = os.environ.get("GRIDSIGHT_DISABLE_AI", "").lower()
     return val in ("true", "1", "yes")
 
 

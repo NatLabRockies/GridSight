@@ -20,7 +20,7 @@ import { useCategoryColors, hexToRgb, rgbToHex } from '../../lib/categoryColors.
 
 // ── Palette persistence (localStorage) ───────────────────────────────────────
 
-const PALETTES_KEY = 'meridian_category_palettes';
+const PALETTES_KEY = 'gridsight_category_palettes';
 
 function readPalettes() {
   try { return JSON.parse(localStorage.getItem(PALETTES_KEY) ?? '{}'); } catch { return {}; }

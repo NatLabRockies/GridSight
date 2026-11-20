@@ -7,11 +7,11 @@
  * for components like chartgpu-react — it's true only when the browser
  * supports WebGPU AND the user hasn't opted out.
  *
- * The preference is stored in localStorage (key: `meridian.webgpuPreferred`)
+ * The preference is stored in localStorage (key: `gridsight.webgpuPreferred`)
  * so toggling it survives reloads. Default depends on environment:
  *   - Desktop (Tauri): ON — the webview is always a secure context and
  *     supports WebGPU on supported hardware.
- *   - Browser: OFF — Meridian deployments aren't guaranteed to serve
+ *   - Browser: OFF — GridSight deployments aren't guaranteed to serve
  *     over HTTPS, so ChartGPU stays opt-in.
  * An explicit user toggle (`setPreferred`) overrides the default in both.
  *
@@ -27,7 +27,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.webgpuPreferred';
+const STORAGE_KEY = 'gridsight.webgpuPreferred';
 
 function isTauriDesktop() {
   // Tauri exposes window.__TAURI__ (or __TAURI_INTERNALS__ in v2 IPC mode)

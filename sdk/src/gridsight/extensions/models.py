@@ -1,5 +1,5 @@
 """
-Data models shared between extensions and the Meridian server.
+Data models shared between extensions and the GridSight server.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ class ExtensionManifest:
     description: str = ""
     capabilities: list[Capability] = field(default_factory=list)
     icon: str | None = None              # Material Icon name (e.g. "bolt") or URL
-    min_meridian_version: str | None = None
+    min_gridsight_version: str | None = None
 
 
 @dataclass
@@ -66,7 +66,7 @@ class GeometryDescriptor:
     format: str                  # "geojson", "geoparquet", "shapefile"
     join_key: str | None = None
     description: str = ""
-    shared: bool = False         # If True, scope="global" in meridian DB (visible across projects)
+    shared: bool = False         # If True, scope="global" in gridsight DB (visible across projects)
 
 
 @dataclass
@@ -80,7 +80,7 @@ class DatasetDescriptor:
     timestamp_col: str | None = None  # None = static dataset
     columns: list[str] = field(default_factory=list)
     description: str = ""
-    shared: bool = False         # If True, scope="global" in meridian DB (visible across projects)
+    shared: bool = False         # If True, scope="global" in gridsight DB (visible across projects)
 
 
 @dataclass

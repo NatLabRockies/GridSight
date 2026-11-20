@@ -26,7 +26,7 @@ from models.orm import (
     User,
 )
 
-logger = logging.getLogger("meridian.lineage")
+logger = logging.getLogger("gridsight.lineage")
 
 
 # ---------------------------------------------------------------------------

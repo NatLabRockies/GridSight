@@ -33,7 +33,7 @@ from models.orm import (
     Project, Scenario, User, UserExtensionPref,
 )
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 
@@ -63,7 +63,7 @@ def _resolve_icon(registry: ExtensionRegistry, m) -> str | None:
         return None
     try:
         if ext.get_icon_bytes() is not None:
-            base = os.environ.get("MERIDIAN_API_BASE", "")
+            base = os.environ.get("GRIDSIGHT_API_BASE", "")
             return f"{base}/api/extensions/{m.name}/icon"
     except Exception:
         pass
@@ -362,7 +362,7 @@ async def getExtensionUploadSpecs(ext_name: str, request: Request, _=Depends(req
     ext = registry.get(ext_name)
     if not ext:
         raise HTTPException(404, f"Extension {ext_name} not found")
-    from meridian.extensions import Capability
+    from gridsight.extensions import Capability
     manifest = registry.get_manifest(ext_name)
     if not manifest or Capability.FILE_UPLOAD not in manifest.capabilities:
         return make_response([])
@@ -377,7 +377,7 @@ async def handleExtensionUpload(ext_name: str, spec_name: str, request: Request,
     if not ext:
         raise HTTPException(404, f"Extension {ext_name} not found")
 
-    temp_dir = Path(tempfile.mkdtemp(prefix="meridian_ext_upload_"))
+    temp_dir = Path(tempfile.mkdtemp(prefix="gridsight_ext_upload_"))
 
     try:
         upload = await stream_multipart_to_dir(request, temp_dir)
@@ -592,7 +592,7 @@ async def handleExtensionPreview(ext_name: str, spec_name: str, request: Request
     if not ext:
         raise HTTPException(404, f"Extension {ext_name} not found")
 
-    temp_dir = Path(tempfile.mkdtemp(prefix="meridian_ext_preview_"))
+    temp_dir = Path(tempfile.mkdtemp(prefix="gridsight_ext_preview_"))
     try:
         upload = await stream_multipart_to_dir(request, temp_dir)
     except Exception as e:

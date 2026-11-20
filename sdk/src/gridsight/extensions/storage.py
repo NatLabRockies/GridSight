@@ -119,7 +119,7 @@ def _cache_root() -> Path:
     """Where downloaded S3 objects live on local disk.
 
     Order: STORAGE_CACHE_DIR > DATA_DIR/_s3_cache > /tmp/_s3_cache.
-    DATA_DIR is the standard meridian server volume, so by default the
+    DATA_DIR is the standard gridsight server volume, so by default the
     cache rides on the same PVC as the rest of /data — handy for
     avoiding a re-download on every pod restart.
     """

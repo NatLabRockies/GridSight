@@ -37,12 +37,12 @@ import polars as pl
 
 from .base import BaseStorageHandler
 
-logger = logging.getLogger("meridian.storage")
+logger = logging.getLogger("gridsight.storage")
 
 
 class S3Handler(BaseStorageHandler):
     """
-    Stores and retrieves Meridian data from an S3-compatible object store
+    Stores and retrieves GridSight data from an S3-compatible object store
     (AWS S3, MinIO, etc.).
 
     Parameters
@@ -55,7 +55,7 @@ class S3Handler(BaseStorageHandler):
         Custom endpoint URL for S3-compatible stores (e.g. MinIO).
         Pass ``None`` or omit for standard AWS S3.
     bucket_name : str
-        The bucket that acts as the root of all Meridian data.
+        The bucket that acts as the root of all GridSight data.
     """
 
     def __init__(

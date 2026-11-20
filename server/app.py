@@ -33,7 +33,7 @@ logging.basicConfig(
 for _noisy in ("python_multipart", "multipart", "urllib3", "httpx", "httpcore"):
     logging.getLogger(_noisy).setLevel(logging.WARNING)
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 logger.info("Logging initialised at level %s", _log_level_name)
 
 import db  # noqa: E402 — must follow logging.basicConfig so S3 download failures are visible
@@ -59,7 +59,7 @@ db.init_db()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from meridian.extensions import ExtensionContext, Capability
+    from gridsight.extensions import ExtensionContext, Capability
 
     # One lock to rule them all — SQLite session + DuckDB engine + every
     # extension's gateway all serialize on db._STATEMENT_LOCK. Two
@@ -148,7 +148,7 @@ async def lifespan(app: FastAPI):
     # atexit doesn't work — Python tears down the executor first and
     # uploads fail with "cannot schedule new futures after interpreter
     # shutdown".
-    from meridian.extensions.storage import flush_pending
+    from gridsight.extensions.storage import flush_pending
     flush_pending()
 
 
@@ -162,7 +162,7 @@ app = FastAPI(lifespan=lifespan)
 # When running embedded in the Tauri desktop shell, the webview origin differs
 # from the sidecar's localhost host, so the browser requires CORS. The flag is
 # off by default — production deployments behind the Bun proxy are unaffected.
-if os.environ.get("MERIDIAN_DESKTOP") == "1":
+if os.environ.get("GRIDSIGHT_DESKTOP") == "1":
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(
         CORSMiddleware,
@@ -199,9 +199,9 @@ from routes import (  # noqa: E402
 )
 
 # Desktop-only: MCP inject bridge. Excluded from container builds where
-# MERIDIAN_DESKTOP is unset — the endpoint must never be reachable on a
+# GRIDSIGHT_DESKTOP is unset — the endpoint must never be reachable on a
 # network-accessible deployment.
-if os.environ.get("MERIDIAN_DESKTOP") == "1":
+if os.environ.get("GRIDSIGHT_DESKTOP") == "1":
     from routes import internal  # noqa: E402
     app.include_router(internal.router)
 

@@ -19,7 +19,7 @@
 
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.maxCanvasSize';
+const STORAGE_KEY = 'gridsight.maxCanvasSize';
 // WebGL's typical MAX_TEXTURE_SIZE on desktop GPUs. Apple Silicon, recent
 // AMD/NVIDIA, and recent Intel iGPUs all report 16384.
 const DEFAULT_WIDTH = 16384;

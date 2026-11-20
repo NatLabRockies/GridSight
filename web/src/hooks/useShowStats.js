@@ -8,7 +8,7 @@
 
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.showStatsWidget';
+const STORAGE_KEY = 'gridsight.showStatsWidget';
 
 function readStored() {
   try {

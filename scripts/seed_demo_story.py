@@ -17,7 +17,7 @@ Usage:
     python3 scripts/seed_demo_story.py
 
     # against another backend / key:
-    MERIDIAN_URL=http://127.0.0.1:5001 API_KEY=dev-api-key python3 scripts/seed_demo_story.py
+    GRIDSIGHT_URL=http://127.0.0.1:5001 API_KEY=dev-api-key python3 scripts/seed_demo_story.py
 
 Re-running deletes the existing "AI Test Drive" story and recreates it, so edit
 the BEATS below and re-run to iterate on the prompt set.
@@ -88,7 +88,7 @@ BEATS = [
     },
 ]
 
-BASE_URL = os.environ.get("MERIDIAN_URL", "http://127.0.0.1:5001").rstrip("/")
+BASE_URL = os.environ.get("GRIDSIGHT_URL", "http://127.0.0.1:5001").rstrip("/")
 API_KEY = os.environ.get("API_KEY", "dev-api-key")
 
 
@@ -141,7 +141,7 @@ def main() -> None:
         print(f"  Step {i}: {beat['title']} ({len(beat['prompts'])} prompts)")
 
     print(
-        f"\nDone. Open the '{STORY_NAME}' story in Meridian, then click the "
+        f"\nDone. Open the '{STORY_NAME}' story in GridSight, then click the "
         "prompt chips above the Atlas composer. Use the story Prev/Next to "
         "move between prompt groups."
     )

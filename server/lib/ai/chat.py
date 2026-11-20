@@ -305,7 +305,7 @@ def build_system_prompt(
                     sql_col = ""
                     # Get invalidated datasets and sql_column from the decorator metadata
                     try:
-                        from meridian.extensions.controls import _collect_input_controls
+                        from gridsight.extensions.controls import _collect_input_controls
                         ext_obj = registry.get(ext_name)
                         if ext_obj:
                             meta_map = _collect_input_controls(ext_obj)
@@ -567,7 +567,7 @@ async def chat_stream(
       data: {"type": "done"}
     """
     if is_ai_disabled():
-        yield _sse({"type": "error", "message": "AI is disabled (MERIDIAN_DISABLE_AI is set)."})
+        yield _sse({"type": "error", "message": "AI is disabled (GRIDSIGHT_DISABLE_AI is set)."})
         yield _sse({"type": "done"})
         return
 

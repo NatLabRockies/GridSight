@@ -1,8 +1,8 @@
 /**
- * Meridian UI font options.
+ * GridSight UI font options.
  *
  * Every stack resolves from fonts already present on the host — nothing is
- * fetched from a CDN. That is deliberate: Meridian ships to air-gapped and
+ * fetched from a CDN. That is deliberate: GridSight ships to air-gapped and
  * kiosk deployments (the display wall, k8s) where a webfont request would
  * either fail or hang the first paint, and the published-artifact CSP blocks
  * external hosts outright. Each entry ends in a generic family so an unusual

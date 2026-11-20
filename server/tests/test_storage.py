@@ -16,7 +16,7 @@ from lib.storage.filesystem import FileSystemHandler
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
-RAW_DATA = b"hello meridian storage test"
+RAW_DATA = b"hello gridsight storage test"
 SHA256   = hashlib.sha256(RAW_DATA).hexdigest()
 
 

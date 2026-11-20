@@ -2,7 +2,7 @@
  * ChartTrayApp — lightweight root for a dedicated "chart tray" browser tab.
  *
  * Rendered in place of <App/> when the URL carries ?view=chartTray. This
- * tab is a pure receiver for chart transfers from a paired Meridian tab:
+ * tab is a pure receiver for chart transfers from a paired GridSight tab:
  * no deck.gl, no layer state, no extension discovery. Just a session join,
  * clock/scenario sync, and a full-screen ChartTray that hosts whatever
  * scenario charts get sent its way.

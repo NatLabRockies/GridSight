@@ -1,12 +1,12 @@
 """
-meridian.extensions — public API for extension developers.
+gridsight.extensions — public API for extension developers.
 
 Usage::
 
-    from meridian.extensions import MeridianExtensionBase, ExtensionManifest, Capability
+    from gridsight.extensions import GridSightExtensionBase, ExtensionManifest, Capability
 """
 
-from .base import MeridianExtensionBase, ExtensionContext
+from .base import GridSightExtensionBase, ExtensionContext
 from .models import (
     Capability,
     CategoryMapDescriptor,
@@ -77,7 +77,7 @@ __all__ = [
     "GraphTopology",
     "GraphTopologyDescriptor",
     "LayerDefinition",
-    "MeridianExtensionBase",
+    "GridSightExtensionBase",
     "PreviewResult",
     "UploadFormField",
     "UploadResult",

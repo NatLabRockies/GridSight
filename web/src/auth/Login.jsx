@@ -78,7 +78,7 @@ export default function Login({ onLogin }) {
             }}
           >
             <Typography variant="h4" fontWeight={700} letterSpacing={1}>
-              Meridian
+              GridSight
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
               Geospatial Analytics Platform

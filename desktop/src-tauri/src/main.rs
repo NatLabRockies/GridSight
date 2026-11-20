@@ -81,7 +81,7 @@ async fn open_window(
 
     let parsed = tauri::Url::parse(&url).map_err(|e| format!("invalid url: {e}"))?;
     WebviewWindowBuilder::new(&app, &label, WebviewUrl::External(parsed))
-        .title(title.as_deref().unwrap_or("Meridian"))
+        .title(title.as_deref().unwrap_or("GridSight"))
         .inner_size(width.unwrap_or(1200.0), height.unwrap_or(800.0))
         .build()
         .map_err(|e| format!("create window: {e}"))?;
@@ -204,7 +204,7 @@ fn main() {
             }
         })
         .run(tauri::generate_context!())
-        .expect("error while running Meridian desktop");
+        .expect("error while running GridSight desktop");
 }
 
 async fn bootstrap(app: AppHandle) {
@@ -342,10 +342,10 @@ fn resolve_paths(app: &AppHandle) -> anyhow::Result<Paths> {
 
     let data_dir = dirs::data_dir()
         .context("could not resolve OS data dir")?
-        .join("Meridian");
+        .join("GridSight");
     let cache_dir = dirs::cache_dir()
         .context("could not resolve OS cache dir")?
-        .join("Meridian");
+        .join("GridSight");
     let log_dir = platform_log_dir();
 
     std::fs::create_dir_all(&data_dir).context("create data dir")?;
@@ -370,7 +370,7 @@ fn resolve_paths(app: &AppHandle) -> anyhow::Result<Paths> {
     // stale ``resources/wheels/`` left over from a prior
     // ``bun run build`` would shadow the local source edits, and the
     // venv would be running prebuilt wheels even though the developer
-    // is editing the GAT / meridian-gat source live. Release builds
+    // is editing the GAT / gridsight-gat source live. Release builds
     // ship without the local repo at all, so they need the bundled
     // resources (.app at install time has no ``~/code/GAT``).
     let bundled_server = if cfg!(debug_assertions) {
@@ -441,15 +441,15 @@ fn resolve_paths(app: &AppHandle) -> anyhow::Result<Paths> {
 fn platform_log_dir() -> PathBuf {
     if cfg!(target_os = "macos") {
         if let Some(home) = dirs::home_dir() {
-            return home.join("Library").join("Logs").join("Meridian");
+            return home.join("Library").join("Logs").join("GridSight");
         }
     }
-    // Linux + Windows + macOS fallback: <cache>/Meridian/Logs.
+    // Linux + Windows + macOS fallback: <cache>/GridSight/Logs.
     // (Linux has $XDG_STATE_HOME conceptually but `dirs::state_dir()` is
     // None on macOS/Windows, so we don't get cross-platform consistency
     // from it. Cache-adjacent is conventional enough.)
     dirs::cache_dir()
-        .map(|c| c.join("Meridian").join("Logs"))
+        .map(|c| c.join("GridSight").join("Logs"))
         .unwrap_or_else(|| PathBuf::from("./logs"))
 }
 

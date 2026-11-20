@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/setup-extensions.sh
 #
-# One-shot bootstrap of the Meridian extensions that the local-dev
+# One-shot bootstrap of the GridSight extensions that the local-dev
 # workflow expects (sibling repos, editable installs).
 #
 # Why this exists: server/pyproject.toml's [tool.uv.sources] points at
@@ -21,7 +21,7 @@
 #   ./scripts/setup-extensions.sh --gat-ref v1.2.3 # pin GAT to a tag/branch/sha
 #   ./scripts/setup-extensions.sh --skip-gat       # skip the GAT clone
 #   ./scripts/setup-extensions.sh --parent-dir DIR # clone siblings under DIR
-#                                                  # (defaults to meridian's parent)
+#                                                  # (defaults to gridsight's parent)
 #
 # Requirements:
 #   - git
@@ -38,7 +38,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
-MERIDIAN_DIR="$(pwd)"
+GRIDSIGHT_DIR="$(pwd)"
 
 # ── Defaults ──────────────────────────────────────────────────────────────
 GAT_REF="${GAT_REF:-mw/v1.0.0}"
@@ -115,8 +115,8 @@ fi
 # ── Wire up server deps ──────────────────────────────────────────────────
 echo
 echo "── Installing server dependencies ────────────────────────"
-echo "  cd $MERIDIAN_DIR/server && uv sync"
-cd "$MERIDIAN_DIR/server"
+echo "  cd $GRIDSIGHT_DIR/server && uv sync"
+cd "$GRIDSIGHT_DIR/server"
 uv sync
 
 cat <<EOF
@@ -124,7 +124,7 @@ cat <<EOF
 ──────────────────────────────────────────────────────────
 ✓ Extensions ready. Next steps:
 
-   cd $MERIDIAN_DIR/web && bun install && cd ..
+   cd $GRIDSIGHT_DIR/web && bun install && cd ..
    ./dev.sh
 
    # Open http://localhost:5173

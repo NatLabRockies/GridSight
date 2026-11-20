@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 // and the deck.gl/MapLibre canvas alike. Used to make the UI legible on the
 // Insight2D video wall (9–12 4K displays, ~15000×6000+).
 
-const STORAGE_KEY = 'meridian-display-scale';
+const STORAGE_KEY = 'gridsight-display-scale';
 
 export const SCALE_MODES = ['auto', '1x', '1.25x', '1.5x', '2x', '3x'];
 const MODE_TO_SCALE = { '1x': 1, '1.25x': 1.25, '1.5x': 1.5, '2x': 2, '3x': 3 };
@@ -72,10 +72,10 @@ export function DisplayScaleProvider({ children }) {
     // body zoom and drift off their control. Undoes the zoom on their portal
     // root → correct position (at normal size). Menus with an explicit
     // anchorEl use zoomAnchorProps instead and are not tagged.
-    let counterEl = document.getElementById('meridian-menu-counter-zoom');
+    let counterEl = document.getElementById('gridsight-menu-counter-zoom');
     if (!counterEl) {
       counterEl = document.createElement('style');
-      counterEl.id = 'meridian-menu-counter-zoom';
+      counterEl.id = 'gridsight-menu-counter-zoom';
       document.head.appendChild(counterEl);
     }
     counterEl.textContent = scale === 1 ? '' : `.zoom-counter-menu { zoom: ${1 / scale}; }`;

@@ -750,7 +750,7 @@ export async function fetchStories(params = {}) {
 
 /**
  * Download a story as a self-contained bundle (story + steps + each step's full
- * perspective config), suitable for sharing with another Meridian instance.
+ * perspective config), suitable for sharing with another GridSight instance.
  */
 export async function exportStory(id) {
   return apiFetch(`/api/stories/${id}/export`, { name: 'exportStory' });

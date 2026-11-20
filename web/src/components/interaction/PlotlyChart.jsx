@@ -44,7 +44,7 @@ function estimateYTickChars(traces) {
 }
 
 /**
- * Apply Meridian's chart chrome to a Plotly layout: transparent bg, themed
+ * Apply GridSight's chart chrome to a Plotly layout: transparent bg, themed
  * font, no drag-to-zoom, unified hover, tight margins + automargin, and the
  * horizontal legend below the plot. Shared by PlotlyChart (extension/AI charts
  * built from rows) AND PlotlyInline (pre-built AI specs) so both render

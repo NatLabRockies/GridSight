@@ -80,8 +80,8 @@ export function applyRenderPixelRatio(map, displayScale) {
   if (!map || typeof map.setPixelRatio !== 'function') return undefined;
   const dpr = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
   const ratio = dpr * (displayScale > 0 ? displayScale : 1);
-  if (map.__meridianPixelRatio === ratio) return ratio;
-  map.__meridianPixelRatio = ratio;
+  if (map.__gridsightPixelRatio === ratio) return ratio;
+  map.__gridsightPixelRatio = ratio;
   map.setPixelRatio(ratio);
   return ratio;
 }

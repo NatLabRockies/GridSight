@@ -123,7 +123,7 @@ function extractDatasetColumnValues(dataIndex, column) {
 
 // ── Palette persistence ───────────────────────────────────────────────────────
 
-const PALETTES_KEY = 'meridian_palettes';
+const PALETTES_KEY = 'gridsight_palettes';
 
 function readPalettes() {
   try { return JSON.parse(localStorage.getItem(PALETTES_KEY) ?? '{}'); } catch { return {}; }

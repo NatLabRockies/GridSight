@@ -1535,6 +1535,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "gridsight-desktop"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "dirs 5.0.1",
+ "env_logger",
+ "http",
+ "keyring",
+ "log",
+ "parking_lot",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "thiserror 1.0.69",
+ "tokio",
+ "zip",
+]
+
+[[package]]
 name = "gtk"
 version = "0.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2239,29 +2262,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "meridian-desktop"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytes",
- "dirs 5.0.1",
- "env_logger",
- "http",
- "keyring",
- "log",
- "parking_lot",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "thiserror 1.0.69",
- "tokio",
- "zip",
 ]
 
 [[package]]

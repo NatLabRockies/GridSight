@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "meridian-seds"
+name = "gridsight-seds"
 version = "0.1.0"
-description = "Meridian extension for the EIA State Energy Data System (SEDS)"
+description = "GridSight extension for the EIA State Energy Data System (SEDS)"
 requires-python = ">=3.11"
 dependencies = [
-    "meridian-sdk",
+    "gridsight-sdk",
     "duckdb>=1.0",
     "pyarrow",
     "polars>=1.39.0",
@@ -19,7 +19,7 @@ dependencies = [
     "truststore>=0.9",
 ]
 
-[project.entry-points."meridian.extensions"]
+[project.entry-points."gridsight.extensions"]
 seds = "seds_ext:SedsExtension"
 
 # hatchling includes all files under the package dir (incl. the bundled

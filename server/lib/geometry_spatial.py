@@ -28,7 +28,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 
 # Extensions ST_Read (GDAL) can open directly. Shapefiles arrive zipped because
 # they are multi-file (.shp/.shx/.dbf/.prj); we unzip and read the inner .shp.

@@ -8,11 +8,11 @@
  * or by calling `setViewportDebug(true)` from the console.
  *
  * When enabled it (a) console.logs structured camera/sync events and (b)
- * publishes a live snapshot to `window.__meridianViewport` and notifies
+ * publishes a live snapshot to `window.__gridsightViewport` and notifies
  * subscribers, which the on-screen ViewportDebugHUD renders.
  */
 
-const STORAGE_KEY = 'meridian.debugViewport';
+const STORAGE_KEY = 'gridsight.debugViewport';
 
 let enabled = false;
 try {
@@ -65,7 +65,7 @@ export function logViewport(tag, data) {
   snapshot[tag] = entry;
   snapshot.last = entry;
   try {
-    if (typeof window !== 'undefined') window.__meridianViewport = snapshot;
+    if (typeof window !== 'undefined') window.__gridsightViewport = snapshot;
   } catch { /* noop */ }
   // eslint-disable-next-line no-console
   console.log(`[viewport:${tag}]`, data);

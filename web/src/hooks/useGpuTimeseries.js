@@ -19,7 +19,7 @@
 
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.useGpuTimeseries';
+const STORAGE_KEY = 'gridsight.useGpuTimeseries';
 
 function readStored() {
   try {

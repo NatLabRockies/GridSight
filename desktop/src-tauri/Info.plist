@@ -6,6 +6,6 @@
        (Tab Sync → Remote → Scan). macOS shows its camera prompt the first
        time and refuses access without this string. -->
   <key>NSCameraUsageDescription</key>
-  <string>Meridian uses the camera to scan a QR code when joining a remote session.</string>
+  <string>GridSight uses the camera to scan a QR code when joining a remote session.</string>
 </dict>
 </plist>

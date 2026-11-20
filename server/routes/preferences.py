@@ -20,7 +20,7 @@ from lib.responses import make_response
 from routes.extensions import _get_or_create_default_user
 from models.orm import UserPreference
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 # Defaults applied when the user hasn't set a style preference.

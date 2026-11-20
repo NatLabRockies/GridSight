@@ -25,14 +25,14 @@ export function tagChartDraw(node, source, info) {
   if (!node) return;
   try {
     node.dataset.chartSource = source;
-    node.__meridianDraw = { ...info, at: new Date().toISOString() };
+    node.__gridsightDraw = { ...info, at: new Date().toISOString() };
   } catch { /* noop */ }
 }
 
 function dumpPlots(reason) {
   const plots = [...document.querySelectorAll('.js-plotly-plot')].map((p) => {
     const fl = p._fullLayout || {};
-    const d = p.__meridianDraw || null;
+    const d = p.__gridsightDraw || null;
     return {
       source: p.dataset.chartSource || 'UNTAGGED',
       client: `${p.clientWidth}x${p.clientHeight}`,

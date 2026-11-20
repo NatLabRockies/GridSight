@@ -16,7 +16,7 @@ use tauri::State;
 
 use crate::AppState;
 
-const SERVICE: &str = "Meridian";
+const SERVICE: &str = "GridSight";
 
 fn index_path(data_dir: &Path) -> PathBuf {
     data_dir.join("secrets-index.json")

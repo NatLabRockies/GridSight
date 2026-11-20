@@ -4,7 +4,7 @@
  *
  * Why: Tauri's macOS WebKit WebView returns `null` / `false` immediately
  * from the three native dialog functions without ever showing UI. Every
- * call site that used them in Meridian (story create/delete, story
+ * call site that used them in GridSight (story create/delete, story
  * chapter add/overwrite/delete, perspective save/overwrite/delete, layer
  * delete confirm) silently no-ops on desktop. This module provides
  * portable replacements that work identically in browser and Tauri.

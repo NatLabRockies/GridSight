@@ -16,7 +16,7 @@ from models.orm import (
     Project, Scenario,
 )
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 
 
 def sync_extension_data(registry: ExtensionRegistry):

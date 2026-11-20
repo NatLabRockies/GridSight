@@ -20,7 +20,7 @@ name: Desktop Build & Release
 #
 # macOS bundle is AD-HOC signed (`signingIdentity: "-"` in
 # tauri.conf.json), not signed with a real Developer ID. This makes
-# the bundle structurally valid so the "Meridian.app is damaged" error
+# the bundle structurally valid so the "GridSight.app is damaged" error
 # doesn't fire on download, but Gatekeeper will still block first launch
 # until the user either right-clicks → Open (macOS 14 and earlier) or
 # clears the quarantine xattr (macOS 15+). The release notes below tell
@@ -45,10 +45,10 @@ jobs:
     name: macOS aarch64 build
     runs-on: macos-14  # Apple Silicon. macos-13 is Intel if we ever need it.
     steps:
-      - name: Checkout meridian
+      - name: Checkout gridsight
         uses: actions/checkout@v4
         with:
-          path: meridian
+          path: gridsight
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -61,8 +61,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            meridian/desktop/src-tauri/target
-          key: ${{ runner.os }}-aarch64-cargo-${{ hashFiles('meridian/desktop/src-tauri/Cargo.lock') }}
+            gridsight/desktop/src-tauri/target
+          key: ${{ runner.os }}-aarch64-cargo-${{ hashFiles('gridsight/desktop/src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-aarch64-cargo-
 
@@ -73,35 +73,35 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          cache-dependency-glob: meridian/server/uv.lock
+          cache-dependency-glob: gridsight/server/uv.lock
 
       - name: Set up Python (matches server/.python-version)
         uses: actions/setup-python@v5
         with:
-          python-version-file: meridian/server/.python-version
+          python-version-file: gridsight/server/.python-version
 
       - name: Install web dependencies (frontend)
-        working-directory: meridian/web
+        working-directory: gridsight/web
         run: bun install --frozen-lockfile
 
       - name: Install desktop dependencies (Tauri CLI)
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         run: bun install --frozen-lockfile
 
       - name: Fetch host uv binary for bundling
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         run: bash scripts/fetch-uv.sh
 
       - name: Prepare server resources (wheels + source)
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         env:
-          MERIDIAN_REPO: ${{ github.workspace }}/meridian
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
         run: bash scripts/prepare-resources.sh
 
       - name: Build Tauri app
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         env:
-          MERIDIAN_REPO: ${{ github.workspace }}/meridian
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
         # No code-signing. Don't set APPLE_* env vars at all — tauri-
         # bundler treats empty strings as "set, try to import" and
         # fails. Leaving them unset is what actually skips signing.
@@ -111,7 +111,7 @@ jobs:
         id: outputs
         run: |
           set -eu
-          BUNDLE_DIR="meridian/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle"
+          BUNDLE_DIR="gridsight/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle"
           if [ ! -d "${BUNDLE_DIR}" ]; then
             echo "::error::Tauri bundle dir not produced at ${BUNDLE_DIR}"
             exit 1
@@ -156,10 +156,10 @@ jobs:
         # know about cmd vs powershell quoting differences.
         shell: bash
     steps:
-      - name: Checkout meridian
+      - name: Checkout gridsight
         uses: actions/checkout@v4
         with:
-          path: meridian
+          path: gridsight
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -172,8 +172,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            meridian/desktop/src-tauri/target
-          key: ${{ runner.os }}-x86_64-cargo-${{ hashFiles('meridian/desktop/src-tauri/Cargo.lock') }}
+            gridsight/desktop/src-tauri/target
+          key: ${{ runner.os }}-x86_64-cargo-${{ hashFiles('gridsight/desktop/src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-x86_64-cargo-
 
@@ -184,42 +184,42 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          cache-dependency-glob: meridian/server/uv.lock
+          cache-dependency-glob: gridsight/server/uv.lock
 
       - name: Set up Python (matches server/.python-version)
         uses: actions/setup-python@v5
         with:
-          python-version-file: meridian/server/.python-version
+          python-version-file: gridsight/server/.python-version
 
       - name: Install web dependencies (frontend)
-        working-directory: meridian/web
+        working-directory: gridsight/web
         run: bun install --frozen-lockfile
 
       - name: Install desktop dependencies (Tauri CLI)
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         run: bun install --frozen-lockfile
 
       - name: Fetch host uv binary for bundling
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         run: bash scripts/fetch-uv.sh
 
       - name: Prepare server resources (wheels + source)
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         env:
-          MERIDIAN_REPO: ${{ github.workspace }}/meridian
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
         run: bash scripts/prepare-resources.sh
 
       - name: Build Tauri app
-        working-directory: meridian/desktop
+        working-directory: gridsight/desktop
         env:
-          MERIDIAN_REPO: ${{ github.workspace }}/meridian
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
         run: bun run tauri build --target x86_64-pc-windows-msvc
 
       - name: Locate + stage outputs
         id: outputs
         run: |
           set -eu
-          BUNDLE_DIR="meridian/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle"
+          BUNDLE_DIR="gridsight/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle"
           if [ ! -d "${BUNDLE_DIR}" ]; then
             echo "::error::Tauri bundle dir not produced at ${BUNDLE_DIR}"
             exit 1
@@ -289,13 +289,13 @@ jobs:
 
             ### macOS
 
-            1. Download the `.dmg`, open it, drag **Meridian.app** to Applications.
-            2. On **macOS 14 (Sonoma) or earlier**: right-click Meridian in
+            1. Download the `.dmg`, open it, drag **GridSight.app** to Applications.
+            2. On **macOS 14 (Sonoma) or earlier**: right-click GridSight in
                Applications, choose **Open**, then **Open** in the prompt.
             3. On **macOS 15 (Sequoia) or later**: macOS won't offer the
                right-click bypass. Run this once in Terminal:
                ```
-               xattr -dr com.apple.quarantine /Applications/Meridian.app
+               xattr -dr com.apple.quarantine /Applications/GridSight.app
                ```
                Then launch normally.
 

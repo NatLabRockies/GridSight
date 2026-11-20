@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from meridian.extensions.models import GraphTopology
+    from gridsight.extensions.models import GraphTopology
 
 # Output is in arbitrary world units; the frontend orthographic view
 # fits the resulting bounds to the viewport on load.

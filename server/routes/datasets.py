@@ -33,7 +33,7 @@ from models.orm import (
     TableDescription,
 )
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 

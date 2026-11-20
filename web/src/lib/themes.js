@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 /**
- * Meridian theme definitions.
+ * GridSight theme definitions.
  *
  * Each theme provides a full MUI palette plus a `custom` block for
  * app-specific surface tokens (glassmorphism panels, chart colors, etc.).

@@ -23,7 +23,7 @@ from models.orm import (
     Painting, Project, Scenario,
 )
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 # Qualitative palette for categorical layer coloring (Tableau-10-ish, RGBA).

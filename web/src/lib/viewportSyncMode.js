@@ -14,7 +14,7 @@
  * or with `?fitBounds=1` (sticky).
  */
 
-const KEY = 'meridian.viewportFitBounds';
+const KEY = 'gridsight.viewportFitBounds';
 
 let enabled = false;
 try {

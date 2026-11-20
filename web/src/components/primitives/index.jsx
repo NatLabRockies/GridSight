@@ -59,7 +59,7 @@ export function ExtensionIcon({ ext, fontSize = 'medium', sx, color }) {
     return <ExtensionOutlinedIcon fontSize={fontSize} color={color} sx={sx} />;
   }
   // A URL if it starts with '/' (relative) or contains a scheme delimiter
-  // (`http://`, `https://`, `meridian-api://`, `data:`, etc.). Anything
+  // (`http://`, `https://`, `gridsight-api://`, `data:`, etc.). Anything
   // else is treated as a Material icon name.
   const isUrl = ext.icon.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(ext.icon);
   if (!isUrl) {

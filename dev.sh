@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Meridian development launcher
+# GridSight development launcher
 #
 # Usage:
 #   ./dev.sh          — run everything locally (requires bun, uv)
@@ -92,7 +92,7 @@ if [ "$MODE" = "clean" ]; then
 fi
 
 if [ "$MODE" = "docker" ]; then
-  echo "Starting Meridian (Docker dev mode)…"
+  echo "Starting GridSight (Docker dev mode)…"
   echo "  → Vite dev server: http://localhost:5173"
   echo "  → Bun proxy:       http://localhost:3001"
   echo "  → Python backend:  http://localhost:5001 (internal)"
@@ -102,7 +102,7 @@ fi
 
 # ── Local mode ──────────────────────────────────────────────────────────────
 
-echo "Starting Meridian (local dev mode)…"
+echo "Starting GridSight (local dev mode)…"
 
 # Kill any leftover processes from a previous run
 kill_port 5001
@@ -112,12 +112,12 @@ kill_port 5173
 # 1. Python backend
 echo "  → Python backend:  http://localhost:5001"
 
-# Sync core deps + first-party extensions (meridian-sdk, meridian-seds).
+# Sync core deps + first-party extensions (gridsight-sdk, gridsight-seds).
 # External extensions (GAT, DemandTldr) live in sibling repos and are NOT in
 # the lockfile, so we install them separately after syncing. This keeps them
 # from being uninstalled by subsequent `uv sync` calls.
 (cd server && uv sync --group dev)
-for ext_path in "../GAT" "../GAT/meridian-ext" "../DemandTldr/meridian-ext"; do
+for ext_path in "../GAT" "../GAT/gridsight-ext" "../DemandTldr/gridsight-ext"; do
   abs="$(cd "$(dirname "$0")" && realpath "$ext_path" 2>/dev/null || true)"
   if [ -d "$abs" ]; then
     echo "  → Installing external extension: $ext_path"
@@ -137,11 +137,11 @@ EOF
 
 (cd server && API_KEY="${_DEV_API_KEY}" \
   DATA_DIR="${DATA_DIR:-../data}" \
-  DB_PATH="${DB_PATH:-../data/meridian.db}" \
+  DB_PATH="${DB_PATH:-../data/gridsight.db}" \
   LLM_MODEL="${LLM_MODEL:-gpt-oss:20B}" \
   OLLAMA_URL="${OLLAMA_URL:-http://localhost:11434}" \
   LOG_LEVEL="${LOG_LEVEL:-info}" \
-  MERIDIAN_DESKTOP=1 \
+  GRIDSIGHT_DESKTOP=1 \
   uv run --no-sync uvicorn app:app --host 127.0.0.1 --port 5001 --reload) &
 PIDS+=($!)
 

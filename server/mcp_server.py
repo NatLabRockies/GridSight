@@ -1,22 +1,22 @@
 """
-Meridian MCP server — stdio transport for Claude Desktop integration.
+GridSight MCP server — stdio transport for Claude Desktop integration.
 
 Exposes read tools (list scenarios/layers/charts) and control tools that push
-live state changes into the running Meridian app via the stateBus inject
+live state changes into the running GridSight app via the stateBus inject
 endpoint.
 
 Backend discovery (first match wins):
-  1. MERIDIAN_BACKEND_URL + MERIDIAN_API_KEY  env vars
-  2. <platform config dir>/meridian/backend.json  (written by Tauri on launch)
+  1. GRIDSIGHT_BACKEND_URL + GRIDSIGHT_API_KEY  env vars
+  2. <platform config dir>/gridsight/backend.json  (written by Tauri on launch)
   3. desktop/.dev-backend.json  relative to this file  (dev-mode fallback)
 
 Invoke via Claude Desktop config:
   {
     "mcpServers": {
-      "meridian": {
+      "gridsight": {
         "command": "uv",
-        "args": ["run", "--project", "/path/to/Meridian/server",
-                 "python", "/path/to/Meridian/server/mcp_server.py"]
+        "args": ["run", "--project", "/path/to/GridSight/server",
+                 "python", "/path/to/GridSight/server/mcp_server.py"]
       }
     }
   }
@@ -60,7 +60,7 @@ def _port_alive(port: int, timeout: float = 0.4) -> bool:
 
 
 def _load_backend_info() -> tuple[str, str]:
-    """Return (base_url, api_key) for a LIVE Meridian backend.
+    """Return (base_url, api_key) for a LIVE GridSight backend.
 
     Discovery order: env override → desktop descriptor → dev descriptors. Each
     file-based candidate is liveness-checked (a quick TCP connect) so a stale
@@ -70,13 +70,13 @@ def _load_backend_info() -> tuple[str, str]:
     wins and every tool call fails with "Connection refused" until the stale
     file is deleted by hand. Raises RuntimeError only if nothing is reachable.
     """
-    url = os.environ.get("MERIDIAN_BACKEND_URL")
-    key = os.environ.get("MERIDIAN_API_KEY")
+    url = os.environ.get("GRIDSIGHT_BACKEND_URL")
+    key = os.environ.get("GRIDSIGHT_API_KEY")
     if url and key:
         return url.rstrip("/"), key  # explicit override — honored as-is, no probe
 
     candidates = [
-        _platform_config_dir() / "meridian" / "backend.json",
+        _platform_config_dir() / "gridsight" / "backend.json",
         Path(__file__).parent.parent / "desktop" / ".dev-backend.json",
         Path.cwd() / ".dev-backend.json",
     ]
@@ -105,8 +105,8 @@ def _load_backend_info() -> tuple[str, str]:
         return first_parsed
 
     raise RuntimeError(
-        "Meridian is not running or its backend descriptor was not found. "
-        "Start the Meridian desktop app (or ./dev.sh), then try again."
+        "GridSight is not running or its backend descriptor was not found. "
+        "Start the GridSight desktop app (or ./dev.sh), then try again."
     )
 
 
@@ -122,7 +122,7 @@ def _get_client() -> httpx.Client:
             headers={"X-MyApp-ApiKey": api_key},
             timeout=10.0,
         )
-        logger.info("MCP server connected to Meridian at %s", base_url)
+        logger.info("MCP server connected to GridSight at %s", base_url)
     return _client
 
 
@@ -222,9 +222,9 @@ def _resolve_sector(s: str) -> str | None:
 # ---------------------------------------------------------------------------
 
 mcp = FastMCP(
-    "Meridian",
+    "GridSight",
     instructions=(
-        "Tools for reading data from and controlling the Meridian geospatial "
+        "Tools for reading data from and controlling the GridSight geospatial "
         "energy visualization app (maps, timeseries, and charts for US energy grid data).\n\n"
         "ALWAYS call describe_data() first. It returns every loaded extension's data "
         "model — tables, columns, controls, and example queries. The app's data lives in "
@@ -254,7 +254,7 @@ mcp = FastMCP(
 
 @mcp.tool()
 def list_scenarios() -> list[dict]:
-    """List all projects and their scenarios currently loaded in Meridian.
+    """List all projects and their scenarios currently loaded in GridSight.
 
     Call this first to understand what data is available before using
     set_scenario() or other tools that require project/scenario names.
@@ -269,7 +269,7 @@ def list_scenarios() -> list[dict]:
 
 @mcp.tool()
 def list_layers() -> list[dict]:
-    """List all map layers available in Meridian (generation capacity, transmission lines, etc.).
+    """List all map layers available in GridSight (generation capacity, transmission lines, etc.).
 
     Use the returned layer_id values with set_layer_visibility().
     The project/scenario fields indicate which dataset a layer belongs to (null = always visible).
@@ -331,7 +331,7 @@ def list_charts() -> list[dict]:
 
 @mcp.tool()
 def describe_data(extension: str = "") -> dict:
-    """Describe queryable data in Meridian — CALL THIS FIRST.
+    """Describe queryable data in GridSight — CALL THIS FIRST.
 
     Two tiers:
       - describe_data()           → CONCISE overview: every extension with a
@@ -379,7 +379,7 @@ def describe_data(extension: str = "") -> dict:
 
 @mcp.tool()
 def query_data(sql: str) -> list[dict]:
-    """Run a read-only SQL query against Meridian's DuckDB tables and return rows.
+    """Run a read-only SQL query against GridSight's DuckDB tables and return rows.
 
     Use this to explore data before charting (confirm columns, value ranges,
     distinct categories). Only SELECT / WITH queries are allowed. Table names
@@ -413,7 +413,7 @@ def create_chart(
     chart_format: str = "plotly",
     anchor: str = "floating",
 ) -> str:
-    """Build a chart from your own SQL and open it live in the Meridian app.
+    """Build a chart from your own SQL and open it live in the GridSight app.
 
     This is the flexible, generative path: YOU write the SQL against any
     extension table (see describe_data()), choose the chart type and axes, and
@@ -468,7 +468,7 @@ def load_dataset(
     timestamp_col: str = "",
     description: str = "",
 ) -> dict:
-    """Load a local data file (Parquet or CSV) into Meridian as a queryable dataset.
+    """Load a local data file (Parquet or CSV) into GridSight as a queryable dataset.
 
     Use this to bring arbitrary data into the app. The file is uploaded to the
     backend, registered as a DuckDB table under the `user` schema, and becomes
@@ -757,7 +757,7 @@ def set_style_preference(
 
 @mcp.tool()
 def set_scenario(project: str, scenario: str) -> str:
-    """Switch the active project and scenario displayed in Meridian.
+    """Switch the active project and scenario displayed in GridSight.
 
     Use list_scenarios() to get valid project/scenario names.
 
@@ -770,7 +770,7 @@ def set_scenario(project: str, scenario: str) -> str:
 
 @mcp.tool()
 def pan_map(latitude: float, longitude: float, zoom: float = 5.0) -> str:
-    """Pan and zoom the Meridian map to specific coordinates.
+    """Pan and zoom the GridSight map to specific coordinates.
 
     Args:
         latitude: Target latitude in decimal degrees (e.g. 39.5 for center of US)
@@ -786,7 +786,7 @@ def pan_map(latitude: float, longitude: float, zoom: float = 5.0) -> str:
 
 @mcp.tool()
 def set_basemap(basemap: str) -> str:
-    """Change the Meridian map's base layer (background tiles).
+    """Change the GridSight map's base layer (background tiles).
 
     Canonical schema lives in lib/ai/tool_catalog.py (shared with the web chat);
     this injects the same 'set-basemap' bus payload the in-app assistant uses.
@@ -804,7 +804,7 @@ def set_basemap(basemap: str) -> str:
 
 @mcp.tool()
 def zoom_map(delta: float) -> str:
-    """Zoom the Meridian map in/out by a RELATIVE amount, keeping the center.
+    """Zoom the GridSight map in/out by a RELATIVE amount, keeping the center.
 
     Each +1 roughly doubles the scale (zooms in); each -1 halves it. Use for
     'zoom in a little' (~1), 'zoom in' (~2), 'zoom out' (~-2). To jump to a place,
@@ -818,7 +818,7 @@ def zoom_map(delta: float) -> str:
 
 @mcp.tool()
 def fit_map_to_bounds(west: float, south: float, east: float, north: float) -> str:
-    """Fit the Meridian map view to a geographic bounding box.
+    """Fit the GridSight map view to a geographic bounding box.
 
     Use this to frame a region of interest (e.g. a state, NERC region, or country).
 
@@ -846,7 +846,7 @@ def open_chart(
     entity_id: str = "",
     anchor: str = "",
 ) -> str:
-    """Open an extension chart panel in the Meridian UI with live data.
+    """Open an extension chart panel in the GridSight UI with live data.
 
     Use list_charts() first to find chart names and their scope.
 
@@ -900,7 +900,7 @@ def open_chart(
 
 @mcp.tool()
 def set_layer_visibility(layer_id: str, visible: bool) -> str:
-    """Show or hide a specific map layer in Meridian.
+    """Show or hide a specific map layer in GridSight.
 
     Use list_layers() to find valid layer_id values.
 
@@ -920,7 +920,7 @@ def set_layer_visibility(layer_id: str, visible: bool) -> str:
 
 @mcp.tool()
 def set_clock_year(year: int) -> str:
-    """Jump the Meridian animation clock to a specific year and pause playback.
+    """Jump the GridSight animation clock to a specific year and pause playback.
 
     Useful for snapping the map and charts to a particular point in time
     before opening a chart or taking a screenshot.
@@ -1086,7 +1086,7 @@ def query_seds(
 
 @mcp.tool()
 def close_charts() -> str:
-    """Close ALL open chart panels in Meridian (AI charts and extension charts).
+    """Close ALL open chart panels in GridSight (AI charts and extension charts).
 
     Use this to clear the workspace before opening a fresh set, or when the user
     asks to dismiss the current charts.
@@ -1176,7 +1176,7 @@ def export_story(story_id: int, path: str = "") -> dict:
 
 @mcp.tool()
 def import_story(path: str = "", bundle: dict | None = None, name: str = "") -> dict:
-    """Load a story bundle (from export_story) into this Meridian instance.
+    """Load a story bundle (from export_story) into this GridSight instance.
 
     Creates fresh perspectives and a new story wired to them. Pass `name` to
     import alongside an existing copy instead of creating a confusing duplicate.
@@ -1227,7 +1227,7 @@ def apply_story(story_id: int) -> str:
 
 @mcp.tool()
 def save_view(name: str, description: str = "", as_story: bool = False) -> str:
-    """Snapshot the CURRENT live Meridian view and save it for later reuse.
+    """Snapshot the CURRENT live GridSight view and save it for later reuse.
 
     The frontend captures the live state (map viewport, layer visibility/styles,
     open charts, scenario, clock) and persists it as a perspective. With
@@ -1258,7 +1258,7 @@ def save_memory(
     memory_type: str = "insight",
     tags: list[str] | None = None,
 ) -> str:
-    """Save a reusable artifact (a SQL query, chart spec, or insight) to Meridian's
+    """Save a reusable artifact (a SQL query, chart spec, or insight) to GridSight's
     memory so future agent sessions can find and reuse it.
 
     Use this to record what worked — e.g. a SQL query that produced a good chart,
@@ -1288,7 +1288,7 @@ def save_memory(
 
 @mcp.tool()
 def search_memory(query: str, memory_type: str = "", limit: int = 10) -> list[dict]:
-    """Search Meridian's memory for previously saved artifacts (queries, charts,
+    """Search GridSight's memory for previously saved artifacts (queries, charts,
     insights) — call this to reuse approaches that worked in earlier sessions.
 
     Args:

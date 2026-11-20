@@ -25,13 +25,13 @@ services:
     # once before bringing up the dev stack). Bind-mount source +
     # uvicorn --reload gives the same edit-and-refresh loop as
     # `./dev.sh` without needing to re-stage .build-deps every change.
-    image: meridian-server:${IMAGE_TAG:-local}
+    image: gridsight-server:${IMAGE_TAG:-local}
     env_file:
       - path: .env
         required: false
     environment:
       DATA_DIR: ${DATA_DIR:-/data}
-      DB_PATH: ${DB_PATH:-/data/meridian.db}
+      DB_PATH: ${DB_PATH:-/data/gridsight.db}
       # boto3 picks this up to verify TLS against an internal CA when
       # the deployed S3 endpoint uses a private root.
       # Hard-coded to the in-container mount path — the host's

@@ -96,7 +96,7 @@ def ensure_states_geojson(cache_dir: Path) -> Path:
     try:
         _inject_system_trust()
         import requests
-        resp = requests.get(url, timeout=120, headers={"User-Agent": "meridian-seds"})
+        resp = requests.get(url, timeout=120, headers={"User-Agent": "gridsight-seds"})
         resp.raise_for_status()
         gj = _normalize_states_geojson(resp.json())
         cache_dir.mkdir(parents=True, exist_ok=True)

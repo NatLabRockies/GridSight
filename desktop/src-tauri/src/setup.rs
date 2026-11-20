@@ -31,7 +31,7 @@ where
 fn provision_dev<F: FnMut(&str)>(paths: &Paths, progress: &mut F) -> Result<()> {
     // Dev mode: drive the venv from the live server/pyproject.toml so a
     // change to a dep is reflected on next launch without rebuilding wheels.
-    // Editable installs of sdk + gat + meridian-gat come from the sibling
+    // Editable installs of sdk + gat + gridsight-gat come from the sibling
     // repos via [tool.uv.sources].
     if !paths.server_dir.exists() {
         bail!("server dir missing: {}", paths.server_dir.display());
@@ -59,7 +59,7 @@ fn provision_dev<F: FnMut(&str)>(paths: &Paths, progress: &mut F) -> Result<()> 
 
 fn provision_bundled<F: FnMut(&str)>(paths: &Paths, progress: &mut F) -> Result<()> {
     // Bundled mode: the .app/.exe ships a frozen server tree, a generated
-    // requirements.txt, and pre-built wheels for sdk + gat + meridian-gat.
+    // requirements.txt, and pre-built wheels for sdk + gat + gridsight-gat.
     // The target machine has no copy of the repo and no live source.
     let req = paths.requirements.as_ref().context("bundled requirements path")?;
     let wheels = paths.wheels_dir.as_ref().context("bundled wheels path")?;

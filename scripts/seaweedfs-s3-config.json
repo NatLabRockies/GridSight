@@ -1,11 +1,11 @@
 {
   "identities": [
     {
-      "name": "meridian-local",
+      "name": "gridsight-local",
       "credentials": [
         {
-          "accessKey": "meridian-local",
-          "secretKey": "meridian-local-secret"
+          "accessKey": "gridsight-local",
+          "secretKey": "gridsight-local-secret"
         }
       ],
       "actions": ["Admin", "Read", "Write", "List", "Tagging"]

@@ -17,8 +17,8 @@
  *     look like model failure.
  */
 
-const KEY_EFFORT = 'meridian.ai.reasoningEffort';
-const KEY_INSTRUCTIONS = 'meridian.ai.extraInstructions';
+const KEY_EFFORT = 'gridsight.ai.reasoningEffort';
+const KEY_INSTRUCTIONS = 'gridsight.ai.extraInstructions';
 
 export const REASONING_EFFORTS = [
   { id: 'default', label: 'Server default', hint: 'whatever this deployment configured' },

@@ -25,7 +25,7 @@ import ExtensionInstaller from './ExtensionInstaller.jsx';
 import AgentSetupDialog from '../dialogs/AgentSetupDialog.jsx';
 import { useTheme } from '@mui/material/styles';
 import { BASEMAPS, FEATURE_CATEGORIES, basemapById } from '../../lib/basemaps.js';
-import { useMeridianTheme } from '../../lib/ThemeContext.jsx';
+import { useGridSightTheme } from '../../lib/ThemeContext.jsx';
 import { useDisplayScale, SCALE_MODES } from '../../lib/DisplayScaleContext.jsx';
 import { THEMES, THEME_NAMES } from '../../lib/themes.js';
 import { FONTS, FONT_IDS } from '../../lib/fonts.js';
@@ -117,7 +117,7 @@ export function DisplaySettings({
   baseLayerProp, onBaseLayerChange,
   hiddenBasemapCategories, onToggleBasemapCategory,
 }) {
-  const { themeName, setThemeName, fontName, setFontName } = useMeridianTheme();
+  const { themeName, setThemeName, fontName, setFontName } = useGridSightTheme();
   const { mode: scaleMode, scale, autoScale, setMode: setScaleMode } = useDisplayScale();
 
   return (
@@ -339,7 +339,7 @@ export function AgentSettings() {
     <PanelShell title="Agent Integration">
       <Stack spacing={1.5}>
         <Typography variant="body2" color="text.secondary">
-          Connect AI agents (Claude, Claude Code, and others) to Meridian via MCP
+          Connect AI agents (Claude, Claude Code, and others) to GridSight via MCP
           so they can read data and control the map directly.
         </Typography>
         <Box>

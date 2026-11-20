@@ -11,7 +11,7 @@
 
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.forceDpr1';
+const STORAGE_KEY = 'gridsight.forceDpr1';
 
 function readStored() {
   try {

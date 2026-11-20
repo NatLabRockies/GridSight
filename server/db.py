@@ -5,13 +5,13 @@ import sqlite3
 import threading
 from pathlib import Path
 
-logger = logging.getLogger("meridian.db")
+logger = logging.getLogger("gridsight.db")
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from meridian.extensions.storage import resolve_path
+from gridsight.extensions.storage import resolve_path
 
 from models.orm import Base
 
@@ -20,7 +20,7 @@ from models.orm import Base
 # registers an atexit hook to upload the local file back to S3 after
 # `save_to_disk` has flushed the in-memory DB to it. Local paths pass
 # through unchanged.
-_DB_PATH_RAW = os.environ.get("DB_PATH", "./meridian.db")
+_DB_PATH_RAW = os.environ.get("DB_PATH", "./gridsight.db")
 DB_PATH: Path = resolve_path(_DB_PATH_RAW)
 
 _raw_mem_conn: sqlite3.Connection | None = None
@@ -372,7 +372,7 @@ def _m010_lineage_and_users(conn: sqlite3.Connection):
         "  created_at DATETIME DEFAULT CURRENT_TIMESTAMP"
         ")"
     )
-    admin_name = os.environ.get("MERIDIAN_ADMIN_USER", "admin")
+    admin_name = os.environ.get("GRIDSIGHT_ADMIN_USER", "admin")
     conn.execute(
         "INSERT OR IGNORE INTO users (username, display_name, role) "
         "VALUES (?, ?, 'admin')",

@@ -7,11 +7,11 @@
  * project-scoped because categories are project-wide by design.
  *
  * Backend lives in the GAT extension repo at
- * meridian-ext/src/meridian_gat/display_groups.py — every action here
+ * gridsight-ext/src/gridsight_gat/display_groups.py — every action here
  * maps to a `query_extension` call with one of the 11 supported `kind`s.
  *
  * Writes return an `invalidated` hint that we surface via the parent
- * `onInvalidated` callback so the rest of Meridian re-fetches chart
+ * `onInvalidated` callback so the rest of GridSight re-fetches chart
  * specs (categories may have new colors).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';

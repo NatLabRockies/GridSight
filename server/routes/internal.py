@@ -1,5 +1,5 @@
 """
-Internal endpoints — only mounted when MERIDIAN_DESKTOP=1.
+Internal endpoints — only mounted when GRIDSIGHT_DESKTOP=1.
 
 Provides two things:
   1. POST /internal/bus/inject  — MCP server pushes a stateBus message here.

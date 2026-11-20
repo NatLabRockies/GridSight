@@ -24,7 +24,7 @@ fn is_already_configured() -> bool {
     let Ok(content) = std::fs::read_to_string(&path) else { return false };
     let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else { return false };
     json.get("mcpServers")
-        .and_then(|s| s.get("meridian"))
+        .and_then(|s| s.get("gridsight"))
         .is_some()
 }
 
@@ -38,7 +38,7 @@ pub struct McpInfo {
     pub mcp_server_path: String,
     /// Absolute path where claude_desktop_config.json lives (may not exist yet).
     pub claude_config_path: String,
-    /// True if the meridian entry is already present in the config file.
+    /// True if the gridsight entry is already present in the config file.
     pub is_configured: bool,
 }
 
@@ -63,8 +63,8 @@ pub async fn get_mcp_info(state: State<'_, AppState>) -> Result<McpInfo, String>
     })
 }
 
-/// Write (or merge) the Meridian MCP server entry into claude_desktop_config.json.
-/// Preserves all existing keys — only adds/replaces `mcpServers.meridian`.
+/// Write (or merge) the GridSight MCP server entry into claude_desktop_config.json.
+/// Preserves all existing keys — only adds/replaces `mcpServers.gridsight`.
 /// Returns the path that was written.
 #[tauri::command]
 pub async fn configure_claude_desktop(state: State<'_, AppState>) -> Result<String, String> {
@@ -90,11 +90,11 @@ pub async fn configure_claude_desktop(state: State<'_, AppState>) -> Result<Stri
         serde_json::json!({})
     };
 
-    // Ensure mcpServers object exists, then upsert the meridian entry.
+    // Ensure mcpServers object exists, then upsert the gridsight entry.
     if !config.get("mcpServers").map_or(false, |v| v.is_object()) {
         config["mcpServers"] = serde_json::json!({});
     }
-    config["mcpServers"]["meridian"] = serde_json::json!({
+    config["mcpServers"]["gridsight"] = serde_json::json!({
         "command": python_bin,
         "args": [mcp_path]
     });
@@ -109,6 +109,6 @@ pub async fn configure_claude_desktop(state: State<'_, AppState>) -> Result<Stri
     std::fs::write(&config_path, output)
         .map_err(|e| format!("write {}: {e}", config_path.display()))?;
 
-    log::info!("wrote Meridian MCP entry to {}", config_path.display());
+    log::info!("wrote GridSight MCP entry to {}", config_path.display());
     Ok(config_path.to_string_lossy().into_owned())
 }

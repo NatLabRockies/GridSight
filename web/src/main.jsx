@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
-import { MeridianThemeProvider } from "./lib/ThemeContext.jsx";
+import { GridSightThemeProvider } from "./lib/ThemeContext.jsx";
 import { DisplayScaleProvider } from "./lib/DisplayScaleContext.jsx";
 import { DialogProvider } from "./lib/dialogs.jsx";
 import { CategoryColorProvider } from "./lib/categoryColors.jsx";
@@ -9,7 +9,7 @@ import Login from "./auth/Login.jsx";
 import { App } from "./components/App.jsx";
 import { initDesktopBridge, isTauri } from "./lib/desktopBridge.js";
 import { installChartDebug } from "./lib/chartDebug.js";
-import meridianIconSvg from "./meridian_icon.svg?raw";
+import gridsightIconSvg from "./gridsight_icon.svg?raw";
 import "./styles/globals.css";
 
 // Enrich Plotly's context-free "Too many auto-margin redraws" warning with a
@@ -109,7 +109,7 @@ function AppShell() {
 function AppProviders({ children }) {
   return (
     <DisplayScaleProvider>
-      <MeridianThemeProvider>
+      <GridSightThemeProvider>
         <CategoryColorProvider>
           <AuthProvider>
             {/* DialogProvider hosts the MUI replacement for window.prompt/
@@ -118,7 +118,7 @@ function AppProviders({ children }) {
             <DialogProvider>{children}</DialogProvider>
           </AuthProvider>
         </CategoryColorProvider>
-      </MeridianThemeProvider>
+      </GridSightThemeProvider>
     </DisplayScaleProvider>
   );
 }
@@ -132,7 +132,7 @@ if (!container) {
   );
 }
 
-// Splash screen shown during the ~3-8s sidecar cold boot. The Meridian
+// Splash screen shown during the ~3-8s sidecar cold boot. The GridSight
 // icon SVG groups its three conceptual layers (generation / transmission
 // / demand) as ``<g class="layer-…">``; CSS keyframes fade them in
 // staggered then settle to the full composition, looping until the
@@ -143,14 +143,14 @@ function ensureSplashStyles() {
   _splashStylesInstalled = true;
   const style = document.createElement("style");
   style.textContent = `
-    .meridian-splash {
+    .gridsight-splash {
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
       flex-direction: column;
       background: #0d1117; color: #fff;
       font-family: system-ui, -apple-system, sans-serif;
     }
-    .meridian-splash svg {
+    .gridsight-splash svg {
       /* Splash uses the SVG at full canvas (no icon-grid padding),
          so we can render it larger than a dock icon would be. */
       width: 320px; height: 320px;
@@ -166,18 +166,18 @@ function ensureSplashStyles() {
          3.50-3.60s  blank, then the loop restarts
        Separate @keyframes per layer (rather than animation-delay) keeps
        the resets perfectly aligned. */
-    .meridian-splash .layer { opacity: 0; }
-    .meridian-splash .layer-gen    { animation: meridian-gen    3.6s ease-in-out infinite; }
-    .meridian-splash .layer-tx     { animation: meridian-tx     3.6s ease-in-out infinite; }
-    .meridian-splash .layer-demand { animation: meridian-demand 3.6s ease-in-out infinite; }
-    @keyframes meridian-gen {
+    .gridsight-splash .layer { opacity: 0; }
+    .gridsight-splash .layer-gen    { animation: gridsight-gen    3.6s ease-in-out infinite; }
+    .gridsight-splash .layer-tx     { animation: gridsight-tx     3.6s ease-in-out infinite; }
+    .gridsight-splash .layer-demand { animation: gridsight-demand 3.6s ease-in-out infinite; }
+    @keyframes gridsight-gen {
       0%   { opacity: 0; }
       8%   { opacity: 1; }
       89%  { opacity: 1; }
       97%  { opacity: 0; }
       100% { opacity: 0; }
     }
-    @keyframes meridian-tx {
+    @keyframes gridsight-tx {
       0%   { opacity: 0; }
       8%   { opacity: 0; }
       17%  { opacity: 1; }
@@ -185,7 +185,7 @@ function ensureSplashStyles() {
       97%  { opacity: 0; }
       100% { opacity: 0; }
     }
-    @keyframes meridian-demand {
+    @keyframes gridsight-demand {
       0%   { opacity: 0; }
       17%  { opacity: 0; }
       25%  { opacity: 1; }
@@ -193,10 +193,10 @@ function ensureSplashStyles() {
       97%  { opacity: 0; }
       100% { opacity: 0; }
     }
-    .meridian-splash-title {
+    .gridsight-splash-title {
       font-size: 1.4rem; letter-spacing: 0.04em; margin-top: 16px;
     }
-    .meridian-splash-msg {
+    .gridsight-splash-msg {
       font-size: 0.85rem; color: #8b949e; margin-top: 4px;
       min-height: 1.2em;
     }
@@ -209,14 +209,14 @@ function renderSplash(message) {
   ensureSplashStyles();
   if (!_splashMounted) {
     container.innerHTML = `
-      <div class="meridian-splash">
-        ${meridianIconSvg}
-        <div class="meridian-splash-title">Meridian</div>
-        <div class="meridian-splash-msg"></div>
+      <div class="gridsight-splash">
+        ${gridsightIconSvg}
+        <div class="gridsight-splash-title">GridSight</div>
+        <div class="gridsight-splash-msg"></div>
       </div>`;
     _splashMounted = true;
   }
-  const msgEl = container.querySelector(".meridian-splash-msg");
+  const msgEl = container.querySelector(".gridsight-splash-msg");
   if (msgEl) msgEl.textContent = message;
 }
 

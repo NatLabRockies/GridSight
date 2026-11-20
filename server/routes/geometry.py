@@ -24,7 +24,7 @@ from lib.serializers import serialize_geometry, file_suffix
 from lib.state import storage
 from models.orm import GeometryFile
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 

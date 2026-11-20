@@ -108,7 +108,7 @@ export default function LLMKeysDialog({ open, onClose, onSaved }) {
       <DialogContent dividers>
         {!available ? (
           <Alert severity="info">
-            API key management is only available in the Meridian desktop app.
+            API key management is only available in the GridSight desktop app.
             In web/server deployments, the administrator configures provider
             keys via environment variables on the server container.
           </Alert>

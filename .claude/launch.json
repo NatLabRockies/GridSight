@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "meridian-web",
+      "name": "gridsight-web",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev"],
       "cwd": "web",

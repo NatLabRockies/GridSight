@@ -29,8 +29,8 @@ import { isTauri } from '../../lib/desktopBridge.js';
 // ---------------------------------------------------------------------------
 
 const FIELD_HINT = {
-  pypi: 'e.g. meridian-some-ext  or  meridian-some-ext==1.2.0',
-  git: 'e.g. https://github.com/example/meridian-some-ext.git@main',
+  pypi: 'e.g. gridsight-some-ext  or  gridsight-some-ext==1.2.0',
+  git: 'e.g. https://github.com/example/gridsight-some-ext.git@main',
   wheel: 'Pick a .whl or bundle .zip from disk',
 };
 

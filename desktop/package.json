@@ -1,6 +1,6 @@
 {
-  "name": "meridian-desktop",
-  "version": "0.1.0",
+  "name": "gridsight-desktop",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {

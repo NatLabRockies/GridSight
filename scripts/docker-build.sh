@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Build the Meridian server + web images.
+# Build the GridSight server + web images.
 #
 # Usage:
 #   scripts/docker-build.sh                                   # native arch, tag = local
@@ -15,7 +15,7 @@
 #
 # The server image installs:
 #   1. Local SDK + SEDS sources staged from in-repo directories:
-#        sdk/              → server/.build-deps/sdk/     (MERIDIAN_SDK_PATH)
+#        sdk/              → server/.build-deps/sdk/     (GRIDSIGHT_SDK_PATH)
 #        extensions/seds/  → server/.build-deps/seds/    (SEDS_PATH)
 #      Both are in-repo so no GitHub credentials are needed. Their
 #      git+https:// lines in requirements.docker.txt are auto-commented.
@@ -34,8 +34,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 IMAGE_TAG="${IMAGE_TAG:-local}"
-SERVER_IMAGE="${SERVER_IMAGE:-meridian-server}"
-WEB_IMAGE="${WEB_IMAGE:-meridian-web}"
+SERVER_IMAGE="${SERVER_IMAGE:-gridsight-server}"
+WEB_IMAGE="${WEB_IMAGE:-gridsight-web}"
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     sed -n '2,/^# ───/p' "$0" | sed 's/^# \?//'
@@ -43,10 +43,10 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
 fi
 
 # SDK and SEDS live in-repo. Override paths via env vars if needed.
-MERIDIAN_SDK_PATH="${MERIDIAN_SDK_PATH:-$ROOT/sdk}"
+GRIDSIGHT_SDK_PATH="${GRIDSIGHT_SDK_PATH:-$ROOT/sdk}"
 SEDS_PATH="${SEDS_PATH:-$ROOT/extensions/seds}"
 
-# DemandTldr lives in a sibling repo and its `meridian-ext` package isn't
+# DemandTldr lives in a sibling repo and its `gridsight-ext` package isn't
 # pushed/tagged to the private GitHub yet, so we stage it locally like SEDS
 # rather than via a git URL in requirements.docker.txt (which would need
 # private-repo auth). Optional: if the path is absent the image just builds
@@ -54,7 +54,7 @@ SEDS_PATH="${SEDS_PATH:-$ROOT/extensions/seds}"
 # to force-skip. Its reference data (forecast.parquet, geojson) is deliberately
 # EXCLUDED from the image — the deployment sources it from SeaweedFS S3 at
 # startup (DEMANDTLDR_S3_URI); see .env.example.
-DEMANDTLDR_PATH="${DEMANDTLDR_PATH:-$HOME/code/DemandTldr/meridian-ext}"
+DEMANDTLDR_PATH="${DEMANDTLDR_PATH:-$HOME/code/DemandTldr/gridsight-ext}"
 
 BUILD_DEPS="$ROOT/server/.build-deps"
 
@@ -70,7 +70,7 @@ stage_dep() {
 
     if [ ! -d "$src" ]; then
         echo "✗ $name source not found at: $src" >&2
-        echo "  Set MERIDIAN_SDK_PATH or SEDS_PATH to override." >&2
+        echo "  Set GRIDSIGHT_SDK_PATH or SEDS_PATH to override." >&2
         exit 1
     fi
 
@@ -110,7 +110,7 @@ stage_dep() {
 }
 
 echo "→ staging local sources into $BUILD_DEPS"
-stage_dep sdk  "$MERIDIAN_SDK_PATH"
+stage_dep sdk  "$GRIDSIGHT_SDK_PATH"
 stage_dep seds "$SEDS_PATH"
 
 # DemandTldr is optional. Its reference data (forecast.parquet + geojson under
@@ -137,9 +137,9 @@ REQS_BACKUP="${REQS}.preBuild.bak"
 if [ -f "$REQS" ]; then
     cp "$REQS" "$REQS_BACKUP"
     declare -a STAGED_PKGS
-    [ -d "$BUILD_DEPS/sdk" ]  && STAGED_PKGS+=("meridian-sdk")
-    [ -d "$BUILD_DEPS/seds" ] && STAGED_PKGS+=("meridian-seds")
-    [ -d "$BUILD_DEPS/demand-tldr" ] && STAGED_PKGS+=("meridian-demand-tldr")
+    [ -d "$BUILD_DEPS/sdk" ]  && STAGED_PKGS+=("gridsight-sdk")
+    [ -d "$BUILD_DEPS/seds" ] && STAGED_PKGS+=("gridsight-seds")
+    [ -d "$BUILD_DEPS/demand-tldr" ] && STAGED_PKGS+=("gridsight-demand-tldr")
     for pkg in ${STAGED_PKGS[@]+"${STAGED_PKGS[@]}"}; do
         sed -i '' -E "s|^(${pkg}[[:space:]]+@[[:space:]]+git\\+.*)$|# [staged-local] \\1|" "$REQS"
     done

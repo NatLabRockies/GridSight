@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Meridian",
-  "version": "0.1.0",
-  "identifier": "gov.nlr.meridian",
+  "productName": "GridSight",
+  "version": "1.0.0",
+  "identifier": "gov.nlr.gridsight",
   "build": {
     "beforeDevCommand": "cd ../web && bunx vite --port 1420 --strictPort",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Meridian",
+        "title": "GridSight",
         "width": 1400,
         "height": 900,
         "resizable": true,

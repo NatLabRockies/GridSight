@@ -1,5 +1,5 @@
 /**
- * AgentSetupDialog — in-app instructions for wiring Meridian to an MCP client
+ * AgentSetupDialog — in-app instructions for wiring GridSight to an MCP client
  * (Claude Desktop, Claude Code, or any other agent that speaks MCP).
  *
  * Desktop-only: reads paths from Tauri so the config snippet always shows the
@@ -146,7 +146,7 @@ export default function AgentSetupDialog({ open, onClose }) {
     ? JSON.stringify(
         {
           mcpServers: {
-            meridian: {
+            gridsight: {
               command: info.python_bin,
               args: [info.mcp_server_path],
             },
@@ -177,12 +177,12 @@ export default function AgentSetupDialog({ open, onClose }) {
       <DialogContent dividers>
         {!available ? (
           <Alert severity="info">
-            Agent integration setup is only available in the Meridian desktop app.
+            Agent integration setup is only available in the GridSight desktop app.
           </Alert>
         ) : (
           <Stack spacing={2.5}>
             <Typography variant="body2" color="text.secondary">
-              Meridian exposes an{' '}
+              GridSight exposes an{' '}
               <strong>MCP (Model Context Protocol) server</strong> so AI agents
               can read data, control the map, and open charts directly — no
               copy-pasting required. Works with Claude Desktop, Claude Code, and
@@ -201,14 +201,14 @@ export default function AgentSetupDialog({ open, onClose }) {
 
             <Divider />
 
-            <Step number="1" title="Keep Meridian running">
+            <Step number="1" title="Keep GridSight running">
               <Typography variant="body2" color="text.secondary">
-                The MCP server proxies requests to the Meridian backend, so
-                Meridian must be open whenever your agent wants to use it.
+                The MCP server proxies requests to the GridSight backend, so
+                GridSight must be open whenever your agent wants to use it.
               </Typography>
             </Step>
 
-            <Step number="2" title="Add Meridian to your MCP client">
+            <Step number="2" title="Add GridSight to your MCP client">
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 <strong>Claude Desktop / Claude Code</strong> — use the button
                 below to auto-configure, or paste the snippet manually into{' '}
@@ -238,7 +238,7 @@ export default function AgentSetupDialog({ open, onClose }) {
 
             <Step number="4" title="Try it">
               <Typography variant="body2" color="text.secondary">
-                Ask your agent: <em>"What scenarios are loaded in Meridian?"</em>{' '}
+                Ask your agent: <em>"What scenarios are loaded in GridSight?"</em>{' '}
                 or <em>"Zoom the map to Texas."</em> The agent will call{' '}
                 <code>list_scenarios</code> or <code>fit_map_to_bounds</code>{' '}
                 automatically.

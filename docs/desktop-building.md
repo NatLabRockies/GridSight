@@ -1,6 +1,6 @@
-# Building the Meridian Desktop App
+# Building the GridSight Desktop App
 
-Self-contained, single-binary builds of Meridian for individual users on
+Self-contained, single-binary builds of GridSight for individual users on
 macOS, Windows, and Linux. The output is a standard installer / app bundle
 that ships with its own Python sidecar and `uv`-managed venv — no Python,
 Node, or backend setup required on the end user's machine.
@@ -16,8 +16,8 @@ spawns a Python (`uvicorn`) sidecar as a child process. The bundle includes:
 
 | Resource | Source | Notes |
 |---|---|---|
-| `resources/server/` | `meridian/server/` | Frozen copy of the FastAPI app |
-| `resources/wheels/` | `sdk/`, `GAT/`, `GAT/meridian-ext/` | Locally-built wheels for sibling packages |
+| `resources/server/` | `gridsight/server/` | Frozen copy of the FastAPI app |
+| `resources/wheels/` | `sdk/`, `GAT/`, `GAT/gridsight-ext/` | Locally-built wheels for sibling packages |
 | `resources/requirements.txt` | `server/pyproject.toml` (via `uv export`) | Pinned PyPI deps, local packages stripped |
 | `binaries/uv` (or `uv.exe`) | astral-sh release | Used at first launch to provision the venv |
 | Webview UI | `web/dist/` | Built by `bun run build` via Tauri's `beforeBuildCommand` |
@@ -32,9 +32,9 @@ wheels. Subsequent launches reuse the venv.
 
 | Host | Artifact |
 |---|---|
-| macOS | `desktop/src-tauri/target/release/bundle/dmg/Meridian_<ver>_<arch>.dmg` and `…/macos/Meridian.app` |
-| Windows | `desktop\src-tauri\target\release\bundle\nsis\Meridian_<ver>_x64-setup.exe` (+ MSI alongside) |
-| Linux | `desktop/src-tauri/target/release/bundle/deb/meridian_<ver>_amd64.deb` and `…/appimage/Meridian_<ver>_amd64.AppImage` |
+| macOS | `desktop/src-tauri/target/release/bundle/dmg/GridSight_<ver>_<arch>.dmg` and `…/macos/GridSight.app` |
+| Windows | `desktop\src-tauri\target\release\bundle\nsis\GridSight_<ver>_x64-setup.exe` (+ MSI alongside) |
+| Linux | `desktop/src-tauri/target/release/bundle/deb/gridsight_<ver>_amd64.deb` and `…/appimage/GridSight_<ver>_amd64.AppImage` |
 
 ---
 
@@ -46,12 +46,12 @@ cross-compile; a macOS host produces a `.dmg`, a Windows host produces an
 
 - **Rust** stable toolchain via [rustup](https://rustup.rs)
 - **Bun** ([install](https://bun.sh)) — frontend build + dev server
-- **Git** with access to the Meridian and sibling repos checked out side by side:
+- **Git** with access to the GridSight and sibling repos checked out side by side:
   ```
-  ~/code/meridian/        ← this repo
-  ~/code/GAT/             ← GAT repo (contains gat/ and meridian-ext/)
+  ~/code/gridsight/        ← this repo
+  ~/code/GAT/             ← GAT repo (contains gat/ and gridsight-ext/)
   ```
-  Paths can be overridden via `MERIDIAN_REPO` / `GAT_SOURCE_DIR` env vars
+  Paths can be overridden via `GRIDSIGHT_REPO` / `GAT_SOURCE_DIR` env vars
   when running `prepare-resources.sh`.
 
 The build pulls `uv` from the official release archive automatically; you
@@ -166,7 +166,7 @@ bun run dev
 
 This launches Tauri in dev mode (with HMR via Vite), runs the local
 `server/` source through `uv sync` against editable sibling packages, and
-writes logs to `~/Library/Logs/Meridian/backend.log` (macOS) or the OS
+writes logs to `~/Library/Logs/GridSight/backend.log` (macOS) or the OS
 equivalent on other platforms. Code edits to either the React app or the
 Python server (and its sibling extensions) are picked up live — no
 rebuild needed.
@@ -181,9 +181,9 @@ the bundled path.
 
 | Platform | Logs | Data | Cache (venv) |
 |---|---|---|---|
-| macOS | `~/Library/Logs/Meridian/` | `~/Library/Application Support/Meridian/` | `~/Library/Caches/Meridian/` |
-| Linux | `~/.cache/Meridian/Logs/` | `~/.local/share/Meridian/` | `~/.cache/Meridian/` |
-| Windows | `%LOCALAPPDATA%\Meridian\Logs\` | `%APPDATA%\Meridian\` | `%LOCALAPPDATA%\Meridian\` |
+| macOS | `~/Library/Logs/GridSight/` | `~/Library/Application Support/GridSight/` | `~/Library/Caches/GridSight/` |
+| Linux | `~/.cache/GridSight/Logs/` | `~/.local/share/GridSight/` | `~/.cache/GridSight/` |
+| Windows | `%LOCALAPPDATA%\GridSight\Logs\` | `%APPDATA%\GridSight\` | `%LOCALAPPDATA%\GridSight\` |
 
 Uninstall does not remove these directories. To fully reset a user's
 install, delete the three paths above.
@@ -216,8 +216,8 @@ suspect it, `rm -rf desktop/src-tauri/target/debug/resources` and rerun.
 
 **Need to wipe the dev venv and start over**
 ```bash
-rm -rf ~/Library/Caches/Meridian/venv      # macOS
-rm -rf ~/.cache/Meridian/venv              # Linux
-# Windows: delete %LOCALAPPDATA%\Meridian\venv
+rm -rf ~/Library/Caches/GridSight/venv      # macOS
+rm -rf ~/.cache/GridSight/venv              # Linux
+# Windows: delete %LOCALAPPDATA%\GridSight\venv
 ```
 Next launch reprovisions from scratch.

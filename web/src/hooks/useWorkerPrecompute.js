@@ -14,7 +14,7 @@
 
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'meridian.useWorkerPrecompute';
+const STORAGE_KEY = 'gridsight.useWorkerPrecompute';
 
 function readStored() {
   try {

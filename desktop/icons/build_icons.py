@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render meridian_icon.svg into the platform icons Tauri bundles.
+"""Render gridsight_icon.svg into the platform icons Tauri bundles.
 
 Writes directly into ``desktop/src-tauri/icons/`` so the next ``tauri
 build`` picks them up with no copy step:
@@ -40,9 +40,9 @@ except ImportError:
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SVG_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / "meridian_icon.svg"
+SVG_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / "gridsight_icon.svg"
 BUILD_DIR = SCRIPT_DIR / "build"
-ICONSET = BUILD_DIR / "meridian.iconset"
+ICONSET = BUILD_DIR / "gridsight.iconset"
 WIN_DIR = BUILD_DIR / "win"
 TARGET_DIR = SCRIPT_DIR.parent / "src-tauri" / "icons"
 
@@ -151,7 +151,7 @@ def build_windows() -> None:
         print(f"  rendering {size}×{size}")
         img = render(size)
         images.append(img)
-        img.save(WIN_DIR / f"meridian_{size}.png", "PNG")
+        img.save(WIN_DIR / f"gridsight_{size}.png", "PNG")
 
     # Save the largest image as the ICO base — Pillow downsamples from
     # it to the requested sizes. Passing a small base + ``append_images``
@@ -165,12 +165,12 @@ def build_windows() -> None:
     print(f"  ✓ {ico_path} ({ico_path.stat().st_size // 1024} KB)")
 
     # Reuse the 64×64 for the Tauri ``64x64.png`` slot.
-    shutil.copy2(WIN_DIR / "meridian_64.png", TARGET_DIR / "64x64.png")
+    shutil.copy2(WIN_DIR / "gridsight_64.png", TARGET_DIR / "64x64.png")
     print(f"  ✓ {TARGET_DIR / '64x64.png'}")
 
 
 if __name__ == "__main__":
-    print("Meridian icon builder")
+    print("GridSight icon builder")
     print(f"  source: {SVG_PATH}")
     print(f"  target: {TARGET_DIR}")
     BUILD_DIR.mkdir(exist_ok=True)

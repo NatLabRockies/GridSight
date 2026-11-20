@@ -1,9 +1,9 @@
-//! Custom URI scheme protocol that proxies `meridian-api://localhost/api/*`
+//! Custom URI scheme protocol that proxies `gridsight-api://localhost/api/*`
 //! to the sidecar's HTTP endpoint.
 //!
 //! The webview's React app uses the same relative `/api/...` URLs the Bun-
 //! proxy web mode does, but the bridge rewrites them to absolute
-//! `meridian-api://...` URLs. The browser dispatches those to this handler,
+//! `gridsight-api://...` URLs. The browser dispatches those to this handler,
 //! which makes a Rust-side HTTPS request to the sidecar via reqwest, then
 //! returns the response. No CORS, no Vite, no plugin scopes — same scheme
 //! works in dev and packaged builds.
@@ -18,7 +18,7 @@ use tauri::{AppHandle, Manager, UriSchemeContext, UriSchemeResponder};
 
 use crate::{AppState, BackendStatus, DESKTOP_API_KEY};
 
-pub const SCHEME: &str = "meridian-api";
+pub const SCHEME: &str = "gridsight-api";
 
 pub fn handle<R: tauri::Runtime>(
     ctx: UriSchemeContext<'_, R>,
@@ -53,7 +53,7 @@ pub fn handle<R: tauri::Runtime>(
         let response = match proxy(&app, request).await {
             Ok(r) => with_cors(r, origin.as_deref()),
             Err(e) => {
-                log::error!("meridian-api proxy error: {e:#}");
+                log::error!("gridsight-api proxy error: {e:#}");
                 with_cors(error_response(StatusCode::BAD_GATEWAY, &format!("{e:#}")), origin.as_deref())
             }
         };
@@ -120,7 +120,7 @@ async fn proxy<R: tauri::Runtime>(
     let mut req = client.request(req_method, upstream_url.clone());
 
     for (name, value) in request.headers().iter() {
-        // host header would point at meridian-api.localhost; let reqwest set
+        // host header would point at gridsight-api.localhost; let reqwest set
         // it from the URL. Origin/Referer would expose the custom scheme to
         // the server and confuse logs — strip them.
         let lower = name.as_str().to_ascii_lowercase();

@@ -1629,7 +1629,7 @@ def _get_controls_for_tables(
             scen_name = scenarios[0].name if scenarios else None
             if not scen_name:
                 continue
-            from meridian.extensions.controls import _collect_input_controls
+            from gridsight.extensions.controls import _collect_input_controls
             meta_map = _collect_input_controls(ext)
             for dc in ext.get_input_controls(proj_name, scen_name):
                 ctrl_info = {

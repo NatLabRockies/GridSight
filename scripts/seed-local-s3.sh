@@ -9,22 +9,22 @@
 # Usage:
 #   ./scripts/seed-local-s3.sh                  # uses defaults
 #   DATA_DIR=/path/to/demand_tldr_data ./scripts/seed-local-s3.sh
-#   ENDPOINT=http://localhost:8333 BUCKET=meridian-demand-tldr ./scripts/seed-local-s3.sh
+#   ENDPOINT=http://localhost:8333 BUCKET=gridsight-demand-tldr ./scripts/seed-local-s3.sh
 #
 # Requires: aws CLI installed locally (or run via `docker run amazon/aws-cli`).
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-# Defaults match the DEMANDTLDR_S3_URI layout (s3://meridian/demand-tldr/v1/)
+# Defaults match the DEMANDTLDR_S3_URI layout (s3://gridsight/demand-tldr/v1/)
 # so local-SeaweedFS testing and a real deployment read from the same layout.
 # For a real bucket: ENDPOINT=<seaweedfs-s3> AWS_ACCESS_KEY_ID=… AWS_SECRET_ACCESS_KEY=… ./scripts/seed-local-s3.sh
 ENDPOINT="${ENDPOINT:-http://localhost:8333}"
-BUCKET="${BUCKET:-meridian}"
+BUCKET="${BUCKET:-gridsight}"
 PREFIX="${PREFIX:-demand-tldr/v1/}"
-DATA_DIR="${DATA_DIR:-$HOME/code/DemandTldr/meridian-ext/src/demand_tldr_ext/data}"
+DATA_DIR="${DATA_DIR:-$HOME/code/DemandTldr/gridsight-ext/src/demand_tldr_ext/data}"
 
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-meridian-local}"
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-meridian-local-secret}"
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-gridsight-local}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-gridsight-local-secret}"
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 
 if [ ! -d "$DATA_DIR" ]; then
@@ -57,7 +57,7 @@ for i in $(seq 1 60); do
     echo
     echo "S3 endpoint at $ENDPOINT not reachable after 60s. Check:" >&2
     echo "  docker-compose --profile s3-local ps" >&2
-    echo "  docker logs meridian-seaweedfs-1 | tail -30" >&2
+    echo "  docker logs gridsight-seaweedfs-1 | tail -30" >&2
     exit 1
   fi
 done

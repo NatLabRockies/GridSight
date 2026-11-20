@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Desktop mode routing: the Tauri Rust side registers a `meridian-api://`
+// Desktop mode routing: the Tauri Rust side registers a `gridsight-api://`
 // custom URI scheme protocol that proxies to the Python sidecar. The
 // desktopBridge.js fetch override rewrites /api/* to that scheme, so Vite
 // never sees those requests in Tauri mode. The /api proxy entry below is
@@ -13,7 +13,7 @@ export default defineConfig({
 
   server: {
     port: 5173,
-    // Allow importing sibling-repo files (e.g. desktop/icons/meridian_icon.svg
+    // Allow importing sibling-repo files (e.g. desktop/icons/gridsight_icon.svg
     // for the boot splash). Without this, Vite's strict fs guard blocks
     // anything outside ``web/`` during dev.
     fs: {

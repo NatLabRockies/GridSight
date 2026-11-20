@@ -1,7 +1,7 @@
 [project]
-name = "meridian-server"
-version = "0.1.0"
-description = "Meridian geospatial visualization server"
+name = "gridsight-server"
+version = "1.0.0"
+description = "GridSight geospatial visualization server"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -18,8 +18,8 @@ dependencies = [
     "duckdb>=1.0",
     # First-party, in-repo packages — always resolvable from any checkout
     # (relative paths below), so they stay in core deps and CI installs them.
-    "meridian-sdk",
-    "meridian-seds",
+    "gridsight-sdk",
+    "gridsight-seds",
     "pdfplumber>=0.11.9",
     "openai>=1.30",
     "truststore>=0.9",
@@ -28,10 +28,10 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-meridian-sdk = { path = "../sdk", editable = true }
+gridsight-sdk = { path = "../sdk", editable = true }
 # First-party extension bundled in this repo (in-repo relative path → works
 # in any checkout and every git worktree, no external symlink needed).
-meridian-seds = { path = "../extensions/seds", editable = true }
+gridsight-seds = { path = "../extensions/seds", editable = true }
 # External extensions (GAT, DemandTldr) are NOT listed here — they live in
 # sibling repos that don't exist in CI. dev.sh installs them via
 # `uv pip install -e` after syncing, so they aren't in the lockfile and

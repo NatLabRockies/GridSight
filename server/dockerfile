@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------------------
-# Meridian server image (FastAPI + uv).
+# GridSight server image (FastAPI + uv).
 #
 # Build context: this directory (`server/`).
-#   docker build -t meridian-server:<tag> server/
+#   docker build -t gridsight-server:<tag> server/
 #
 # Dependencies — including extensions — come from `requirements.docker.txt`,
 # which lists everything as either a PyPI package or a git URL. There's
@@ -83,15 +83,15 @@ ENV PYTHONPATH=/app
 
 # 3. Runtime data dir. Mount a volume here in production.
 ENV DATA_DIR=/data \
-    DB_PATH=/data/meridian.db
+    DB_PATH=/data/gridsight.db
 RUN mkdir -p /data
 VOLUME ["/data"]
 
 EXPOSE 5001
 
 # Drop privileges.
-RUN useradd --create-home --shell /bin/bash meridian && \
-    chown -R meridian:meridian /app /data /opt/venv
-USER meridian
+RUN useradd --create-home --shell /bin/bash gridsight && \
+    chown -R gridsight:gridsight /app /data /opt/venv
+USER gridsight
 
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5001"]

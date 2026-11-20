@@ -1,5 +1,5 @@
 """
-Base class and context for Meridian extensions.
+Base class and context for GridSight extensions.
 """
 
 from __future__ import annotations
@@ -49,8 +49,8 @@ class ExtensionContext:
     get_db_session: Any = None  # callable returning SQLAlchemy session
 
 
-class MeridianExtensionBase(ABC):
-    """Abstract base class every Meridian extension must subclass."""
+class GridSightExtensionBase(ABC):
+    """Abstract base class every GridSight extension must subclass."""
 
     @abstractmethod
     def get_manifest(self) -> ExtensionManifest:

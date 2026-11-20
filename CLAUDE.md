@@ -1,8 +1,8 @@
-# Meridian — Claude Code Project Guide
+# GridSight — Claude Code Project Guide
 
 ## Project Overview
 
-Meridian is a geospatial data visualization platform for energy/grid modeling. It animates timeseries data over maps using deck.gl + MapLibre, with a Python/FastAPI backend and React frontend.
+GridSight is a geospatial data visualization platform for energy/grid modeling. It animates timeseries data over maps using deck.gl + MapLibre, with a Python/FastAPI backend and React frontend.
 
 ## Development
 
@@ -25,12 +25,12 @@ checklist item there whenever you build a new interaction.
 - **Server:** `uv` (Python) — `cd server && uv sync`
 - **Frontend:** `bun` — `cd web && bun install`
 - **SDK:** `cd sdk && uv pip install -e .`
-- **Extensions:** most live in their own repo (e.g. `~/code/DemandTldr/meridian-ext`, `~/code/GAT/meridian-ext`); install with `uv pip install -e .` from inside the package directory. The server's `pyproject.toml` references them via `tool.uv.sources` so `uv sync` wires them up automatically. **SEDS is a first-party exception** — it lives in this repo at `extensions/seds/` (the `meridian-seds` package, in-repo relative `tool.uv.sources` path) and ships with the server, like `meridian-sdk`. Small first-party dataset extensions can go there; larger model-backed ones stay in their own repos.
+- **Extensions:** most live in their own repo (e.g. `~/code/DemandTldr/gridsight-ext`, `~/code/GAT/gridsight-ext`); install with `uv pip install -e .` from inside the package directory. The server's `pyproject.toml` references them via `tool.uv.sources` so `uv sync` wires them up automatically. **SEDS is a first-party exception** — it lives in this repo at `extensions/seds/` (the `gridsight-seds` package, in-repo relative `tool.uv.sources` path) and ships with the server, like `gridsight-sdk`. Small first-party dataset extensions can go there; larger model-backed ones stay in their own repos.
 
 ### Key env vars (set in dev.sh)
 - `API_KEY` — API auth key (default: `dev-api-key`)
 - `DATA_DIR` — Storage directory (default: `../data`)
-- `DB_PATH` — SQLite database path (default: `../data/meridian.db`)
+- `DB_PATH` — SQLite database path (default: `../data/gridsight.db`)
 - `LLM_MODEL` — Ollama model name (default: `gpt-oss:20B`)
 - `OLLAMA_URL` — Ollama server URL (default: `http://localhost:11434`)
 
@@ -38,14 +38,14 @@ checklist item there whenever you build a new interaction.
 Images are built and tagged by `scripts/docker-build.sh`:
 
 ```bash
-./scripts/docker-build.sh                    # tags meridian-server:local + meridian-web:local
+./scripts/docker-build.sh                    # tags gridsight-server:local + gridsight-web:local
 IMAGE_TAG=v1.2.3 ./scripts/docker-build.sh   # custom tag
 ```
 
 The container build uses **`server/requirements.docker.txt`** (PyPI names + `git+https://…` URLs) instead of `pyproject.toml`'s editable sibling-repo sources. Adding an extension to a deployment image = appending one line to that file (no Dockerfile edits). Extension env vars (DB URLs, API keys) live in `.env` and are forwarded into both containers via `env_file:` in `docker-compose.yml`.
 
 Two distinct extension install paths exist on purpose:
-- **Local dev** — `pyproject.toml` + `uv sync` with editable installs from `~/code/<ext>/meridian-ext`. Edits to extension source are picked up immediately.
+- **Local dev** — `pyproject.toml` + `uv sync` with editable installs from `~/code/<ext>/gridsight-ext`. Edits to extension source are picked up immediately.
 - **Container** — `server/requirements.docker.txt` with pinned remote refs. Self-contained, no host-machine paths.
 
 For dev mode inside Docker (Vite HMR + `--reload`), use the overlay: `docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build`. For active extension development, prefer `./dev.sh` over Docker — editable cross-repo installs don't survive a containerized build.
@@ -53,13 +53,13 @@ For dev mode inside Docker (Vite HMR + `--reload`), use the overlay: `docker com
 ## Architecture
 
 ### Two packages (plus extensions)
-1. **meridian-sdk** (`sdk/`) — Extension interfaces, dataclasses. Extension devs import from here.
-2. **meridian-server** (`server/`) — FastAPI backend. Discovers extensions, serves data, runs AI chat.
+1. **gridsight-sdk** (`sdk/`) — Extension interfaces, dataclasses. Extension devs import from here.
+2. **gridsight-server** (`server/`) — FastAPI backend. Discovers extensions, serves data, runs AI chat.
 
-Most extensions live in their own repos under `~/code/` (currently DemandTldr and GAT) and are referenced from `server/pyproject.toml`'s `tool.uv.sources` as editable installs. The exception is **SEDS** (`extensions/seds/`, package `meridian-seds`), bundled first-party in this repo — local dev uses an in-repo relative `tool.uv.sources` path; the container build pulls it via `git+https://…/Meridian.git@main#subdirectory=extensions/seds` (same pattern as the SDK).
+Most extensions live in their own repos under `~/code/` (currently DemandTldr and GAT) and are referenced from `server/pyproject.toml`'s `tool.uv.sources` as editable installs. The exception is **SEDS** (`extensions/seds/`, package `gridsight-seds`), bundled first-party in this repo — local dev uses an in-repo relative `tool.uv.sources` path; the container build pulls it via `git+https://…/GridSight.git@main#subdirectory=extensions/seds` (same pattern as the SDK).
 
 ### Extension system
-Extensions are pip packages with `meridian.extensions` entry_points. They implement `MeridianExtensionBase` from the SDK. The server discovers them at startup via `importlib.metadata.entry_points`.
+Extensions are pip packages with `gridsight.extensions` entry_points. They implement `GridSightExtensionBase` from the SDK. The server discovers them at startup via `importlib.metadata.entry_points`.
 
 ### Database
 SQLite (in-memory with disk backup). Migrations in `server/db.py` (currently 4). DuckDB for analytical queries (in-memory, tables registered by extensions).

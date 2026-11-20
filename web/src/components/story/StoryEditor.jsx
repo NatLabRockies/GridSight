@@ -88,7 +88,7 @@ export default function StoryEditor({
       );
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${safe}.meridian-story.json`;
+      a.download = `${safe}.gridsight-story.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();

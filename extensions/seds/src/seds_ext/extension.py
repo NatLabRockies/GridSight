@@ -1,5 +1,5 @@
 """
-SEDS Meridian extension — EIA State Energy Data System historical data.
+SEDS GridSight extension — EIA State Energy Data System historical data.
 
 State-level annual energy statistics, 1960–present, indexed by MSN codes
 (fuel × sector × unit). Ships alongside the DemandTldr forecast extension
@@ -20,7 +20,7 @@ from typing import Any
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from meridian.extensions import (
+from gridsight.extensions import (
     Capability,
     ChartSpec,
     ControlType,
@@ -33,10 +33,10 @@ from meridian.extensions import (
     ExtensionScenario,
     GeometryDescriptor,
     LayerDefinition,
-    MeridianExtensionBase,
+    GridSightExtensionBase,
     input_control,
 )
-from meridian.extensions.ai import AIControlSchema, AISchema, AITableSchema
+from gridsight.extensions.ai import AIControlSchema, AISchema, AITableSchema
 
 from . import seds as seds_mod
 
@@ -101,7 +101,7 @@ _STATE_TO_FIPS: dict[str, str] = {
 _FIPS_TO_STATE: dict[str, str] = {v: k for k, v in _STATE_TO_FIPS.items()}
 
 
-class SedsExtension(MeridianExtensionBase):
+class SedsExtension(GridSightExtensionBase):
     def __init__(self) -> None:
         self._context: ExtensionContext | None = None
         self._duckdb_conn: Any = None
@@ -387,7 +387,7 @@ class SedsExtension(MeridianExtensionBase):
     # Stable colors for the US fuel-mix area chart so the legend doesn't
     # shuffle between renders. Aligned to the NLR-standard fuel palette (the set
     # GAT uses and the Demand extension's CARRIER_COLORS mirror) so a fuel reads
-    # the same color across every Meridian view. Coal/Natural Gas/Petroleum match
+    # the same color across every GridSight view. Coal/Natural Gas/Petroleum match
     # CARRIER_COLORS directly; Nuclear + Renewables aren't demand carriers so
     # they come from GAT's `standard` set (NUCLEAR, VRE).
     _FUEL_MIX_COLORS = {

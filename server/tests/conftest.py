@@ -11,8 +11,8 @@ import os
 import tempfile
 
 # ── Must come before any app import ────────────────────────────────────────
-_TMP_DATA_DIR = tempfile.mkdtemp(prefix="meridian_test_data_")
-_TMP_DB_DIR   = tempfile.mkdtemp(prefix="meridian_test_db_")
+_TMP_DATA_DIR = tempfile.mkdtemp(prefix="gridsight_test_data_")
+_TMP_DB_DIR   = tempfile.mkdtemp(prefix="gridsight_test_db_")
 
 os.environ["DATA_DIR"]        = _TMP_DATA_DIR
 os.environ["DB_PATH"]         = os.path.join(_TMP_DB_DIR, "test.db")

@@ -4,14 +4,14 @@
 # Produces under desktop/src-tauri/resources/:
 #   server/             — frozen copy of the server/ source tree (no .venv,
 #                          no __pycache__, no tests)
-#   wheels/             — pre-built wheels: meridian-sdk, gat, meridian-gat
+#   wheels/             — pre-built wheels: gridsight-sdk, gat, gridsight-gat
 #   requirements.txt    — pinned PyPI deps derived from server/pyproject.toml
 #                          (with the local packages stripped)
 #
 # Source locations are configurable via env vars so the script works on a
 # fresh build machine where the repos live somewhere other than ~/code.
-#   MERIDIAN_REPO       — defaults to two levels up from this script
-#   GAT_SOURCE_DIR      — defaults to $MERIDIAN_REPO/../GAT
+#   GRIDSIGHT_REPO       — defaults to two levels up from this script
+#   GAT_SOURCE_DIR      — defaults to $GRIDSIGHT_REPO/../GAT
 
 set -euo pipefail
 
@@ -20,9 +20,9 @@ DESKTOP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 RESOURCES="$DESKTOP_DIR/src-tauri/resources"
 WHEELS="$RESOURCES/wheels"
 
-MERIDIAN_REPO="${MERIDIAN_REPO:-$(cd "$DESKTOP_DIR/.." && pwd)}"
-GAT_SOURCE_DIR="${GAT_SOURCE_DIR:-$MERIDIAN_REPO/../GAT}"
-DEMAND_TLDR_SOURCE_DIR="${DEMAND_TLDR_SOURCE_DIR:-$MERIDIAN_REPO/../DemandTldr/meridian-ext}"
+GRIDSIGHT_REPO="${GRIDSIGHT_REPO:-$(cd "$DESKTOP_DIR/.." && pwd)}"
+GAT_SOURCE_DIR="${GAT_SOURCE_DIR:-$GRIDSIGHT_REPO/../GAT}"
+DEMAND_TLDR_SOURCE_DIR="${DEMAND_TLDR_SOURCE_DIR:-$GRIDSIGHT_REPO/../DemandTldr/gridsight-ext}"
 
 UV="${UV:-$DESKTOP_DIR/src-tauri/binaries/uv}"
 if [ ! -x "$UV" ]; then
@@ -33,12 +33,12 @@ if [ -z "$UV" ] || [ ! -x "$UV" ]; then
   exit 1
 fi
 
-echo "→ meridian repo:  $MERIDIAN_REPO"
+echo "→ gridsight repo:  $GRIDSIGHT_REPO"
 echo "→ GAT source:     $GAT_SOURCE_DIR"
 echo "→ DemandTldr ext: $DEMAND_TLDR_SOURCE_DIR"
 echo "→ uv:             $UV"
 
-for d in "$MERIDIAN_REPO/server" "$MERIDIAN_REPO/sdk"; do
+for d in "$GRIDSIGHT_REPO/server" "$GRIDSIGHT_REPO/sdk"; do
   if [ ! -d "$d" ]; then
     echo "missing required source dir: $d" >&2
     exit 1
@@ -46,7 +46,7 @@ for d in "$MERIDIAN_REPO/server" "$MERIDIAN_REPO/sdk"; do
 done
 
 HAS_GAT=true
-for d in "$GAT_SOURCE_DIR" "$GAT_SOURCE_DIR/meridian-ext"; do
+for d in "$GAT_SOURCE_DIR" "$GAT_SOURCE_DIR/gridsight-ext"; do
   if [ ! -d "$d" ]; then
     echo "→ GAT not found at $d — skipping GAT wheels (extension unavailable at runtime)"
     HAS_GAT=false
@@ -67,7 +67,7 @@ mkdir -p "$RESOURCES" "$WHEELS"
 echo "→ copying server source"
 # Mirror server/ but skip dev cruft. rsync would be cleaner but isn't on all
 # Windows shells; tar-then-untar gives us the same selective copy.
-(cd "$MERIDIAN_REPO" && tar --exclude=server/__pycache__ \
+(cd "$GRIDSIGHT_REPO" && tar --exclude=server/__pycache__ \
                            --exclude='server/**/__pycache__' \
                            --exclude=server/.venv \
                            --exclude=server/tests \
@@ -77,23 +77,23 @@ find "$RESOURCES/server" -name "*.pyc" -delete 2>/dev/null || true
 
 echo "→ exporting requirements.txt (local packages stripped)"
 "$UV" export \
-  --project "$MERIDIAN_REPO/server" \
+  --project "$GRIDSIGHT_REPO/server" \
   --frozen \
   --format requirements-txt \
   --no-emit-project \
-  --no-emit-package meridian-sdk \
-  --no-emit-package meridian-gat \
-  --no-emit-package meridian-demand-tldr \
+  --no-emit-package gridsight-sdk \
+  --no-emit-package gridsight-gat \
+  --no-emit-package gridsight-demand-tldr \
   --no-emit-package gat \
   --no-hashes \
   --no-dev \
   -o "$RESOURCES/requirements.txt"
 
 echo "→ building wheels"
-"$UV" build --wheel --out-dir "$WHEELS" "$MERIDIAN_REPO/sdk"
+"$UV" build --wheel --out-dir "$WHEELS" "$GRIDSIGHT_REPO/sdk"
 if [ "$HAS_GAT" = "true" ]; then
   "$UV" build --wheel --out-dir "$WHEELS" "$GAT_SOURCE_DIR"
-  "$UV" build --wheel --out-dir "$WHEELS" "$GAT_SOURCE_DIR/meridian-ext"
+  "$UV" build --wheel --out-dir "$WHEELS" "$GAT_SOURCE_DIR/gridsight-ext"
 fi
 if [ "$HAS_DEMAND_TLDR" = "true" ]; then
   "$UV" build --wheel --out-dir "$WHEELS" "$DEMAND_TLDR_SOURCE_DIR"

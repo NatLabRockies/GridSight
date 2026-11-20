@@ -1172,7 +1172,7 @@ export function App() {
     // small fixed offset rather than the clicked button's own position
     // — otherwise opening a settings section (last items) would anchor the
     // tray near the bottom of the drawer and leave no room for the panel.
-    const firstItem = document.querySelector('.meridian-drawer-first-item');
+    const firstItem = document.querySelector('.gridsight-drawer-first-item');
     if (firstItem) {
       layout.setTrayTop(firstItem.getBoundingClientRect().top);
     } else {
@@ -1696,7 +1696,7 @@ export function App() {
           )}
           <List>
             {["Layers", "Data Catalog", "Timeline"].map((text, idx) => (
-              <ListItem key={text} disablePadding className={idx === 0 ? 'meridian-drawer-first-item' : undefined}>
+              <ListItem key={text} disablePadding className={idx === 0 ? 'gridsight-drawer-first-item' : undefined}>
                 <ListItemButton onClick={(e) => handleListItemClick(idx, e)}>
                   <ListItemIcon sx={{ minWidth: showLabels ? 56 : 'auto' }}>{listIcons[idx]}</ListItemIcon>
                   {showLabels && <ListItemText primary={text} />}

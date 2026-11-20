@@ -11,8 +11,8 @@
  * localStorage style of useGpuPreference, with live subscription added.
  */
 
-const ENABLED_KEY = 'meridian.whisper.enabled';
-const MODEL_KEY = 'meridian.whisper.model';
+const ENABLED_KEY = 'gridsight.whisper.enabled';
+const MODEL_KEY = 'gridsight.whisper.model';
 
 // The models offered in Developer Settings. `id` is the transformers.js repo
 // id; assets are resolved from the self-hosted `/models/<id>/…` path in

@@ -483,9 +483,9 @@ export default function ChatPanel({
   // - selectedModel: stored as "provider::model" composite string
   // - thinkingLevel: 'off' | 'on' (string toggle, not a numeric level)
   let initialModel = null;
-  try { initialModel = localStorage.getItem('meridian-chat-model') || null; } catch {}
+  try { initialModel = localStorage.getItem('gridsight-chat-model') || null; } catch {}
   let initialThinking = 'off';
-  try { initialThinking = localStorage.getItem('meridian-chat-thinking') || 'off'; } catch {}
+  try { initialThinking = localStorage.getItem('gridsight-chat-thinking') || 'off'; } catch {}
   const chat = useChatPanelState({ selectedModel: initialModel, thinkingLevel: initialThinking });
   const { messages, input, loading, chatConfig, providerGroups, selectedModel, thinkingLevel, pendingImages } = chat.state;
   const [conversationId] = useState(() => `chat-${Date.now()}`);
@@ -540,13 +540,13 @@ export default function ChatPanel({
 
   const handleModelChange = useCallback((compositeValue) => {
     chat.setSelectedModel(compositeValue || null);
-    try { if (compositeValue) localStorage.setItem('meridian-chat-model', compositeValue); } catch {}
+    try { if (compositeValue) localStorage.setItem('gridsight-chat-model', compositeValue); } catch {}
   }, [chat]);
 
   const handleThinkingChange = useCallback((_, val) => {
     if (val !== null) {
       chat.setThinkingLevel(val);
-      try { localStorage.setItem('meridian-chat-thinking', val); } catch {}
+      try { localStorage.setItem('gridsight-chat-thinking', val); } catch {}
     }
   }, [chat]);
 
@@ -769,7 +769,7 @@ export default function ChatPanel({
                     // Write to both storage keys used by CategoryColorPanel and GenericLayerStyler.
                     const saveName = palette_name || 'AI Palette';
                     try {
-                      for (const storageKey of ['meridian_category_palettes', 'meridian_palettes']) {
+                      for (const storageKey of ['gridsight_category_palettes', 'gridsight_palettes']) {
                         const existing = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
                         existing[saveName] = rgbaMap;
                         localStorage.setItem(storageKey, JSON.stringify(existing));

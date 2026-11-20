@@ -1,23 +1,23 @@
 ---
 name: interactivity-test
-description: Run Meridian's live interactivity regression suite — bring up the dev stack and drive the map, chart-frame, and MCP/stateBus handlers in a real browser via the preview tools, verifying each interaction GROUP independently so a regression in one area doesn't require re-running everything. Use when verifying frontend interactivity, stateBus channel handlers, or MCP-driven control after a change; when confirming a bug fix in those areas; or to add a newly-built interaction to the running checklist.
+description: Run GridSight's live interactivity regression suite — bring up the dev stack and drive the map, chart-frame, and MCP/stateBus handlers in a real browser via the preview tools, verifying each interaction GROUP independently so a regression in one area doesn't require re-running everything. Use when verifying frontend interactivity, stateBus channel handlers, or MCP-driven control after a change; when confirming a bug fix in those areas; or to add a newly-built interaction to the running checklist.
 ---
 
-# Meridian interactivity test
+# GridSight interactivity test
 
-A grouped, repeatable checklist for verifying Meridian's **interactive** behavior:
+A grouped, repeatable checklist for verifying GridSight's **interactive** behavior:
 map camera control, chart frames, and the `stateBus` channel handlers that the
 MCP server / remote sessions drive. Each **group** is independent and has its own
 preconditions — run only the group(s) that a change could affect, not the whole
 suite.
 
-These tests drive the frontend by dispatching the exact `meridian:mcp-bus`
+These tests drive the frontend by dispatching the exact `gridsight:mcp-bus`
 `CustomEvent`s that `desktopBridge.js`'s SSE listener feeds into
 `stateBus.receive()`. That is a faithful stand-in for the live MCP→SSE→bus path,
 so it exercises the real React handlers without needing Claude Desktop running.
 (The *full* loop — real SSE delivery + the live MCP tools like `describe_data`,
 `list_stories`, `save_view` — still warrants a one-time smoke test in the actual
-Claude Desktop + Meridian desktop setup, since a running MCP subprocess only
+Claude Desktop + GridSight desktop setup, since a running MCP subprocess only
 picks up server-side tool changes after it reconnects.)
 
 Use the `Bash` tool for the stack + backend checks and the `preview_*` tools for
@@ -32,7 +32,7 @@ relevant source and diagnose before moving on.
    checkout serves stale code):
    ```bash
    # --git-common-dir resolves to the main checkout even from inside a worktree
-   cd "$(git rev-parse --path-format=absolute --git-common-dir)/.." && ./dev.sh > /tmp/meridian-dev.log 2>&1 &
+   cd "$(git rev-parse --path-format=absolute --git-common-dir)/.." && ./dev.sh > /tmp/gridsight-dev.log 2>&1 &
    ```
    Wait until the backend answers:
    ```bash
@@ -46,16 +46,16 @@ relevant source and diagnose before moving on.
    the dev backend instead of a dead desktop port:
    ```bash
    printf '{\n  "port": 5001,\n  "apiKey": "dev-api-key"\n}\n' \
-     > "$HOME/Library/Application Support/meridian/backend.json"
+     > "$HOME/Library/Application Support/gridsight/backend.json"
    ```
    (The desktop app rewrites this on its next launch — harmless.)
 
 3. **Open the app in the preview browser.** Register/start the dev server then
-   navigate to **`:5173`** (the main-repo vite). A `meridian-web` launch config
+   navigate to **`:5173`** (the main-repo vite). A `gridsight-web` launch config
    may start vite on `:5174`, but **`:5174` serves the worktree (wrong code)** —
    always navigate the page to `http://localhost:5173/`.
    ```
-   preview_start  name=meridian-web
+   preview_start  name=gridsight-web
    preview_eval   expression: window.location.href = 'http://localhost:5173/'
    ```
    If a login form appears, fill `admin` / `changeme` and submit
@@ -78,7 +78,7 @@ relevant source and diagnose before moving on.
    (`sourceId:'mcp'`, `force:true`, unique seq/timestamp):
    ```js
    let __n = Date.now();
-   const fire = (channel, payload) => window.dispatchEvent(new CustomEvent('meridian:mcp-bus', {
+   const fire = (channel, payload) => window.dispatchEvent(new CustomEvent('gridsight:mcp-bus', {
      detail: { channel, action: 'update', payload, sourceId: 'mcp', timestamp: __n++, seq: __n, force: true }
    }));
    ```
@@ -104,8 +104,8 @@ SQL in a file (`curl -d @file`) to avoid shell-quote mangling of inner `'...'`.
 - [ ] **Memory save** — `POST /api/memory` → `{"success":true,"memory_id":...}`.
 - [ ] **Memory search** — `GET /api/memory/search?query=<tag>` → finds it.
 - [ ] **Lists** — `GET /api/stories` and `GET /api/perspectives` → arrays (200).
-- [ ] **MCP tools** (if connected): `mcp__meridian__query_data`,
-      `mcp__meridian__create_chart` → return live rows / "Opened chart … on N display(s)".
+- [ ] **MCP tools** (if connected): `mcp__gridsight__query_data`,
+      `mcp__gridsight__create_chart` → return live rows / "Opened chart … on N display(s)".
 
 ---
 
@@ -193,7 +193,7 @@ Then inspect:
 
 ## Cleanup
 
-- Charts/perspectives created during a run persist in `../data/meridian.db`.
+- Charts/perspectives created during a run persist in `../data/gridsight.db`.
   Delete test artifacts via `DELETE /api/perspectives/<id>` and
   `DELETE /api/stories/<id>` if you don't want them lingering.
 - Leave the dev stack running for iterative testing, or `./dev.sh clean` to free
@@ -216,7 +216,7 @@ a new MCP control tool, a new chart behavior):
 
 ## Known gotchas
 
-- **Port `5174` vs `5173`** — the `meridian-web` preview config starts vite from
+- **Port `5174` vs `5173`** — the `gridsight-web` preview config starts vite from
   the worktree on `:5174`; that serves a different branch. Always test on
   `:5173` (main-repo dev.sh). Verify with the `hasMcp` check (Setup 4).
 - **Stale MCP subprocess** — a long-lived MCP connection keeps the tool set and

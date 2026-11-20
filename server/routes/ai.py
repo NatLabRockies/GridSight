@@ -17,7 +17,7 @@ from lib.extensions.registry import ExtensionRegistry
 from lib.lineage import LineageManager
 from lib.responses import make_response
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 
@@ -466,7 +466,7 @@ async def getChatConfig(_=Depends(require_api_key)):
     if is_ai_disabled():
         return make_response({
             "enabled": False,
-            "disabled_reason": "AI has been disabled by the deployment administrator (MERIDIAN_DISABLE_AI).",
+            "disabled_reason": "AI has been disabled by the deployment administrator (GRIDSIGHT_DISABLE_AI).",
             "providers": [],
             "default_provider": None,
             "default_model": None,

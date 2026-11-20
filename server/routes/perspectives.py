@@ -13,7 +13,7 @@ from lib.lineage import LineageManager
 from lib.responses import make_response
 from models.orm import Layer, Perspective, Project, Scenario, Story, StoryStep
 
-logger = logging.getLogger("meridian")
+logger = logging.getLogger("gridsight")
 router = APIRouter()
 
 
@@ -408,7 +408,7 @@ async def reorderStorySteps(story_id: int, body: dict, session: Session = Depend
 # up — import reports those as warnings rather than failing, so a partially
 # satisfiable story still lands and says what's missing.
 
-BUNDLE_FORMAT = "meridian.story"
+BUNDLE_FORMAT = "gridsight.story"
 # v2 replaced numeric layer ids in perspective configs with portable
 # "project::scenario::layer" refs and added a `requirements` block. v1 bundles
 # still import, but their layer visibility/style can't be remapped — the ids
@@ -803,7 +803,7 @@ async def importStory(body: dict, request: Request, session: Session = Depends(d
             warnings.append(
                 "v1 bundle: layer visibility/style is keyed by numeric ids from the "
                 "source instance and cannot be remapped; re-export from an updated "
-                "Meridian for portable layer refs")
+                "GridSight for portable layer refs")
 
         created = 0
         for i, step in enumerate(body.get("steps") or []):

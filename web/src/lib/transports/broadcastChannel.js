@@ -8,16 +8,16 @@
  *   import { bus } from '../stateBus.js';
  *   import { BroadcastChannelTransport } from './broadcastChannel.js';
  *
- *   const transport = new BroadcastChannelTransport(bus, 'meridian-sync');
+ *   const transport = new BroadcastChannelTransport(bus, 'gridsight-sync');
  *   bus.addTransport(transport);
  */
 
 export class BroadcastChannelTransport {
   /**
    * @param {import('../stateBus.js').StateBus} bus - the bus to deliver received messages to
-   * @param {string} [channelName='meridian-sync'] - BroadcastChannel name
+   * @param {string} [channelName='gridsight-sync'] - BroadcastChannel name
    */
-  constructor(bus, channelName = 'meridian-sync') {
+  constructor(bus, channelName = 'gridsight-sync') {
     this._bus = bus;
     this._channel = new BroadcastChannel(channelName);
     this._channel.onmessage = (event) => {

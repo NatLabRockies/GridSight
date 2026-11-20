@@ -31,12 +31,12 @@ import polars as pl
 
 from .base import BaseStorageHandler
 
-logger = logging.getLogger("meridian.storage")
+logger = logging.getLogger("gridsight.storage")
 
 
 class FileSystemHandler(BaseStorageHandler):
     """
-    Stores and retrieves Meridian data from the local filesystem.
+    Stores and retrieves GridSight data from the local filesystem.
 
     Parameters
     ----------

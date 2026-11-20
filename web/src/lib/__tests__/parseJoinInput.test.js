@@ -24,7 +24,7 @@ let parseJoinInput, parseControlUrl, encodeJoinCode, normalizeHost;
 
 beforeAll(async () => {
   globalThis.window = {
-    __meridianTabIdInitialized__: false,
+    __gridsightTabIdInitialized__: false,
     opener: null,
     location: {
       origin: 'http://localhost', href: 'http://localhost/', search: '',
@@ -43,14 +43,14 @@ beforeAll(async () => {
 
 describe('parseControlUrl', () => {
   it('extracts host + token from a /control deep link', () => {
-    expect(parseControlUrl('https://meridian.example.org/control/AbC123')).toEqual({
-      host: 'https://meridian.example.org',
+    expect(parseControlUrl('https://gridsight.example.org/control/AbC123')).toEqual({
+      host: 'https://gridsight.example.org',
       token: 'AbC123',
     });
   });
 
   it('ignores non-control URLs and junk', () => {
-    expect(parseControlUrl('https://meridian.example.org/dashboard')).toBeNull();
+    expect(parseControlUrl('https://gridsight.example.org/dashboard')).toBeNull();
     expect(parseControlUrl('not a url')).toBeNull();
   });
 });
@@ -93,7 +93,7 @@ describe('parseJoinInput', () => {
 
 describe('normalizeHost', () => {
   it('adds https:// when no scheme is present', () => {
-    expect(normalizeHost('meridian.example.org')).toBe('https://meridian.example.org');
+    expect(normalizeHost('gridsight.example.org')).toBe('https://gridsight.example.org');
   });
 
   it('preserves an explicit scheme and strips trailing slashes', () => {

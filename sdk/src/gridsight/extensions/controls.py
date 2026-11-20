@@ -138,7 +138,7 @@ def input_control(
 
     Usage::
 
-        class MyExtension(MeridianExtensionBase):
+        class MyExtension(GridSightExtensionBase):
 
             @input_control(
                 name="ev_stock_share",

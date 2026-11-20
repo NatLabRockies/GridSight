@@ -1,5 +1,5 @@
 # lib/storage/base.py
-# Abstract base class defining the storage interface for Meridian.
+# Abstract base class defining the storage interface for GridSight.
 # All storage backends must implement every method defined here.
 
 from abc import ABC, abstractmethod
@@ -9,7 +9,7 @@ from typing import List
 
 class BaseStorageHandler(ABC):
     """
-    Abstract interface for Meridian data storage.
+    Abstract interface for GridSight data storage.
 
     Concrete implementations must provide project/scenario discovery,
     file retrieval (parquet, pickle, geojson), and file upload.

@@ -4,8 +4,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { THEMES, DEFAULT_THEME, THEME_NAMES } from './themes.js';
 import { FONT_IDS, DEFAULT_FONT, fontStack } from './fonts.js';
 
-const STORAGE_KEY = 'meridian-theme';
-const FONT_STORAGE_KEY = 'meridian-font';
+const STORAGE_KEY = 'gridsight-theme';
+const FONT_STORAGE_KEY = 'gridsight-font';
 
 function loadSavedTheme() {
   try {
@@ -30,11 +30,11 @@ const ThemeContext = createContext({
   setFontName: () => {},
 });
 
-export function useMeridianTheme() {
+export function useGridSightTheme() {
   return useContext(ThemeContext);
 }
 
-export function MeridianThemeProvider({ children }) {
+export function GridSightThemeProvider({ children }) {
   const [themeName, setThemeNameRaw] = useState(loadSavedTheme);
   const [fontName, setFontNameRaw] = useState(loadSavedFont);
 

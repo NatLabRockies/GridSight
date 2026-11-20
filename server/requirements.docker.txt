@@ -1,4 +1,4 @@
-# Meridian server — Docker install spec.
+# GridSight server — Docker install spec.
 #
 # This file is the canonical dependency list for the production image.
 # Local dev still uses pyproject.toml + uv (with editable installs from
@@ -34,22 +34,22 @@ openai>=1.30
 truststore>=0.9
 boto3>=1.34
 
-# ── Meridian SDK ──────────────────────────────────────────────────────────
+# ── GridSight SDK ──────────────────────────────────────────────────────────
 # Ships in the same repo as the server; pin to main so the SDK always
 # matches the server code being containerised.
-meridian-sdk @ git+https://github.com/NatLabRockies/Meridian.git@main#subdirectory=sdk
+gridsight-sdk @ git+https://github.com/NatLabRockies/GridSight.git@main#subdirectory=sdk
 
 # ── First-party extensions (bundled in this repo) ─────────────────────────
 # SEDS (EIA State Energy Data System) lives in-repo at extensions/seds, so it
 # ships with the server — no separate repo/ref to bump. Pinned to main like
 # the SDK so it matches the server code being containerised. (Migrated out of
 # the DemandTldr package; it's a small first-party dataset extension.)
-meridian-seds @ git+https://github.com/NatLabRockies/Meridian.git@main#subdirectory=extensions/seds
+gridsight-seds @ git+https://github.com/NatLabRockies/GridSight.git@main#subdirectory=extensions/seds
 
 # ── External extensions (own repos) ──────────────────────────────────────
 # GAT ships via git URL once private-repo auth is wired into the build host
 # (GITHUB_TOKEN build-arg or mounted SSH key). DemandTldr is instead STAGED
-# LOCALLY by scripts/docker-build.sh (its meridian-ext isn't pushed to the
+# LOCALLY by scripts/docker-build.sh (its gridsight-ext isn't pushed to the
 # private repo yet), the same mechanism as sdk/seds — so its git line below
 # stays commented and no auth is needed. Its reference data (forecast.parquet +
 # geojson) is baked into the image; set DEMANDTLDR_S3_URI to source from S3
@@ -57,8 +57,8 @@ meridian-seds @ git+https://github.com/NatLabRockies/Meridian.git@main#subdirect
 
 # GAT — Grid Analysis Toolkit.
 # gat @ git+https://github.com/NatLabRockies/GAT.git@v1.0.0
-# meridian-gat @ git+https://github.com/NatLabRockies/GAT.git@v1.0.0#subdirectory=meridian-ext
+# gridsight-gat @ git+https://github.com/NatLabRockies/GAT.git@v1.0.0#subdirectory=gridsight-ext
 
 # DemandTldr — demand forecasting (Demand100 pipeline). Staged locally by
 # docker-build.sh from $DEMANDTLDR_PATH; leave commented (no git auth needed).
-# meridian-demand-tldr @ git+https://github.com/NatLabRockies/DemandTldr.git@0.1.0-beta.1#subdirectory=meridian-ext
+# gridsight-demand-tldr @ git+https://github.com/NatLabRockies/DemandTldr.git@0.1.0-beta.1#subdirectory=gridsight-ext

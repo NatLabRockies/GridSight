@@ -1,10 +1,15 @@
-# Meridian
+# GridSight
 
 **An extensible geospatial analytics and animation platform.**
 
-Meridian is a web-based platform for visualizing, animating, and analyzing geospatial timeseries data. Built on a plugin architecture, it supports pip-installable Python extensions that provide data, interactive controls, SQL-driven charts, and custom shaders. An integrated AI chat assistant lets users query data with natural language via DuckDB, and a data lineage system tracks provenance across every query and control change.
+GridSight is a desktop app (also available as a Docker deployment) for visualizing, animating, and analyzing geospatial timeseries data. Built on a plugin architecture, it supports pip-installable Python extensions that provide data, interactive controls, SQL-driven charts, and custom shaders. An integrated AI chat assistant lets users query data with natural language via DuckDB, and a data lineage system tracks provenance across every query and control change.
 
 While designed with energy and infrastructure modeling in mind, the platform's extension system makes it suitable for any domain that combines geospatial data with temporal analysis.
+
+
+> **Looking for GridSight classic?** The original GridSight lives on the
+> [`classic`](https://github.com/NatLabRockies/GridSight/tree/classic) branch
+> and the [`v0-classic`](https://github.com/NatLabRockies/GridSight/tree/v0-classic) tag.
 
 
 ## Key Features
@@ -24,11 +29,11 @@ While designed with energy and infrastructure modeling in mind, the platform's e
 ## Architecture
 
 ```
-meridian-sdk        (pip package — extension interfaces & data models)
+gridsight-sdk        (pip package — extension interfaces & data models)
       | implements
-my-extension         (pip package — entry_points: meridian.extensions)
+my-extension         (pip package — entry_points: gridsight.extensions)
       | discovered by
-meridian-server     (FastAPI backend)
+gridsight-server     (FastAPI backend)
   |-- ExtensionRegistry  — discovers extensions via importlib.metadata
   |-- DuckDBEngine       — in-memory analytical SQL engine
   |-- AI Chat            — provider-agnostic LLM with tool use
@@ -58,7 +63,37 @@ At startup, the server discovers all installed extensions, calls `get_manifest()
 | **Story** | A sequence of perspectives with transitions and narration for guided analysis. |
 
 
-## Quick Start
+## Install the Desktop App
+
+The desktop app is the main way to use GridSight. It bundles the server and
+the web UI; at first launch it sets up its own Python environment.
+
+1. Download the installer for your platform from
+   [Releases](https://github.com/NatLabRockies/GridSight/releases/latest):
+   `.dmg` (macOS, Apple Silicon), `.exe` or `.msi` (Windows).
+2. **macOS:** open the `.dmg` and drag **GridSight.app** to Applications.
+   The app is not signed with an Apple Developer ID, so on first launch:
+   - macOS 14 or earlier: right-click GridSight, choose **Open**, then **Open**.
+   - macOS 15 or later: run `xattr -dr com.apple.quarantine /Applications/GridSight.app` once, then open it.
+3. **Windows:** run the installer. SmartScreen warns that the publisher is
+   unknown; click **More info → Run anyway**.
+
+To build the desktop app from source, see
+[`docs/desktop-building.md`](docs/desktop-building.md).
+
+## Run with Docker
+
+Use Docker to serve GridSight to a team from one host:
+
+```bash
+cp .env.example .env          # extension creds, AI keys, …
+./scripts/docker-build.sh     # builds gridsight-server and gridsight-web
+docker compose up
+```
+
+See [Docker](#docker) below for build options.
+
+## Development
 
 ### Prerequisites
 
@@ -70,8 +105,8 @@ At startup, the server discovers all installed extensions, calls `get_manifest()
 
 ```bash
 # Clone and enter the repo
-git clone <repo-url>
-cd [platform]
+git clone https://github.com/NatLabRockies/GridSight.git
+cd GridSight
 
 # Install SDK (editable)
 cd sdk && uv pip install -e . && cd ..
@@ -99,7 +134,7 @@ cd web && bun install && cd ..
 
 Open http://localhost:5173 in your browser.
 
-`setup-extensions.sh` clones GAT to `../GAT` (relative to the meridian
+`setup-extensions.sh` clones GAT to `../GAT` (relative to the gridsight
 repo) at branch `mw/v1.0.0` by default. Override with flags:
 
 ```bash
@@ -108,8 +143,8 @@ repo) at branch `mw/v1.0.0` by default. Override with flags:
 
 ### Docker
 
-Two images come out of `scripts/docker-build.sh`: `meridian-server`
-(FastAPI + extensions) and `meridian-web` (Vite-built dist + Bun
+Two images come out of `scripts/docker-build.sh`: `gridsight-server`
+(FastAPI + extensions) and `gridsight-web` (Vite-built dist + Bun
 proxy). Build and run:
 
 ```bash
@@ -141,7 +176,7 @@ editable installs make changes live without a rebuild.
 
 ### AI Chat Setup (Optional)
 
-Meridian's AI assistant automatically discovers available LLM providers. No configuration is required beyond setting API keys — each provider with valid credentials appears in the chat model selector.
+GridSight's AI assistant automatically discovers available LLM providers. No configuration is required beyond setting API keys — each provider with valid credentials appears in the chat model selector.
 
 **Ollama** is auto-detected when running locally (default `http://localhost:11434`). For cloud providers, set the corresponding API key:
 
@@ -172,7 +207,7 @@ export LLM_PROVIDER=openai    # ollama (default), openai, xai, anthropic
 To force-disable AI entirely (e.g. in a deployment that shouldn't expose LLM access):
 
 ```bash
-export MERIDIAN_DISABLE_AI=true
+export GRIDSIGHT_DISABLE_AI=true
 ```
 
 #### Configuring LLM Providers
@@ -242,12 +277,12 @@ To add a custom provider (e.g. Azure OpenAI, local vLLM, or another OpenAI-compa
 
 ## Extension System
 
-Extensions are pip-installable Python packages that implement `MeridianExtensionBase` from the SDK. They declare capabilities (data provision, controls, charts, shaders, AI context, DuckDB tables) and are discovered automatically at startup via `importlib.metadata.entry_points`.
+Extensions are pip-installable Python packages that implement `GridSightExtensionBase` from the SDK. They declare capabilities (data provision, controls, charts, shaders, AI context, DuckDB tables) and are discovered automatically at startup via `importlib.metadata.entry_points`.
 
 ```python
-from meridian.extensions import MeridianExtensionBase, ExtensionManifest, Capability
+from gridsight.extensions import GridSightExtensionBase, ExtensionManifest, Capability
 
-class MyExtension(MeridianExtensionBase):
+class MyExtension(GridSightExtensionBase):
     def get_manifest(self):
         return ExtensionManifest(
             name="my-extension",
@@ -263,7 +298,7 @@ class MyExtension(MeridianExtensionBase):
 Register via `pyproject.toml`:
 
 ```toml
-[project.entry-points."meridian.extensions"]
+[project.entry-points."gridsight.extensions"]
 my_extension = "my_package:MyExtension"
 ```
 

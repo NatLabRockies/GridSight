@@ -1,8 +1,8 @@
-# Meridian Extension Developer Guide
+# GridSight Extension Developer Guide
 
 ## Overview
 
-Extensions are pip-installable Python packages that add data, interactive controls, charts, shaders, and AI context to Meridian. Each extension is a Python class that subclasses `MeridianExtensionBase` from the SDK and declares its capabilities via a manifest. The server discovers installed extensions at startup using Python entry points and integrates them into the platform automatically.
+Extensions are pip-installable Python packages that add data, interactive controls, charts, shaders, and AI context to GridSight. Each extension is a Python class that subclasses `GridSightExtensionBase` from the SDK and declares its capabilities via a manifest. The server discovers installed extensions at startup using Python entry points and integrates them into the platform automatically.
 
 Extensions can:
 
@@ -16,10 +16,10 @@ Extensions can:
 ### How Discovery Works
 
 ```
-pyproject.toml entry_points: "meridian.extensions"
+pyproject.toml entry_points: "gridsight.extensions"
         |
         v
-Server startup: importlib.metadata.entry_points(group="meridian.extensions")
+Server startup: importlib.metadata.entry_points(group="gridsight.extensions")
         |
         v
 For each entry point:
@@ -34,15 +34,15 @@ For each entry point:
 ### Minimal Example
 
 ```python
-from meridian.extensions import (
-    MeridianExtensionBase,
+from gridsight.extensions import (
+    GridSightExtensionBase,
     ExtensionManifest,
     ExtensionProject,
     ExtensionScenario,
     Capability,
 )
 
-class MyExtension(MeridianExtensionBase):
+class MyExtension(GridSightExtensionBase):
     def get_manifest(self):
         return ExtensionManifest(
             name="my-ext",
@@ -66,9 +66,9 @@ class MyExtension(MeridianExtensionBase):
 name = "my-extension"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["meridian-sdk"]
+dependencies = ["gridsight-sdk"]
 
-[project.entry-points."meridian.extensions"]
+[project.entry-points."gridsight.extensions"]
 my_ext = "my_package.extension:MyExtension"
 
 [build-system]
@@ -90,7 +90,7 @@ third-party extension — are covered in the next section.
 There are two install paths depending on whether you're running the
 local dev server (`./dev.sh`) or building a container image to deploy.
 Both rely on the same Python entry-points mechanism: as long as a
-package exposing a `meridian.extensions` entry point is importable in
+package exposing a `gridsight.extensions` entry point is importable in
 the server's Python environment, it shows up.
 
 ### Local development (editable install from a sibling repo)
@@ -102,16 +102,16 @@ GAT and DemandTldr in this way under `[tool.uv.sources]`:
 ```toml
 [project]
 dependencies = [
-    "meridian-sdk",
-    "meridian-gat",
-    "meridian-demand-tldr",
+    "gridsight-sdk",
+    "gridsight-gat",
+    "gridsight-demand-tldr",
     # ...core deps...
 ]
 
 [tool.uv.sources]
-meridian-sdk         = { path = "../sdk",                       editable = true }
-meridian-gat         = { path = "../../GAT/meridian-ext",       editable = true }
-meridian-demand-tldr = { path = "../../DemandTldr/meridian-ext", editable = true }
+gridsight-sdk         = { path = "../sdk",                       editable = true }
+gridsight-gat         = { path = "../../GAT/gridsight-ext",       editable = true }
+gridsight-demand-tldr = { path = "../../DemandTldr/gridsight-ext", editable = true }
 ```
 
 Running `cd server && uv sync` resolves these against the host's
@@ -120,15 +120,15 @@ on next reload.
 
 To add a **new** extension you're developing locally:
 
-1. Clone or scaffold the extension package alongside the meridian repo
-   (e.g. `~/code/MyExt/meridian-ext/`).
+1. Clone or scaffold the extension package alongside the gridsight repo
+   (e.g. `~/code/MyExt/gridsight-ext/`).
 2. Append it to `server/pyproject.toml`:
    ```toml
    [project]
    dependencies = [..., "my-ext"]
 
    [tool.uv.sources]
-   my-ext = { path = "../../MyExt/meridian-ext", editable = true }
+   my-ext = { path = "../../MyExt/gridsight-ext", editable = true }
    ```
 3. `cd server && uv sync`
 4. Restart the server (`./dev.sh` will re-run discovery).
@@ -151,10 +151,10 @@ a PyPI name or a `git+https://…` URL pointing at a tag or commit:
 
 ```
 # core deps...
-meridian-sdk          @ git+https://github.com/NatLabRockies/GridSight.git@v1.2.3#subdirectory=sdk
-meridian-gat          @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@v0.1.0#subdirectory=meridian-ext
+gridsight-sdk          @ git+https://github.com/NatLabRockies/GridSight.git@v1.2.3#subdirectory=sdk
+gridsight-gat          @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@v0.1.0#subdirectory=gridsight-ext
 gat                   @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@v0.1.0
-meridian-demand-tldr  @ git+https://github.com/YOUR_ORG/DemandTldr.git@v0.1.0#subdirectory=meridian-ext
+gridsight-demand-tldr  @ git+https://github.com/YOUR_ORG/DemandTldr.git@v0.1.0#subdirectory=gridsight-ext
 ```
 
 Anything pip understands works: `name>=ver`, `git+https://…@<ref>`,
@@ -187,7 +187,7 @@ in the Settings panel's per-extension toggle. If it doesn't appear:
 
 - Check the server's startup log for `Loaded extension '<name>'` lines.
 - Confirm the package is importable: `uv run python -c "import my_pkg; print(my_pkg.__file__)"` from `server/`.
-- Confirm the entry point: `uv run python -c "from importlib.metadata import entry_points; print(list(entry_points(group='meridian.extensions')))"`.
+- Confirm the entry point: `uv run python -c "from importlib.metadata import entry_points; print(list(entry_points(group='gridsight.extensions')))"`.
 
 ### Extension-specific environment variables
 
@@ -215,12 +215,12 @@ Each `Capability` enum value enables a set of extension methods. Only declare ca
 | `AI_QUERYABLE` | `"ai_queryable"` | Schema context for AI chat | `get_ai_schema` |
 | `DUCKDB_TABLES` | `"duckdb_tables"` | Register tables in analytical engine | `register_duckdb_tables` |
 
-Import: `from meridian.extensions import Capability`
+Import: `from gridsight.extensions import Capability`
 
 
 ## Data Models
 
-All models are Python dataclasses. Import from `meridian.extensions` (top-level) or `meridian.extensions.models`.
+All models are Python dataclasses. Import from `gridsight.extensions` (top-level) or `gridsight.extensions.models`.
 
 ### `ExtensionManifest`
 
@@ -234,7 +234,7 @@ Returned by `get_manifest()`. Every extension must provide this.
 | `description` | `str` | no | Brief description of the extension. Default: `""`. |
 | `capabilities` | `list[Capability]` | no | List of capabilities this extension provides. Default: `[]`. |
 | `icon` | `str \| None` | no | Material Icon name (e.g. `"bolt"`) or URL. Default: `None`. |
-| `min_meridian_version` | `str \| None` | no | Minimum server version required. Default: `None`. |
+| `min_gridsight_version` | `str \| None` | no | Minimum server version required. Default: `None`. |
 
 ### `ExtensionProject`
 
@@ -326,9 +326,9 @@ Returned by `register_duckdb_tables()`. Metadata about tables the extension crea
 
 ## Extension Base Class
 
-All methods below are on `MeridianExtensionBase`. Only `get_manifest()` is abstract; all others have default implementations that return empty lists or raise `NotImplementedError`.
+All methods below are on `GridSightExtensionBase`. Only `get_manifest()` is abstract; all others have default implementations that return empty lists or raise `NotImplementedError`.
 
-Import: `from meridian.extensions import MeridianExtensionBase, ExtensionContext`
+Import: `from gridsight.extensions import GridSightExtensionBase, ExtensionContext`
 
 ### Lifecycle
 
@@ -468,7 +468,7 @@ Return GLSL source code for the named shader. Default: raises `NotImplementedErr
 
 ## Controls System
 
-Import: `from meridian.extensions.controls import ControlType, DataControl, ControlUpdateResult, input_control`
+Import: `from gridsight.extensions.controls import ControlType, DataControl, ControlUpdateResult, input_control`
 
 ### `ControlType` Enum
 
@@ -572,12 +572,12 @@ Extensions can optionally guide how the UI visualizes the result of a control ch
 | `color_scheme` | `str \| None` | Colormap name (e.g. `"viridis"`). |
 | `compare_with` | `str \| None` | Column name for side-by-side comparison. |
 
-Import: `from meridian.extensions.controls import ResponseTier, TieredResponse, VizHint`
+Import: `from gridsight.extensions.controls import ResponseTier, TieredResponse, VizHint`
 
 
 ## Charts and Shaders
 
-Import: `from meridian.extensions.charts import ChartSpec, ShaderSpec`
+Import: `from gridsight.extensions.charts import ChartSpec, ShaderSpec`
 
 ### `ChartSpec`
 
@@ -622,7 +622,7 @@ Custom GLSL or deck.gl layer extension.
 
 ## AI Integration
 
-Import: `from meridian.extensions.ai import AISchema, AITableSchema, AIControlSchema`
+Import: `from gridsight.extensions.ai import AISchema, AITableSchema, AIControlSchema`
 
 The AI chat system builds its system prompt from all extensions with `Capability.AI_QUERYABLE`. The prompt includes table schemas, column descriptions, example queries, and example prompts. The AI has tools to execute DuckDB queries, create charts, update controls, and inspect data lineage.
 
@@ -659,7 +659,7 @@ The AI chat system builds its system prompt from all extensions with `Capability
 Passed to `on_startup()`. Store it for later use.
 
 ```python
-from meridian.extensions import ExtensionContext
+from gridsight.extensions import ExtensionContext
 ```
 
 | Field | Type | Description |
@@ -692,13 +692,13 @@ my-extension/
 [project]
 name = "my-extension"
 version = "0.1.0"
-description = "My extension for Meridian"
+description = "My extension for GridSight"
 requires-python = ">=3.12"
 dependencies = [
-    "meridian-sdk",
+    "gridsight-sdk",
 ]
 
-[project.entry-points."meridian.extensions"]
+[project.entry-points."gridsight.extensions"]
 my_ext = "my_package.extension:MyExtension"
 
 [build-system]
@@ -735,11 +735,11 @@ Create the directory structure above. Set up `pyproject.toml` and `__init__.py`.
 ### Step 2: Manifest and Startup
 
 ```python
-from meridian.extensions import (
-    MeridianExtensionBase, ExtensionManifest, ExtensionContext, Capability,
+from gridsight.extensions import (
+    GridSightExtensionBase, ExtensionManifest, ExtensionContext, Capability,
 )
 
-class MyExtension(MeridianExtensionBase):
+class MyExtension(GridSightExtensionBase):
     def __init__(self):
         self._context = None
 
@@ -765,7 +765,7 @@ class MyExtension(MeridianExtensionBase):
 ### Step 3: Projects and Scenarios
 
 ```python
-from meridian.extensions import ExtensionProject, ExtensionScenario
+from gridsight.extensions import ExtensionProject, ExtensionScenario
 
     def list_projects(self):
         return [ExtensionProject(
@@ -786,7 +786,7 @@ Serve a GeoJSON file bundled with your package.
 
 ```python
 from pathlib import Path
-from meridian.extensions import GeometryDescriptor
+from gridsight.extensions import GeometryDescriptor
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -808,7 +808,7 @@ Serve a Parquet dataset. For animated data, implement `list_dataset_partitions` 
 
 ```python
 import io
-from meridian.extensions import DatasetDescriptor
+from gridsight.extensions import DatasetDescriptor
 
     def list_datasets(self, project=None, scenario=None):
         return [DatasetDescriptor(
@@ -831,7 +831,7 @@ from meridian.extensions import DatasetDescriptor
 Configure a choropleth that renders automatically.
 
 ```python
-from meridian.extensions import DefaultLayerConfig
+from gridsight.extensions import DefaultLayerConfig
 
     def list_default_layers(self):
         return [DefaultLayerConfig(
@@ -856,7 +856,7 @@ from meridian.extensions import DefaultLayerConfig
 Register your data so users and AI can query it with SQL.
 
 ```python
-from meridian.extensions import DuckDBTableInfo
+from gridsight.extensions import DuckDBTableInfo
 
     def register_duckdb_tables(self, conn):
         conn.register("_ext_myext_data", self._dataframe)
@@ -881,7 +881,7 @@ from meridian.extensions import DuckDBTableInfo
 Add a slider that re-generates data when changed.
 
 ```python
-from meridian.extensions.controls import ControlType, ControlUpdateResult, input_control
+from gridsight.extensions.controls import ControlType, ControlUpdateResult, input_control
 
     @input_control(
         name="growth_factor",
@@ -907,7 +907,7 @@ from meridian.extensions.controls import ControlType, ControlUpdateResult, input
 Tell the AI about your data so users can query it with natural language.
 
 ```python
-from meridian.extensions.ai import AISchema, AITableSchema
+from gridsight.extensions.ai import AISchema, AITableSchema
 
     def get_ai_schema(self):
         return AISchema(
@@ -946,4 +946,4 @@ Open the browser. Your extension's project should appear in the project selector
 ## Reference Examples
 
 - **DemandTldr extension:** A real-world extension that bridges the demand100 energy forecasting CLI tool into the platform, serving US county geometries and forecast data with time partitions for animation.
-- **GAT extension:** A power-system simulation extension that exposes Grid Analysis Toolkit results (generators, lines, buses, dispatch dispatch timeseries) as a Meridian project.
+- **GAT extension:** A power-system simulation extension that exposes Grid Analysis Toolkit results (generators, lines, buses, dispatch dispatch timeseries) as a GridSight project.
