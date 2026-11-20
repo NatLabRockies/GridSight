@@ -1,0 +1,23 @@
+# GridSight Client – Development Dockerfile
+#
+# Runs both the Vite dev server (HMR + source maps) and the Bun auth/proxy
+# server concurrently. Source files are bind-mounted from the host so edits
+# are reflected instantly via Vite's hot module replacement.
+
+FROM oven/bun:1
+
+WORKDIR /app
+
+# Copy dependency manifests and install everything (dev + prod)
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+# Source files are bind-mounted at runtime (see docker-compose.dev.yml),
+# but copy them here as a fallback so the image is self-contained if needed.
+COPY . .
+
+EXPOSE 5173 3001
+
+# Start both servers: Vite dev server on 5173, Bun auth/proxy on 3001.
+# Vite must bind 0.0.0.0 to be reachable outside the container.
+CMD ["sh", "-c", "bun run server/index.js & exec bunx vite --host 0.0.0.0 --port ${VITE_PORT:-5173}"]

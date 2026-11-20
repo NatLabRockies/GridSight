@@ -1,3 +1,14 @@
+# Notes
+notes/
+
+# database
+*.db
+*.db-shm
+*.db-wal
+
+# Archives
+*.zip
+
 # Logs
 logs
 *.log
@@ -95,6 +106,8 @@ out/
 # data
 src/layers/*
 server/data
+data/*
+!data/.gitkeep
 *.pq.gz
 
 # PYTHON
@@ -105,3 +118,7 @@ old/*
 data
 .pytest_cache
 *.egg-info
+
+# docker-build.sh transient staging (created + removed by its EXIT trap)
+server/.build-deps/
+server/requirements.docker.txt.preBuild.bak

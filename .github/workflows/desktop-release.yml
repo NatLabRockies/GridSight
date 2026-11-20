@@ -1,0 +1,318 @@
+name: Desktop Build & Release
+
+# Single workflow covering both macOS and Windows desktop builds, plus
+# the one GitHub Release that gets created on tag push.
+#
+# Previous setup had two separate workflows (one per platform), each
+# calling softprops/action-gh-release against the same tag. They raced:
+# both passed the "release exists?" check, both tried to create or
+# update the same release, and the second got
+# ``tag_name already_exists`` retries until the action gave up. This
+# file gives both platforms their own build job and funnels the
+# release attachment through a single trailing job, so no two steps
+# ever update the same release in parallel.
+#
+# Triggers:
+#   - Manual dispatch — builds both platforms; the release job is
+#     skipped (we only publish on tag).
+#   - Push tag matching ``v*`` — builds both, attaches all installers
+#     to a single release.
+#
+# macOS bundle is AD-HOC signed (`signingIdentity: "-"` in
+# tauri.conf.json), not signed with a real Developer ID. This makes
+# the bundle structurally valid so the "GridSight.app is damaged" error
+# doesn't fire on download, but Gatekeeper will still block first launch
+# until the user either right-clicks → Open (macOS 14 and earlier) or
+# clears the quarantine xattr (macOS 15+). The release notes below tell
+# users the one-liner. Windows is unsigned and triggers SmartScreen.
+# Extensions (GAT, DemandTldr, etc.) are not bundled here — users
+# install them post-install via wheels or pip.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+# Cancel in-flight runs from the same ref so re-running the dispatch
+# doesn't double-spend a runner.
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos:
+    name: macOS aarch64 build
+    runs-on: macos-14  # Apple Silicon. macos-13 is Intel if we ever need it.
+    steps:
+      - name: Checkout gridsight
+        uses: actions/checkout@v4
+        with:
+          path: gridsight
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gridsight/desktop/src-tauri/target
+          key: ${{ runner.os }}-aarch64-cargo-${{ hashFiles('gridsight/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-aarch64-cargo-
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Set up uv (Python + the host uv binary)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: gridsight/server/uv.lock
+
+      - name: Set up Python (matches server/.python-version)
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: gridsight/server/.python-version
+
+      - name: Install web dependencies (frontend)
+        working-directory: gridsight/web
+        run: bun install --frozen-lockfile
+
+      - name: Install desktop dependencies (Tauri CLI)
+        working-directory: gridsight/desktop
+        run: bun install --frozen-lockfile
+
+      - name: Fetch host uv binary for bundling
+        working-directory: gridsight/desktop
+        run: bash scripts/fetch-uv.sh
+
+      - name: Prepare server resources (wheels + source)
+        working-directory: gridsight/desktop
+        env:
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
+        run: bash scripts/prepare-resources.sh
+
+      - name: Build Tauri app
+        working-directory: gridsight/desktop
+        env:
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
+        # No code-signing. Don't set APPLE_* env vars at all — tauri-
+        # bundler treats empty strings as "set, try to import" and
+        # fails. Leaving them unset is what actually skips signing.
+        run: bun run tauri build --target aarch64-apple-darwin
+
+      - name: Locate + stage outputs
+        id: outputs
+        run: |
+          set -eu
+          BUNDLE_DIR="gridsight/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle"
+          if [ ! -d "${BUNDLE_DIR}" ]; then
+            echo "::error::Tauri bundle dir not produced at ${BUNDLE_DIR}"
+            exit 1
+          fi
+          ls -lhR "${BUNDLE_DIR}"
+          DMG_PATH="$(find "${BUNDLE_DIR}/dmg" -maxdepth 1 -name '*.dmg' 2>/dev/null | head -1 || true)"
+          APP_DIR="$(find "${BUNDLE_DIR}/macos" -maxdepth 1 -name '*.app' -type d 2>/dev/null | head -1 || true)"
+          if [ -z "${DMG_PATH}" ]; then
+            echo "::error::No .dmg under ${BUNDLE_DIR}/dmg"; exit 1
+          fi
+          if [ -z "${APP_DIR}" ]; then
+            echo "::error::No .app under ${BUNDLE_DIR}/macos"; exit 1
+          fi
+          # Stage both files under a known directory so download-artifact
+          # in the release job picks them up with a stable path.
+          mkdir -p staging
+          cp "${DMG_PATH}" staging/
+          APP_NAME="$(basename "${APP_DIR}")"
+          # ditto preserves macOS resource forks + Finder metadata that
+          # plain zip strips. Without this the downloaded .app fails to
+          # launch with a code-signing error.
+          (cd "$(dirname "${APP_DIR}")" && \
+            ditto -c -k --sequesterRsrc --keepParent "${APP_NAME}" "${OLDPWD}/staging/${APP_NAME%.app}.app.zip")
+          ls -lh staging
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos
+          path: staging/*
+          if-no-files-found: error
+          retention-days: 14
+
+  build-windows:
+    name: Windows x64 build
+    runs-on: windows-latest
+    defaults:
+      run:
+        # windows-latest ships Git Bash; using it everywhere means
+        # prepare-resources.sh / fetch-uv.sh work with the same
+        # invocation as on macOS, and the other steps don't have to
+        # know about cmd vs powershell quoting differences.
+        shell: bash
+    steps:
+      - name: Checkout gridsight
+        uses: actions/checkout@v4
+        with:
+          path: gridsight
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gridsight/desktop/src-tauri/target
+          key: ${{ runner.os }}-x86_64-cargo-${{ hashFiles('gridsight/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-x86_64-cargo-
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Set up uv (Python + the host uv binary)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: gridsight/server/uv.lock
+
+      - name: Set up Python (matches server/.python-version)
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: gridsight/server/.python-version
+
+      - name: Install web dependencies (frontend)
+        working-directory: gridsight/web
+        run: bun install --frozen-lockfile
+
+      - name: Install desktop dependencies (Tauri CLI)
+        working-directory: gridsight/desktop
+        run: bun install --frozen-lockfile
+
+      - name: Fetch host uv binary for bundling
+        working-directory: gridsight/desktop
+        run: bash scripts/fetch-uv.sh
+
+      - name: Prepare server resources (wheels + source)
+        working-directory: gridsight/desktop
+        env:
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
+        run: bash scripts/prepare-resources.sh
+
+      - name: Build Tauri app
+        working-directory: gridsight/desktop
+        env:
+          GRIDSIGHT_REPO: ${{ github.workspace }}/gridsight
+        run: bun run tauri build --target x86_64-pc-windows-msvc
+
+      - name: Locate + stage outputs
+        id: outputs
+        run: |
+          set -eu
+          BUNDLE_DIR="gridsight/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle"
+          if [ ! -d "${BUNDLE_DIR}" ]; then
+            echo "::error::Tauri bundle dir not produced at ${BUNDLE_DIR}"
+            exit 1
+          fi
+          ls -lhR "${BUNDLE_DIR}"
+          NSIS_PATH="$(find "${BUNDLE_DIR}/nsis" -maxdepth 1 -name '*.exe' 2>/dev/null | head -1 || true)"
+          MSI_PATH="$(find "${BUNDLE_DIR}/msi"  -maxdepth 1 -name '*.msi' 2>/dev/null | head -1 || true)"
+          # windows-latest ships Wix + NSIS; with default
+          # ``"targets": "all"`` in tauri.conf.json both installers
+          # should land. Require both so a regression fails loudly.
+          if [ -z "${NSIS_PATH}" ]; then
+            echo "::error::No NSIS .exe under ${BUNDLE_DIR}/nsis"; exit 1
+          fi
+          if [ -z "${MSI_PATH}" ]; then
+            echo "::error::No .msi under ${BUNDLE_DIR}/msi"; exit 1
+          fi
+          mkdir -p staging
+          cp "${NSIS_PATH}" staging/
+          cp "${MSI_PATH}"  staging/
+          ls -lh staging
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: staging/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Attach to GitHub Release
+    needs: [build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Pulls every artifact this run uploaded into ./dist/<name>/.
+          # We don't filter — if a build job failed we wouldn't be here
+          # (needs: gates it), so everything in dist/ belongs in the
+          # release.
+          path: dist
+
+      - name: Inspect downloaded tree
+        run: ls -lhR dist
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Glob through both platform subdirectories. fail_on_unmatched
+          # would trip on any non-matching line, so we keep it true.
+          files: |
+            dist/desktop-macos/*
+            dist/desktop-windows/*
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          # Install instructions for unsigned builds. softprops only
+          # overwrites the body on the first create — subsequent runs
+          # against the same tag leave the body alone, so manual edits
+          # post-release survive.
+          body: |
+            ## Install
+
+            ### macOS
+
+            1. Download the `.dmg`, open it, drag **GridSight.app** to Applications.
+            2. On **macOS 14 (Sonoma) or earlier**: right-click GridSight in
+               Applications, choose **Open**, then **Open** in the prompt.
+            3. On **macOS 15 (Sequoia) or later**: macOS won't offer the
+               right-click bypass. Run this once in Terminal:
+               ```
+               xattr -dr com.apple.quarantine /Applications/GridSight.app
+               ```
+               Then launch normally.
+
+            *Why this is needed:* releases are not signed with an Apple
+            Developer ID. The bundle is ad-hoc signed so it isn't
+            "damaged," but Gatekeeper still requires explicit user
+            consent on first launch.
+
+            ### Windows
+
+            Download the `.exe` (NSIS) or `.msi` and run it. SmartScreen
+            will warn that the publisher is unrecognized — click
+            **More info → Run anyway**.
+          # NOTE: ``make_latest`` is intentionally NOT set. GitHub auto-
+          # promotes the highest non-prerelease, non-draft semver tag
+          # to "Latest" automatically, and explicit ``make_latest: true``
+          # triggers a 422 validation error when the action is updating
+          # a release that was previously created as a prerelease (the
+          # PATCH evaluates make_latest before applying the new
+          # prerelease=false on the same call).

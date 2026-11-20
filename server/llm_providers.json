@@ -1,0 +1,75 @@
+{
+  "providers": [
+    {
+      "id": "ollama",
+      "display_name": "Ollama (Local)",
+      "base_url": "http://localhost:11434/v1",
+      "base_url_env": "OLLAMA_URL",
+      "api_key_env": null,
+      "api_key_default": "ollama",
+      "enabled_when": "always"
+    },
+    {
+      "id": "openai",
+      "display_name": "OpenAI",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "enabled_when": "api_key"
+    },
+    {
+      "id": "xai",
+      "display_name": "xAI (Grok)",
+      "base_url": "https://api.x.ai/v1",
+      "api_key_env": "XAI_API_KEY",
+      "enabled_when": "api_key",
+      "models_endpoint": "https://api.x.ai/v1/models",
+      "known_models": [
+        {"name": "grok-4-1-fast-reasoning", "supports_tools": true, "supports_thinking": true},
+        {"name": "grok-4-1-fast-non-reasoning", "supports_tools": true, "supports_thinking": false}
+      ]
+    },
+    {
+      "id": "anthropic",
+      "display_name": "Anthropic",
+      "base_url": "https://api.anthropic.com/v1/",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "enabled_when": "api_key",
+      "known_models": [
+        {"name": "claude-sonnet-4-20250514", "supports_tools": true, "supports_thinking": true},
+        {"name": "claude-opus-4-20250514", "supports_tools": true, "supports_thinking": true},
+        {"name": "claude-3-5-haiku-20241022", "supports_tools": true, "supports_thinking": false}
+      ]
+    },
+    {
+      "id": "google",
+      "display_name": "Google Gemini",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "api_key_env": "GOOGLE_API_KEY",
+      "enabled_when": "api_key",
+      "known_models": [
+        {"name": "gemini-2.5-pro", "supports_tools": true, "supports_thinking": true},
+        {"name": "gemini-2.5-flash", "supports_tools": true, "supports_thinking": true},
+        {"name": "gemini-2.0-flash", "supports_tools": true, "supports_thinking": false}
+      ]
+    },
+    {
+      "id": "bedrock",
+      "display_name": "AWS Bedrock",
+      "base_url": "https://bedrock-runtime.us-east-1.amazonaws.com/v1",
+      "base_url_env": "BEDROCK_BASE_URL",
+      "api_key_env": "AWS_BEDROCK_API_KEY",
+      "enabled_when": "api_key"
+    },
+    {
+      "id": "custom",
+      "display_name": "Custom (OpenAI-compatible)",
+      "base_url": "",
+      "base_url_env": "CUSTOM_LLM_BASE_URL",
+      "api_key_env": "CUSTOM_LLM_API_KEY",
+      "enabled_when": "base_url",
+      "models_allowlist_env": "CUSTOM_LLM_MODELS",
+      "models_filter_env": "CUSTOM_LLM_MODEL_FILTER",
+      "reasoning_effort_env": "CUSTOM_LLM_REASONING_EFFORT"
+    }
+  ]
+}

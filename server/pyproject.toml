@@ -1,0 +1,50 @@
+[project]
+name = "gridsight-server"
+version = "1.0.0"
+description = "GridSight geospatial visualization server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "fsspec>=2026.2.0",
+    "pandas>=3.0.1",
+    "polars>=1.39.0",
+    "pyarrow>=23.0.1",
+    "python-dotenv>=1.2.2",
+    "python-multipart>=0.0.20",
+    "s3fs>=2026.2.0",
+    "sqlalchemy>=2.0.48",
+    "uvicorn[standard]>=0.30.0",
+    "duckdb>=1.0",
+    # First-party, in-repo packages — always resolvable from any checkout
+    # (relative paths below), so they stay in core deps and CI installs them.
+    "gridsight-sdk",
+    "gridsight-seds",
+    "pdfplumber>=0.11.9",
+    "openai>=1.30",
+    "truststore>=0.9",
+    "httpx>=0.27",
+    "mcp>=1.0",
+]
+
+[tool.uv.sources]
+gridsight-sdk = { path = "../sdk", editable = true }
+# First-party extension bundled in this repo (in-repo relative path → works
+# in any checkout and every git worktree, no external symlink needed).
+gridsight-seds = { path = "../extensions/seds", editable = true }
+# External extensions (GAT, DemandTldr) are NOT listed here — they live in
+# sibling repos that don't exist in CI. dev.sh installs them via
+# `uv pip install -e` after syncing, so they aren't in the lockfile and
+# uv never tries to resolve their paths on the runner.
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[tool.pytest.ini_options]
+# Run from the server/ directory: uv run pytest
+# With coverage:                  uv run pytest --cov=. --cov-report=term-missing
+testpaths = ["tests"]
+pythonpath = ["."]       # makes `import app`, `import db`, etc. work

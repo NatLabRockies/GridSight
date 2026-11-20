@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "gridsight-local",
+      "credentials": [
+        {
+          "accessKey": "gridsight-local",
+          "secretKey": "gridsight-local-secret"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

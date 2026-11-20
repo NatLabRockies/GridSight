@@ -3,3 +3,9 @@
 __pycache__
 old/**/*
 old
+# .build-deps is intentionally NOT excluded — scripts/docker-build.sh
+# stages local SDK + extension sources there for the Dockerfile to COPY.
+data
+tests
+*.duckdb
+*.db

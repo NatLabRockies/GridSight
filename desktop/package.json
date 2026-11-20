@@ -1,0 +1,16 @@
+{
+  "name": "gridsight-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "bash scripts/prepare-resources.sh && tauri build",
+    "prepare-resources": "bash scripts/prepare-resources.sh",
+    "fetch-uv": "bash scripts/fetch-uv.sh"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  }
+}

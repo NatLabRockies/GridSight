@@ -1,0 +1,37 @@
+name: Docs Layout
+
+# Markdown files belong in docs/. Allowed elsewhere:
+#   - README.md, LICENSE.md, CONTRIBUTING.md, CHANGELOG.md, CLAUDE.md,
+#     AGENTS.md at any level
+#   - anything under .github/ or .claude/
+#   - extensions/*/README.md
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  markdown-location:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that .md files live under docs/
+        run: |
+          bad=0
+          while IFS= read -r f; do
+            case "$f" in
+              docs/*|.github/*|.claude/*) continue ;;
+              extensions/*/README.md) continue ;;
+            esac
+            case "$(basename "$f")" in
+              README.md|LICENSE.md|CONTRIBUTING.md|CHANGELOG.md|CLAUDE.md|AGENTS.md) continue ;;
+            esac
+            echo "::error file=$f::Markdown file outside docs/: $f (move it into docs/)"
+            bad=1
+          done < <(git ls-files -- '*.md')
+          if [ "$bad" -ne 0 ]; then
+            exit 1
+          fi
+          echo "All Markdown files are in allowed locations."

@@ -1,9 +1,0 @@
-flask
-flask-rebar
-polars
-fsspec
-pandas
-pyarrow
-uwsgi
-python-dotenv
-s3fs
