@@ -1,0 +1,119 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Meridian — production compose file.
+#
+# Both images are built ahead of time by `scripts/docker-build.sh`.
+# Compose just runs them. The server image installs deps (including
+# extensions) from `server/requirements.docker.txt`; adding an extension
+# = appending a line to that file and rebuilding.
+#
+# Secrets live in `.env` next to this file (see `.env.example`). Each
+# extension can declare its own env vars there too — they're forwarded
+# verbatim into the server container via `env_file`, so adding an
+# extension's DB credentials is a pure config change.
+#
+# Override for local dev with `docker-compose.dev.yml`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  server:
+    image: meridian-server:${IMAGE_TAG:-local}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # ${VAR:-default} lets .env override (compose `environment:` would
+      # otherwise win unconditionally over env_file). Useful when DB_PATH
+      # is set to an s3:// URI to back the DB on object storage.
+      DATA_DIR: ${DATA_DIR:-/data}
+      DB_PATH: ${DB_PATH:-/data/meridian.db}
+      # Map operator-facing SEAWEEDFS_* into the standard AWS_* chain so
+      # the storage helper (and anything else using boto3) works out of
+      # the box without bespoke env-var handling. Empty defaults mean
+      # boto3 falls through to its normal credential chain when SEAWEEDFS_*
+      # isn't set — useful when you don't want any S3 sync at all.
+      AWS_ACCESS_KEY_ID: ${SEAWEEDFS_ACCESS_KEY:-${AWS_ACCESS_KEY_ID:-}}
+      AWS_SECRET_ACCESS_KEY: ${SEAWEEDFS_SECRET_KEY:-${AWS_SECRET_ACCESS_KEY:-}}
+      AWS_ENDPOINT_URL_S3: ${SEAWEEDFS_ENDPOINT:-${AWS_ENDPOINT_URL_S3:-}}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      # Same creds, surfaced under the names DemandTldr's extension
+      # currently reads. Drops out once the extension is refactored
+      # to the SDK's resolve_path / AWS_* chain.
+      DEMANDTLDR_S3_ACCESS_KEY: ${SEAWEEDFS_ACCESS_KEY:-${AWS_ACCESS_KEY_ID:-}}
+      DEMANDTLDR_S3_SECRET_KEY: ${SEAWEEDFS_SECRET_KEY:-${AWS_SECRET_ACCESS_KEY:-}}
+      DEMANDTLDR_S3_ENDPOINT_URL: ${SEAWEEDFS_ENDPOINT:-${AWS_ENDPOINT_URL_S3:-}}
+      DEMANDTLDR_S3_REGION: ${AWS_REGION:-us-east-1}
+    volumes:
+      - meridian-data:/data
+    expose:
+      - "5001"
+    # Optional dependency: only takes effect when the s3-local profile
+    # is enabled (otherwise seaweedfs isn't part of the project and the
+    # condition is ignored). Server's DemandTldr S3 sync runs at module
+    # import — without this gate, server can race past a not-yet-ready
+    # SeaweedFS and silently fall back to (empty) packaged data.
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+
+  # ── Local S3 (SeaweedFS) ─────────────────────────────────────────────────
+  # Opt-in via `--profile s3-local`, e.g.:
+  #   docker compose --profile s3-local up
+  # Provides an S3-compatible endpoint at http://seaweedfs:8333 (inside the
+  # compose network) / http://localhost:8333 (from the host) so you can
+  # exercise the same DEMANDTLDR_S3_URI flow you'll use in k8s without
+  # standing up a real bucket. Production uses AWS S3 / NREL S3 / etc. and
+  # this service stays off.
+  #
+  # After `docker compose --profile s3-local up`, seed it once with:
+  #   ./scripts/seed-local-s3.sh
+  # then point the server at it via .env (DEMANDTLDR_S3_URI etc).
+  seaweedfs:
+    image: chrislusf/seaweedfs:3.71
+    profiles: ["s3-local"]
+    # `server` runs an all-in-one master+volume; -s3 and -filer turn on
+    # the S3 gateway and required filer subprocess. Without -filer the
+    # S3 service hangs waiting for filer:8888 to come up.
+    command: >
+      server -s3 -filer
+      -s3.config=/etc/seaweedfs/s3_config.json
+      -dir=/data
+    ports:
+      - "${SEAWEEDFS_S3_PORT:-8333}:8333"   # S3 API (host access for `aws s3 sync`)
+      - "9333:9333"                         # master UI (optional)
+    volumes:
+      - seaweedfs-data:/data
+      - ./scripts/seaweedfs-s3-config.json:/etc/seaweedfs/s3_config.json:ro
+    # Master + volume + filer + S3 take ~10–15s to handshake. The
+    # healthcheck gates `depends_on` so the server doesn't try (and
+    # silently fall back to packaged data) before S3 is reachable.
+    # Master cluster status returns 200 once the leader is elected,
+    # which happens just before the S3 gateway accepts requests.
+    # IPv4 is mandatory — `localhost` inside the alpine image resolves
+    # to ::1 which SeaweedFS doesn't bind to.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9333/cluster/status >/dev/null 2>&1 || exit 1"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+    restart: unless-stopped
+
+  web:
+    image: meridian-web:${IMAGE_TAG:-local}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      BACKEND_URL: http://server:5001
+      BUN_PORT: "3001"
+    ports:
+      - "${WEB_PORT:-3001}:3001"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  meridian-data:
+  seaweedfs-data:

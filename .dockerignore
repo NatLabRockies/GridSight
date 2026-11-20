@@ -1,0 +1,31 @@
+# Applied to both server/ and web/ build contexts. Keep the runtime
+# image lean by excluding dev artifacts, VCS metadata, and local DBs.
+
+# Build artifacts
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/node_modules/
+**/dist/
+**/.venv/
+
+# VCS + editor cruft
+.git/
+**/.DS_Store
+
+# Local runtime data
+data/
+**/*.duckdb
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Plans + transcripts
+.claude/
+
+# Docs are not needed at runtime
+docs/
+
+# Server tests + DB scratch files (kept out of the runtime image)
+server/server_tests/
+server/gridsight.db*

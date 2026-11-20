@@ -1,0 +1,26 @@
+/* Local overrides for the chart-tray grid + chart focus styles.
+ * Imported once from ChartTray.jsx so the rules ride along with whichever
+ * code path mounts the tray. Keep selectors specific enough that we don't
+ * accidentally restyle other parts of the app. */
+
+/* react-grid-layout's drop placeholder ships as solid red with z-index 2,
+ * which overlays the chart underneath. Replace with a dashed outline so
+ * the chart stays readable while dragging. */
+.react-grid-item.react-grid-placeholder {
+  background: transparent !important;
+  border: 2px dashed rgba(33, 150, 243, 0.65);
+  border-radius: 4px;
+  opacity: 1;
+  z-index: 1;
+}
+
+/* RGL items themselves can also get focus rings when grabbed; suppress
+ * for the item and any descendant. (Global canvas focus suppression
+ * lives in styles/globals.css.) */
+.react-grid-item,
+.react-grid-item *,
+.react-grid-item *:focus,
+.react-grid-item *:focus-visible {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}

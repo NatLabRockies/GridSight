@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Development override for docker-compose.yml.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# This replaces the production web image with a Vite-dev-server build so
+# you get hot module replacement on the frontend, and adds `--reload` to
+# the backend uvicorn so server-side edits trigger a restart.
+#
+# The compose file uses build: rather than image:, so each service is
+# rebuilt locally from the dev tree on first run. Source is bind-mounted
+# from the host so subsequent edits show up immediately without rebuilds.
+#
+# Note: the dev backend still uses the production server/Dockerfile,
+# which installs deps from requirements.docker.txt. For *active extension
+# development* (editing GAT or DemandTldr source), use `./dev.sh`
+# (without `docker`) — that runs everything locally with editable
+# installs from sibling repos, which Docker can't easily replicate.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  server:
+    # Reuse the prebuilt server image (run `scripts/docker-build.sh`
+    # once before bringing up the dev stack). Bind-mount source +
+    # uvicorn --reload gives the same edit-and-refresh loop as
+    # `./dev.sh` without needing to re-stage .build-deps every change.
+    image: meridian-server:${IMAGE_TAG:-local}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATA_DIR: ${DATA_DIR:-/data}
+      DB_PATH: ${DB_PATH:-/data/meridian.db}
+      # boto3 picks this up to verify TLS against an internal CA when
+      # the deployed S3 endpoint uses a private root.
+      # Hard-coded to the in-container mount path — the host's
+      # AWS_CA_BUNDLE points at a host path that doesn't exist here.
+      AWS_CA_BUNDLE: /etc/ssl/extra-cacert.pem
+    volumes:
+      - ./data:/data
+      - ./server:/app
+      # Mount the operator's CA bundle read-only. Host path is
+      # configurable via CA_BUNDLE_HOST; the /dev/null default is a
+      # no-op file for devs who don't need a private CA.
+      - ${CA_BUNDLE_HOST:-/dev/null}:/etc/ssl/extra-cacert.pem:ro
+    command: uvicorn app:app --host 0.0.0.0 --port 5001 --reload
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      BACKEND_URL: http://server:5001
+      BUN_PORT: "3001"
+      VITE_PORT: "5173"
+    ports:
+      - "5173:5173"
+      - "3001:3001"
+    volumes:
+      - ./web/src:/app/src
+      - ./web/server:/app/server
+      - ./web/vite.config.js:/app/vite.config.js
+      - ./web/postcss.config.js:/app/postcss.config.js
+      - ./web/tailwind.config.js:/app/tailwind.config.js
+      - ./web/index.html:/app/index.html

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meridian-seds"
+version = "0.1.0"
+description = "Meridian extension for the EIA State Energy Data System (SEDS)"
+requires-python = ">=3.11"
+dependencies = [
+    "meridian-sdk",
+    "duckdb>=1.0",
+    "pyarrow",
+    "polars>=1.39.0",
+    # SEDS pulls use_all_btu from eia.gov. `requests` does the download;
+    # `truststore` makes it use the OS CA store (the federal cert chain
+    # isn't always in certifi's Mozilla bundle, esp. on macOS).
+    "requests>=2.31",
+    "truststore>=0.9",
+]
+
+[project.entry-points."meridian.extensions"]
+seds = "seds_ext:SedsExtension"
+
+# hatchling includes all files under the package dir (incl. the bundled
+# data/states.geojson + static/icon.svg read via Path(__file__).parent).
+[tool.hatch.build.targets.wheel]
+packages = ["src/seds_ext"]

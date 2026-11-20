@@ -1,0 +1,8 @@
+src-tauri/target/
+src-tauri/binaries/uv
+src-tauri/binaries/uv.exe
+src-tauri/gen/
+src-tauri/resources/
+node_modules/
+*.log
+.dev-backend.json

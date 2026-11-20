@@ -1,0 +1,3 @@
+# Intermediate iconset + per-size PNGs from build_icons.py.
+# Final outputs go straight into ../src-tauri/icons/.
+build/

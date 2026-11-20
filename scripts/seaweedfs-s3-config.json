@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "meridian-local",
+      "credentials": [
+        {
+          "accessKey": "meridian-local",
+          "secretKey": "meridian-local-secret"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

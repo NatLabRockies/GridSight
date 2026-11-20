@@ -1,0 +1,169 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="genFace"><polygon points="512,665 877,730 512,812 147,730"/></clipPath>
+    <clipPath id="demFace"><polygon points="512,271 877,344 512,417 147,344"/></clipPath>
+    <clipPath id="iconBounds"><rect width="1024" height="1024" rx="220"/></clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="#080d16"/>
+  <rect width="1024" height="1024" rx="220" fill="none" stroke="#14243a" stroke-width="5.5"/>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LAYER 1 — GENERATION CHOROPLETH (bottom)                 -->
+  <!-- Face: top(512,665) right(877,730) bot(512,812) left(147,730) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <g class="layer layer-gen">
+  <!-- Slab sides -->
+  <polygon points="147,730 147,812 512,894 512,812" fill="#0a1018" stroke="#101820" stroke-width="2.5"/>
+  <polygon points="877,730 877,812 512,894 512,812" fill="#0c1220" stroke="#101820" stroke-width="2.5"/>
+  <!-- Face base -->
+  <polygon points="512,665 877,730 512,812 147,730" fill="#0c1828"/>
+  <!-- Zone fills -->
+  <g clip-path="url(#genFace)">
+    <polygon points="512,665 147,730 336,744 420,709" fill="#1a3f62"/>
+    <polygon points="147,730 512,812 394,776 336,744" fill="#0d3830"/>
+    <polygon points="336,744 394,776 540,768 504,724 420,709" fill="#6a5000"/>
+    <polygon points="512,665 420,709 504,724 603,716 676,701" fill="#152e50"/>
+    <polygon points="540,768 394,776 512,812 614,782" fill="#7a5800"/>
+    <polygon points="504,724 603,716 723,737 614,782 540,768" fill="#28203a"/>
+    <polygon points="512,665 676,701 877,730 723,737 603,716" fill="#102038"/>
+    <polygon points="877,730 512,812 614,782 723,737" fill="#1e1830"/>
+    <!-- Zone borders -->
+    <g opacity="0.7">
+      <line x1="512" y1="665" x2="336" y2="744" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="336" y1="744" x2="420" y2="709" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="420" y1="709" x2="504" y2="724" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="504" y1="724" x2="603" y2="716" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="603" y1="716" x2="676" y2="701" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="676" y1="701" x2="723" y2="737" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="723" y1="737" x2="614" y2="782" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="614" y1="782" x2="540" y2="768" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="540" y1="768" x2="394" y2="776" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="394" y1="776" x2="336" y2="744" stroke="#0a1020" stroke-width="2.5"/>
+      <line x1="504" y1="724" x2="540" y2="768" stroke="#0a1020" stroke-width="2.2"/>
+      <line x1="603" y1="716" x2="614" y2="782" stroke="#0a1020" stroke-width="2.2"/>
+    </g>
+  </g>
+  <polygon points="512,665 877,730 512,812 147,730" fill="none" stroke="#1e3458" stroke-width="4"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LAYER 2 — TRANSMISSION (middle)                          -->
+  <!-- Face: top(512,467) right(877,540) bot(512,613) left(147,540) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <g class="layer layer-tx">
+  <!-- Slab sides -->
+  <polygon points="147,540 147,622 512,695 512,613" fill="#152040" stroke="#203060" stroke-width="3"/>
+  <polygon points="877,540 877,622 512,695 512,613" fill="#172244" stroke="#203060" stroke-width="3"/>
+  <!-- Face base -->
+  <polygon points="512,467 877,540 512,613 147,540" fill="#0e1c3a"/>
+
+  <!-- 138kV lines -->
+  <line x1="293" y1="524" x2="347" y2="541" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="347" y1="541" x2="457" y2="559" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="457" y1="559" x2="494" y2="581" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="494" y1="581" x2="585" y2="587" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="347" y1="541" x2="530" y2="521" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="457" y1="559" x2="530" y2="521" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="585" y1="587" x2="670" y2="565" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <line x1="738" y1="540" x2="670" y2="565" stroke="#1e3f72" stroke-width="3.3" stroke-linecap="round"/>
+  <!-- 230kV lines -->
+  <line x1="467" y1="490" x2="402" y2="512" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="402" y1="512" x2="293" y2="524" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="402" y1="512" x2="530" y2="521" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="530" y1="521" x2="457" y2="559" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="683" y1="515" x2="603" y2="543" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="603" y1="543" x2="585" y2="587" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <line x1="603" y1="543" x2="494" y2="581" stroke="#2a62a8" stroke-width="5.8" stroke-linecap="round"/>
+  <!-- 500kV backbone -->
+  <line x1="293" y1="524" x2="467" y2="490" stroke="#58a6ff" stroke-width="10.2" stroke-linecap="round"/>
+  <line x1="467" y1="490" x2="585" y2="490" stroke="#58a6ff" stroke-width="10.2" stroke-linecap="round"/>
+  <line x1="585" y1="490" x2="683" y2="515" stroke="#58a6ff" stroke-width="10.2" stroke-linecap="round"/>
+  <line x1="683" y1="515" x2="738" y2="540" stroke="#58a6ff" stroke-width="10.2" stroke-linecap="round"/>
+  <line x1="585" y1="490" x2="530" y2="521" stroke="#58a6ff" stroke-width="8.0" stroke-linecap="round"/>
+  <line x1="530" y1="521" x2="603" y2="543" stroke="#58a6ff" stroke-width="8.0" stroke-linecap="round"/>
+  <!-- Flow dashes -->
+  <line x1="293" y1="524" x2="467" y2="490" stroke="#c0dcff" stroke-width="3.3" stroke-dasharray="11 18" opacity="0.45"/>
+  <line x1="467" y1="490" x2="585" y2="490" stroke="#c0dcff" stroke-width="3.3" stroke-dasharray="11 18" opacity="0.45"/>
+  <line x1="585" y1="490" x2="738" y2="540" stroke="#c0dcff" stroke-width="3.3" stroke-dasharray="11 18" opacity="0.35"/>
+  <!-- Face border -->
+  <polygon points="512,467 877,540 512,613 147,540" fill="none" stroke="#2a4888" stroke-width="4.4"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LAYER 3 — DEMAND DOTS aligned to TX nodes (top)          -->
+  <!-- Face: top(512,271) right(877,344) bot(512,417) left(147,344) -->
+  <!-- TX nodes shift up by 196px (467-271=196)                 -->
+  <!-- TX→Demand: x same, y-=196                                -->
+  <!--   N_SW   (293,524)→(293,328)  12GW                       -->
+  <!--   N_NW1  (402,512)→(402,316)  18GW                       -->
+  <!--   N_NW2  (467,490)→(467,294)   8GW                       -->
+  <!--   N_CTR  (530,521)→(530,325)  10GW                       -->
+  <!--   N_MID1 (457,559)→(457,363)  14GW                       -->
+  <!--   N_MID2 (494,581)→(494,385)   4GW                       -->
+  <!--   N_CNE  (585,490)→(585,294)   7GW                       -->
+  <!--   N_CE   (603,543)→(603,347)  20GW                       -->
+  <!--   N_NE1  (683,515)→(683,319)  16GW                       -->
+  <!--   N_NE2  (738,540)→(738,344)   9GW                       -->
+  <!--   N_SE1  (585,587)→(585,391)   5GW                       -->
+  <!--   N_SE2  (670,565)→(670,369)   4GW                       -->
+  <!--   N_S1   (347,541)→(347,345)   6GW                       -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <g class="layer layer-demand">
+  <!-- Slab sides -->
+  <polygon points="147,344 147,426 512,500 512,417" fill="#152040" stroke="#203060" stroke-width="3"/>
+  <polygon points="877,344 877,426 512,500 512,417" fill="#172244" stroke="#203060" stroke-width="3"/>
+  <!-- Face base -->
+  <polygon points="512,271 877,344 512,417 147,344" fill="#090d18"/>
+
+  <g clip-path="url(#demFace)">
+    <!-- Tiny dots (4-6 GW) -->
+    <circle cx="494" cy="385" r="8"  fill="#7a3c00" opacity="0.60"/>
+    <circle cx="585" cy="391" r="9"  fill="#7a3c00" opacity="0.60"/>
+    <circle cx="670" cy="369" r="8"  fill="#7a3c00" opacity="0.60"/>
+    <circle cx="347" cy="345" r="10" fill="#8a4400" opacity="0.65"/>
+    <!-- Small dots (7-10 GW) -->
+    <circle cx="467" cy="294" r="12" fill="#b05800" opacity="0.75"/>
+    <circle cx="585" cy="294" r="12" fill="#a85200" opacity="0.72"/>
+    <circle cx="738" cy="344" r="13" fill="#b85e00" opacity="0.75"/>
+    <circle cx="530" cy="325" r="15" fill="#c06400" opacity="0.78"/>
+    <circle cx="293" cy="328" r="17" fill="#d06c00" opacity="0.82"/>
+    <!-- Medium dots (11-15 GW) -->
+    <circle cx="457" cy="363" r="19" fill="#e07800" opacity="0.88"/>
+    <!-- Large: N_NW1 18GW -->
+    <circle cx="402" cy="316" r="27" fill="#e07000" opacity="0.18"/>
+    <circle cx="402" cy="316" r="22" fill="#e87800" opacity="0.88"/>
+    <!-- Largest: N_NE1 16GW -->
+    <circle cx="683" cy="319" r="24" fill="#f08200" opacity="0.90"/>
+    <!-- Peak: N_CE 20GW -->
+    <circle cx="603" cy="347" r="35" fill="#f07800" opacity="0.12"/>
+    <circle cx="603" cy="347" r="27" fill="#e07800" opacity="0.22"/>
+    <circle cx="603" cy="347" r="25" fill="#ff9020" opacity="0.95"/>
+    <!-- Bright cores -->
+    <circle cx="603" cy="347" r="13" fill="#ffb840" opacity="1.0"/>
+    <circle cx="402" cy="316" r="11" fill="#ffa830" opacity="1.0"/>
+  </g>
+
+  <!-- Face border -->
+  <polygon points="512,271 877,344 512,417 147,344" fill="none" stroke="#2a4888" stroke-width="4.4"/>
+  </g>
+
+  <!-- Stack edge lines — left -->
+  <line x1="147" y1="271" x2="147" y2="353" stroke="#2a4888" stroke-width="3.3"/>
+  <line x1="147" y1="353" x2="147" y2="435" stroke="#1a3060" stroke-width="2.9"/>
+  <line x1="147" y1="435" x2="147" y2="517" stroke="#162030" stroke-width="2.6"/>
+  <line x1="147" y1="517" x2="147" y2="600" stroke="#121820" stroke-width="2.2"/>
+  <line x1="147" y1="600" x2="147" y2="665" stroke="#101420" stroke-width="1.8"/>
+  <line x1="147" y1="665" x2="147" y2="812" stroke="#0c1018" stroke-width="1.5"/>
+  <!-- Stack edge lines — right -->
+  <line x1="877" y1="271" x2="877" y2="353" stroke="#2a4888" stroke-width="3.3"/>
+  <line x1="877" y1="353" x2="877" y2="435" stroke="#1a3060" stroke-width="2.9"/>
+  <line x1="877" y1="435" x2="877" y2="517" stroke="#162030" stroke-width="2.6"/>
+  <line x1="877" y1="517" x2="877" y2="600" stroke="#121820" stroke-width="2.2"/>
+  <line x1="877" y1="600" x2="877" y2="665" stroke="#101420" stroke-width="1.8"/>
+  <line x1="877" y1="665" x2="877" y2="812" stroke="#0c1018" stroke-width="1.5"/>
+
+  <!-- Outer border -->
+  <rect width="1024" height="1024" rx="220" fill="none" stroke="#1a2e4a" stroke-width="5.5"/>
+</svg>

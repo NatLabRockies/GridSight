@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties ─────────────────────────────────────────────────── */
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  /* --app-font is set by MeridianThemeProvider from the user's Settings ▸ Font
+     choice; the literal stack is the pre-hydration fallback. */
+  font-family: var(--app-font, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+}
+
+/* ── App Bar ────────────────────────────────────────────────────────────────── */
+
+#appbar {
+  background-color: #ffffff00;
+  transition: background-color 0.2s ease;
+}
+
+#appbar:hover {
+  background-color: #82a5f352;
+}
+
+/* ── Scenario Split-view Panels ─────────────────────────────────────────────── */
+
+#sc1 {
+  width: 50%;
+  height: 50%;
+  float: left;
+}
+
+#sc2 {
+  width: 50%;
+  height: 50%;
+  float: right;
+}
+
+.row {
+  display: grid;
+}
+
+/* ── Controller Panel ───────────────────────────────────────────────────────── */
+
+#controller {
+  background-color: #f5f5f5;
+  min-width: 300px;
+  width: 15%;
+  height: auto;
+  margin-top: 1%;
+  margin-left: 1%;
+  display: block grid;
+  border-radius: 8px;
+}
+
+#showFilters {
+  width: 98%;
+  margin: 1%;
+  height: 25px;
+}
+
+#dateController {
+  background-color: rgb(170, 170, 187);
+  display: grid;
+  margin-top: 2%;
+  margin-right: 1%;
+}
+
+#AnimationOptions {
+  display: block grid;
+}
+
+/* ── Filter Controls ────────────────────────────────────────────────────────── */
+
+.MultiSelect {
+  width: 99%;
+  margin-top: 1%;
+  margin-left: 1%;
+  margin-right: 1%;
+}
+
+.FilterText {
+  text-align: center;
+  width: 90%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+#filterOptions {
+  display: grid;
+}
+
+/* ── Clock / DateTime Display ────────────────────────────────────────────────── */
+
+#CurrentDateTime {
+  color: rgb(0, 0, 0);
+  text-align: center;
+  font-size: x-large;
+}
+
+#clearColor {
+  color: rgb(173, 216, 230);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────── */
+
+.button {
+  border-radius: 8px;
+  border-style: none;
+  background-color: rgb(190, 198, 202);
+  margin: 1%;
+  font-size: medium;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.button:hover {
+  background-color: #5759c5;
+  color: white;
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24),
+              0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+.playback-button {
+  border-radius: 8px;
+  background-color: rgb(190, 198, 202);
+  border-style: none;
+  margin: 1%;
+  font-size: large;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.playback-button:hover {
+  background-color: #5759c5;
+  color: white;
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24),
+              0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* ── Playback Controller ─────────────────────────────────────────────────────── */
+
+#playback-controller {
+  text-align: center;
+  align-content: center;
+}
+
+#Actions {
+  display: block;
+}
+
+/* ── Curtailment Indicator ───────────────────────────────────────────────────── */
+
+#curt {
+  color: rgb(225, 225, 225);
+}
+
+/* ── Colormap Swatch ─────────────────────────────────────────────────────────── */
+
+.colormap {
+  height: 20px;
+  width: 20px;
+}
+
+/* ── Canvas focus + selection suppression ────────────────────────────────────
+ *
+ * Browsers paint two unwanted highlights on canvas elements:
+ *   - Focus ring on pointer down (translucent blue rect).
+ *   - ::selection overlay if a text-selection range happens to span the
+ *     canvas (this happens after an HTML5 drag of nearby text — combine-
+ *     by-drag on a chart-frame title leaves the title in a selection
+ *     range that bleeds onto every canvas it covers).
+ *
+ * Canvases are rendered output, not interactive controls, so neither
+ * highlight is meaningful. Suppress globally for every canvas in the app. */
+canvas {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+canvas:focus,
+canvas:focus-visible,
+canvas:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+canvas::selection,
+canvas::-moz-selection {
+  background: transparent;
+  color: inherit;
+}

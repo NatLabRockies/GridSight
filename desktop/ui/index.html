@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meridian</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e1116;
+        --fg: #e6edf3;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --ok: #3fb950;
+        --err: #f85149;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      main {
+        width: min(560px, 90vw);
+        padding: 32px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      }
+      h1 { margin: 0 0 8px 0; font-size: 24px; letter-spacing: 0.3px; }
+      .sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+      .phase { font-size: 14px; margin-bottom: 12px; }
+      .label { color: var(--muted); margin-right: 8px; }
+      .value { font-weight: 600; }
+      .value.ok { color: var(--ok); }
+      .value.err { color: var(--err); }
+      .msg { color: var(--fg); }
+      pre {
+        margin-top: 20px;
+        padding: 12px;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow: auto;
+      }
+      .row { margin: 6px 0; }
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #30363d;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: -2px;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Meridian</h1>
+      <div class="sub">Desktop preview — milestone 1 (sidecar bring-up)</div>
+
+      <div class="phase">
+        <span id="indicator" class="spinner"></span>
+        <span class="label">Status:</span>
+        <span id="phase" class="value">starting…</span>
+      </div>
+      <div class="row" id="message-row" style="display:none">
+        <span class="label">Detail:</span>
+        <span id="message" class="msg"></span>
+      </div>
+      <div class="row" id="port-row" style="display:none">
+        <span class="label">Backend:</span>
+        <span id="port" class="value"></span>
+      </div>
+      <div class="row" id="health-row" style="display:none">
+        <span class="label">/health:</span>
+        <span id="health" class="value"></span>
+      </div>
+
+      <pre id="log" style="display:none"></pre>
+    </main>
+
+    <script type="module">
+      const { invoke } = window.__TAURI__.core;
+      const { listen } = window.__TAURI__.event;
+
+      const phaseEl = document.getElementById("phase");
+      const indicator = document.getElementById("indicator");
+      const msgRow = document.getElementById("message-row");
+      const msgEl = document.getElementById("message");
+      const portRow = document.getElementById("port-row");
+      const portEl = document.getElementById("port");
+      const healthRow = document.getElementById("health-row");
+      const healthEl = document.getElementById("health");
+      const logEl = document.getElementById("log");
+
+      function logLine(s) {
+        logEl.style.display = "block";
+        logEl.textContent += s + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      async function probeHealth(port) {
+        healthRow.style.display = "block";
+        healthEl.textContent = "checking…";
+        for (let i = 0; i < 30; i++) {
+          try {
+            const r = await fetch(`http://127.0.0.1:${port}/openapi.json`);
+            if (r.ok) {
+              healthEl.textContent = `200 OK (openapi reachable)`;
+              healthEl.classList.add("ok");
+              return;
+            }
+          } catch (_) {}
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        healthEl.textContent = "no response after 15s";
+        healthEl.classList.add("err");
+      }
+
+      function render(s) {
+        logLine(JSON.stringify(s));
+        const phase = s.phase;
+        phaseEl.classList.remove("ok", "err");
+        if (phase === "starting") {
+          phaseEl.textContent = "starting…";
+        } else if (phase === "provisioning") {
+          phaseEl.textContent = "provisioning";
+          msgRow.style.display = "block";
+          msgEl.textContent = s.message;
+        } else if (phase === "launching") {
+          phaseEl.textContent = "launching backend";
+          msgRow.style.display = "none";
+        } else if (phase === "ready") {
+          indicator.style.display = "none";
+          phaseEl.textContent = "ready";
+          phaseEl.classList.add("ok");
+          portRow.style.display = "block";
+          portEl.textContent = `127.0.0.1:${s.port}`;
+          probeHealth(s.port);
+        } else if (phase === "failed") {
+          indicator.style.display = "none";
+          phaseEl.textContent = "failed";
+          phaseEl.classList.add("err");
+          msgRow.style.display = "block";
+          msgEl.textContent = s.error;
+        }
+      }
+
+      listen("backend-status", (event) => render(event.payload));
+      invoke("get_backend_status").then(render).catch((e) => logLine("invoke error: " + e));
+    </script>
+  </body>
+</html>

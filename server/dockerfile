@@ -1,29 +1,97 @@
-ARG APP_DIR="/app"
+# ---------------------------------------------------------------------------
+# Meridian server image (FastAPI + uv).
+#
+# Build context: this directory (`server/`).
+#   docker build -t meridian-server:<tag> server/
+#
+# Dependencies — including extensions — come from `requirements.docker.txt`,
+# which lists everything as either a PyPI package or a git URL. There's
+# no path-based source resolution at build time; whatever's reachable
+# from the build host is what the image gets. Local dev still uses
+# pyproject.toml + uv with editable sibling-repo installs; this file
+# isn't involved in that workflow.
+#
+# Adding a new extension = one new line in requirements.docker.txt and
+# `scripts/docker-build.sh` rebuilds. No Dockerfile changes.
+# ---------------------------------------------------------------------------
 
 FROM python:3.12-slim
 
-RUN apt update && apt-get install -y build-essential
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
 
-# Include global args in this stage of the build
-ARG APP_DIR
+# Build toolchain — some Python deps (duckdb, pyarrow on certain arches)
+# build C extensions. git lets uv install requirements from git URLs.
+# ca-certificates is needed for HTTPS to PyPI / git remotes. curl fetches
+# the optional extra root CA below.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        curl \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
+# Optional extra root CA for networks that TLS-intercept outbound HTTPS.
+# Without it, runtime HTTPS fetches (for example the SEDS extension's
+# startup download from eia.gov) fail with CERTIFICATE_VERIFY_FAILED.
+# Pass the URL of a PEM root certificate at build time:
+#   docker build --build-arg EXTRA_CA_CERT_URL=https://example.org/root.pem server/
+# `update-ca-certificates` writes the bundle that the SEDS extension's
+# `truststore.inject_into_ssl()` reads. Install the root only; the live
+# chain supplies the intermediates.
+ARG EXTRA_CA_CERT_URL=""
+RUN if [ -n "$EXTRA_CA_CERT_URL" ]; then \
+        curl -fsSLk -o /usr/local/share/ca-certificates/extra_root.crt "$EXTRA_CA_CERT_URL" && \
+        update-ca-certificates; \
+    fi
 
-ENV PROJ_DIR=/usr/local
+# uv — install from PyPI rather than copying from ghcr.io/astral-sh/uv.
+# Pulling the upstream image fails on networks that MITM TLS to ghcr.io
+# (corp Zscaler), while pip can still reach PyPI through the same proxy.
+RUN pip install --no-cache-dir uv
 
-# Copy function code
-RUN mkdir -p ${APP_DIR}
+WORKDIR /app
 
-# Set working directory to function root directory
-WORKDIR ${APP_DIR}
+# 1. Install deps. Cached as a separate layer so source edits don't
+#    invalidate the dep install.
+COPY requirements.docker.txt /tmp/requirements.txt
+COPY .build-deps /tmp/build-deps
+# Install SDK and SEDS from locally-staged in-repo copies, then remaining
+# PyPI deps from requirements.docker.txt. `--no-sources` prevents uv from
+# chasing `[tool.uv.sources]` blocks that reference host-side paths.
+# SDK is installed first because SEDS and DemandTldr declare it as a
+# dependency. DemandTldr (demand-tldr) is staged only when the sibling repo
+# is present at build time (docker-build.sh); the guard keeps the image
+# building cleanly when it's absent.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv venv /opt/venv && \
+    uv pip install --no-sources --python /opt/venv/bin/python /tmp/build-deps/sdk && \
+    uv pip install --no-sources --python /opt/venv/bin/python /tmp/build-deps/seds && \
+    { [ -d /tmp/build-deps/demand-tldr ] && \
+        uv pip install --no-sources --python /opt/venv/bin/python /tmp/build-deps/demand-tldr \
+        || echo "demand-tldr not staged — skipping"; } && \
+    uv pip install --no-sources --python /opt/venv/bin/python -r /tmp/requirements.txt
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Install python dependencies
-COPY requirements.txt /requirements.txt
+# 2. Copy the server source. Server runs via PYTHONPATH (it's not a
+#    pip-installable package itself).
+COPY . /app
+ENV PYTHONPATH=/app
 
-RUN pip install -r /requirements.txt && rm /requirements.txt
+# 3. Runtime data dir. Mount a volume here in production.
+ENV DATA_DIR=/data \
+    DB_PATH=/data/meridian.db
+RUN mkdir -p /data
+VOLUME ["/data"]
 
-# Copy my app stuff to the image
-COPY . ${APP_DIR}/
+EXPOSE 5001
 
-ENV PYTHONPATH=${APP_DIR}/
+# Drop privileges.
+RUN useradd --create-home --shell /bin/bash meridian && \
+    chown -R meridian:meridian /app /data /opt/venv
+USER meridian
 
-CMD ["uwsgi", "--http", "0.0.0.0:5001", "-w", "wsgi:app"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5001"]
