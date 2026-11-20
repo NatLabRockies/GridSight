@@ -2076,7 +2076,7 @@ export function App() {
           for (const id of ids) {
             const ls = all[id] ?? {};
             if (!enabledCategories && !hoverCategory) {
-              next[id] = { ...ls, filterEnabled: false, filterProperty: null, filterCategories: [] };
+              next[id] = { ...ls, filterEnabled: false, filterProperty: null, filterCategories: [], hoverCategory: null };
             } else {
               next[id] = {
                 ...ls,

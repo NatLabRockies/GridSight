@@ -22,6 +22,26 @@ import { makeFrameKey } from './chartFrameId.js';
 
 export const VIEW_STATE_VERSION = 1;
 
+/** Per-layer style keys that are transient UI state (never saved or shared). */
+export const TRANSIENT_STYLE_KEYS = ['hoverCategory'];
+
+/**
+ * Copy of a { layerId -> style } map without transient UI keys, e.g. the
+ * category a legend hover isolates. Used when a view is captured (so it is
+ * not saved in perspectives or stories) and when one is applied (so views
+ * saved before this rule are clean too).
+ */
+export function withoutTransientStyle(localStyle) {
+  const out = {};
+  for (const [id, style] of Object.entries(localStyle || {})) {
+    if (!style || typeof style !== 'object') { out[id] = style; continue; }
+    const copy = { ...style };
+    for (const k of TRANSIENT_STYLE_KEYS) delete copy[k];
+    out[id] = copy;
+  }
+  return out;
+}
+
 /**
  * Capture the live UI state into a plain JSON-serializable object.
  * Caller passes the current values; this function does not touch React.
@@ -61,7 +81,7 @@ export function captureViewState({
     },
     layers: {
       visibility: { ...(genericLayerVisibility || {}) },
-      localStyle: cloneShallow(genericLayerLocalStyle),
+      localStyle: withoutTransientStyle(cloneShallow(genericLayerLocalStyle)),
     },
     clock: clockState ? {
       index: clockState.index ?? 0,
@@ -169,7 +189,7 @@ export function applyViewState(blob, dispatchers = {}) {
     setGenericLayerVisibility(blob.layers.visibility);
   }
   if (blob.layers?.localStyle && setGenericLayerLocalStyle) {
-    setGenericLayerLocalStyle(blob.layers.localStyle);
+    setGenericLayerLocalStyle(withoutTransientStyle(blob.layers.localStyle));
   }
 
   if (blob.clock && updateClockState) {
