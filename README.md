@@ -9,10 +9,14 @@ data from other sources, check its own work with screenshots and error logs, and
 as a chapter of a story. You get the configuration-heavy, publication-quality view without the
 configuration.
 
+Use it [with Claude Desktop on your Claude subscription](#with-claude-desktop-on-your-claude-subscription)
+(no API key), [with local or open-weight models](#with-local-or-open-weight-models) when your data
+must stay in-house, or [with no agent at all](#without-an-agent).
+
 <p align="center">
-  <img src="docs/images/cats/cats-story.webp" width="900"
+  <img src="https://github.com/user-attachments/assets/82533c83-e3c3-4a94-b38e-9afa023287e6" width="900"
        alt="The CATS story, chapter by chapter: generation capacity, transmission lines by voltage, wildfire exposure, a week of hourly dispatch with charts, and the peak hour">
-  <br><sub>An agent-built story about CATS, the California Test System. Chapters change every 4 seconds;
+  <br><sub>An agent-built story about CATS, the California Test System. Chapter 7 is a screen recording of the week playing in the app; the other chapters change every 4 seconds;
   <a href="#a-story-built-by-an-agent-one-week-of-summer-peak-in-california">see all chapters below</a>.</sub>
 </p>
 
@@ -33,8 +37,8 @@ layer styler, so you can change any chapter by hand.
 |---|---|
 | ![Generation capacity](docs/images/cats/1-generation-capacity.png) | ![500 kV lines](docs/images/cats/2-line-capacity-500-kv.png) |
 | **1. Generation capacity.** Each circle is a plant, sized by installed MW and colored by technology. | **2–5. Lines by voltage.** One chapter per class (500, 230, 115, 66 kV); width shows the thermal rating. |
-| ![Wildfire exposure](docs/images/cats/6-wildfire-exposure.png) | ![A week of summer peak](docs/images/cats/7-a-week-of-summer-peak.png) |
-| **6. Data from another source.** The agent added the CPUC High Fire-Threat District map and CAL FIRE's 2019 fire perimeters: about 10% of CATS line length is in Tier 3. | **7. The week, hour by hour.** Line loading and generation animate; the chart tray (generation by technology, demand) follows the clock. |
+| ![Wildfire exposure](docs/images/cats/6-wildfire-exposure.png) | ![A week of summer peak, animated](https://github.com/user-attachments/assets/8c56e6f3-721f-4478-9e77-236107eaf3ad) |
+| **6. Data from another source.** The agent added the CPUC High Fire-Threat District map and CAL FIRE's 2019 fire perimeters: about 10% of CATS line length is in Tier 3. | **7. The week, hour by hour.** Recorded in the app: line loading and generation animate, and the chart tray (generation by technology, demand) follows the clock. |
 
 <details>
 <summary>More chapters: 230, 115 and 66 kV, and the peak hour</summary>
@@ -54,14 +58,57 @@ it with the GAT extension, then import
 with **Import** under the story picker in the sidebar (or ask your agent to `import_story` and play
 it).
 
+## Three ways to use GridSight
+
+### With Claude Desktop on your Claude subscription
+
+The recommended setup. Claude Desktop (or Claude Code) controls GridSight through MCP and uses your
+Claude plan, so you need no API key and pay no per-token API charges.
+
+1. Install [Claude Desktop](https://claude.ai/download) and sign in with your Claude account.
+2. In GridSight, open **Agent Integration** in the sidebar and choose **Auto-configure Claude
+   Desktop**. This adds a `gridsight` entry to `claude_desktop_config.json` and changes nothing else.
+3. Quit Claude Desktop fully and open it again. Keep GridSight open while you work.
+4. Ask Claude: *"What scenarios are loaded in GridSight?"* or *"Show installed capacity by
+   technology."*
+
+The CATS story above was built this way. With this setup, the data that Claude reads (query
+results, layer properties, screenshots of the map) goes to Anthropic under the terms of your Claude
+plan. For data that must not leave your organization, use the next option.
+
+### With local or open-weight models
+
+For sensitive data, such as utility customer data or internal studies, run the model yourself.
+The data engine (DuckDB) and the app already run on your machine.
+
+- **Built-in AI chat.** GridSight finds [Ollama](https://ollama.com) on `localhost:11434` by itself.
+  For a [LiteLLM](https://docs.litellm.ai) proxy, vLLM, or any other OpenAI-compatible server
+  (for example one that serves open-weight models for your organization), set
+  `CUSTOM_LLM_BASE_URL`. The desktop app reads it from a `.env` file in its data folder; see
+  [AI chat setup](#ai-chat-setup-optional).
+- **MCP.** Any MCP client that runs a local model can use the same tools as Claude: point it at the
+  command that **Agent Integration** shows.
+
+Use models that support tool calling. Smaller local models make more mistakes on long tasks, so
+start with short requests ("show only the 500 kV lines") and let the model check its work with
+`capture_view`.
+
+### Without an agent
+
+Everything an agent does, you can also do by hand: the layer styler, filters, charts, the clock,
+perspectives and the story editor are normal parts of the app. No AI is needed: the chat appears
+only when a model provider is set up (or Ollama runs on your machine), and agents connect only
+through MCP if you add them. The cost is time: there are many style options, so a view like
+the CATS chapters takes many clicks. An agent sets the same options for you, and you can then
+adjust them in the styler.
+
 ## How it works
 
 1. **Load a scenario.** Extensions bring in data: [GAT](https://github.com/NatLabRockies/GridAnalysisToolkit)
    reads Sienna and PLEXOS results; you can also add GeoJSON, CSV or Parquet files.
-2. **Connect an agent.** In the app, open **Settings → Agent Integration** and choose
-   **Set up agent integration**. It adds GridSight to Claude Desktop (or shows the configuration for
-   other MCP clients). The app also has a built-in AI chat that works with local models
-   (Ollama) or cloud models.
+2. **Connect an agent (optional).** In the app, open **Agent Integration** in the sidebar and
+   choose **Auto-configure Claude Desktop**, or copy the command for another MCP client. The app
+   also has a built-in AI chat for local models (Ollama, LiteLLM, vLLM) or cloud APIs.
 3. **Ask for what you want to see.** "Show installed capacity by technology." "Only the 500 kV
    lines, width by rating." "Add the CPUC fire-threat map and tell me which lines cross Tier 3."
 4. **The agent checks its own work.** It can see the map (`capture_view`), what the map draws
@@ -77,8 +124,8 @@ it).
 - **Power-system layers.** Generators with generation inside available capacity; transmission
   lines with animated loading and flow direction, or a static capacity view colored by voltage.
 - **Time-series animation.** Hourly results stream by day and play smoothly, with optional worker and GPU paths for large systems.
-- **Your data, your models.** Local DuckDB engine; the AI chat works with local models, so data
-  can stay on your machine.
+- **Your data, your models.** Local DuckDB engine. Use Claude on your subscription, local or
+  open-weight models through Ollama or LiteLLM, or no AI at all.
 - **Extensions.** Pip-installable Python packages add data sources, controls, charts and shaders.
 - **Data lineage.** Every query, control change and saved view is tracked.
 
@@ -235,43 +282,59 @@ editable installs make changes live without a rebuild.
 
 ### AI Chat Setup (Optional)
 
-GridSight's AI assistant automatically discovers available LLM providers. No configuration is required beyond setting API keys — each provider with valid credentials appears in the chat model selector.
+This section is about the chat inside GridSight. To use Claude Desktop on your Claude subscription
+instead, see [above](#with-claude-desktop-on-your-claude-subscription); it needs none of these
+settings.
 
-**Ollama** is auto-detected when running locally (default `http://localhost:11434`). For cloud providers, set the corresponding API key:
+The chat finds its providers by itself; each one that is set up appears in the model selector.
+
+**Local and self-hosted models (no data leaves your network):**
 
 ```bash
-# OpenAI
-export OPENAI_API_KEY=sk-...
+# Ollama: found automatically at http://localhost:11434. Another host:
+OLLAMA_URL=http://gpu-box.example.org:11434
 
-# Anthropic
-export ANTHROPIC_API_KEY=sk-ant-...
+# LiteLLM proxy, vLLM, or any OpenAI-compatible server
+CUSTOM_LLM_BASE_URL=http://localhost:4000/v1
+CUSTOM_LLM_API_KEY=...                  # optional, e.g. a LiteLLM virtual key
+CUSTOM_LLM_MODELS=model-a,model-b       # optional: show only these models
+CUSTOM_LLM_REASONING_EFFORT=low         # optional: low|medium|high
+```
 
-# Google Gemini
-export GOOGLE_API_KEY=...
+**Desktop app:** put these lines in a `.env` file in the app's data folder, then restart
+GridSight:
 
-# xAI (Grok)
-export XAI_API_KEY=xai-...
+- macOS: `~/Library/Application Support/GridSight/.env`
+- Windows: `%APPDATA%\GridSight\.env`
+- Linux: `~/.local/share/GridSight/.env`
 
-# AWS Bedrock
-export AWS_BEDROCK_API_KEY=...
+**Server or Docker:** set them as environment variables (or in `server/.env`).
+
+**Cloud APIs (billed per token by the provider):**
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GOOGLE_API_KEY=...
+AWS_BEDROCK_API_KEY=...
 ```
 
 Optionally set a default model so AI is pre-selected on startup:
 
 ```bash
-export LLM_MODEL=gpt-4o
-export LLM_PROVIDER=openai    # ollama (default), openai, xai, anthropic
+LLM_PROVIDER=ollama          # ollama (default), custom, anthropic, openai, google, bedrock
+LLM_MODEL=qwen3:32b
 ```
 
-To force-disable AI entirely (e.g. in a deployment that shouldn't expose LLM access):
+To turn off AI entirely (e.g. in a deployment that must not expose LLM access):
 
 ```bash
-export GRIDSIGHT_DISABLE_AI=true
+GRIDSIGHT_DISABLE_AI=true
 ```
 
 #### Configuring LLM Providers
 
-Provider definitions are loaded from `server/llm_providers.json`. The default file ships with four providers (Ollama, OpenAI, xAI, Anthropic), but deployers can customize it to add, remove, or restrict providers.
+Provider definitions are loaded from `server/llm_providers.json`. The default file has Ollama, a custom OpenAI-compatible provider (for LiteLLM or vLLM), Anthropic, OpenAI, Google Gemini and AWS Bedrock. Deployers can add, remove or restrict providers.
 
 The file is resolved in this order:
 1. `LLM_PROVIDERS_FILE` env var — explicit path to a custom JSON file
@@ -311,7 +374,7 @@ Each provider entry has the following fields:
 | `base_url_env` | Optional env var that overrides `base_url` (e.g. `OLLAMA_URL`) |
 | `api_key_env` | Env var containing the API key. `null` if no key is needed |
 | `api_key_default` | Fallback API key when `api_key_env` is not set (e.g. `"ollama"` for local) |
-| `enabled_when` | `"api_key"` — enabled only if the API key env var is set. `"always"` — always enabled |
+| `enabled_when` | `"api_key"`: enabled only if the API key env var is set. `"base_url"`: enabled when the `base_url_env` variable is set. `"always"`: enabled when Ollama answers at `base_url` |
 | `models_endpoint` | Optional custom URL for listing models (direct HTTP GET, bypasses the OpenAI client) |
 | `known_models` | Optional array of fallback models when API-based listing fails (see below) |
 
@@ -319,19 +382,20 @@ Model discovery uses a three-tier resolution: `models_endpoint` (custom URL) -> 
 
 ```json
 {
-  "id": "xai",
-  "display_name": "xAI (Grok)",
-  "base_url": "https://api.x.ai/v1",
-  "api_key_env": "XAI_API_KEY",
-  "enabled_when": "api_key",
+  "id": "litellm",
+  "display_name": "LiteLLM (in-house)",
+  "base_url": "",
+  "base_url_env": "LITELLM_BASE_URL",
+  "api_key_env": "LITELLM_API_KEY",
+  "enabled_when": "base_url",
   "known_models": [
-    {"name": "grok-3", "supports_tools": true, "supports_thinking": false},
-    {"name": "grok-3-mini", "supports_tools": true, "supports_thinking": true}
+    {"name": "devstral-medium", "supports_tools": true, "supports_thinking": false},
+    {"name": "gpt-oss-120b", "supports_tools": true, "supports_thinking": true}
   ]
 }
 ```
 
-To add a custom provider (e.g. Azure OpenAI, local vLLM, or another OpenAI-compatible server), add an entry to the `providers` array with the appropriate base URL and API key configuration. To restrict available providers in a deployment, remove unwanted entries from the file.
+To add another provider (e.g. a second LiteLLM proxy, Azure OpenAI, or another OpenAI-compatible server), add an entry to the `providers` array with the appropriate base URL and API key configuration. To restrict available providers in a deployment, remove unwanted entries from the file.
 
 
 ## Extension System
