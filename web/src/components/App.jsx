@@ -4,6 +4,8 @@ import {
   DEFAULT_BASEMAP_ID, basemapById, applyFeatureVisibility,
   loadHiddenCategories, saveHiddenCategories,
 } from '../lib/basemaps.js';
+import { sortForDrawing } from '../lib/drawOrder.js';
+import { useApplyDeckLayers } from '../lib/useApplyDeckLayers.js';
 import "./app.css";
 import MapView, { useControl, AttributionControl } from "react-map-gl/maplibre";
 import { reportError } from '../lib/errorReporter.js';
@@ -178,6 +180,7 @@ function DeckGLOverlay({ showStats, ...props }) {
   const widgets = showStats && statsRef.current ? [statsRef.current] : [];
   const overlay = useControl(() => new DeckOverlay({ ...props, widgets }));
   overlay.setProps({ ...props, widgets });
+  useApplyDeckLayers(overlay, props.layers);
   if (typeof window !== 'undefined') window.__gsOverlay = overlay;
   return null;
 }
@@ -1053,7 +1056,8 @@ export function App() {
   // TransmissionLayer visibility so it groups with the standard color-bar
   // container. No legacy single-legend auto-show here.
 
-  const genericDeckLayers = useMemo(() => map.state.configs
+  // Areas at the bottom, then lines, then points (see lib/drawOrder.js).
+  const genericDeckLayers = useMemo(() => sortForDrawing(map.state.configs, map.state.geo)
     .filter((lc) => {
       if (map.state.visibility[lc.id] === false) return false;
       // Hide layers from disabled extensions
@@ -1124,7 +1128,14 @@ export function App() {
 
   const layers = [...genericDeckLayers, highlightLayer].filter(Boolean);
   // Exposed for MCP inspect_layers (what deck.gl is really asked to draw).
-  if (typeof window !== 'undefined') window.__gsDeckLayers = layers;
+  if (typeof window !== 'undefined') {
+    window.__gsDeckLayers = layers;
+    // Also for inspect_layers: the window's own layer state (what the UI
+    // toggles and filters say), to find mismatches with what deck.gl draws.
+    window.__gsMapState = map.state;
+    window.__gsDrillDown = drillDownRef.current;
+    window.__gsClockIndex = clockState.index;
+  }
 
   // Derive current timestamp label from the first active TimeseriesBuffer.
   const currentTime = useMemo(() => {
@@ -1485,7 +1496,12 @@ export function App() {
                 numInstances: l.getNumInstances?.() ?? null,
                 sublayers: (l.getSubLayers?.() || []).length,
               })),
-              mapCustomLayers: m ? (m.getStyle()?.layers || []).filter((x) => x.type === 'custom').map((x) => x.id) : null,
+              // getStyle() leaves custom layers out, so ask getLayer for each one.
+              attachedToMap: m ? (window.__gsDeckLayers || []).filter((l) => l && m.getLayer(l.id)).map((l) => l.id) : null,
+              pendingLayerUpdate: deck?.layerManager?.needsUpdate?.() || false,
+              animationLoop: deck?.animationLoop ? { running: !!deck.animationLoop._running,
+                frameId: deck.animationLoop._animationFrameId ?? null } : null,
+              layerApplies: window.__gsLayerApplies || 0,
               viewport: deck?.getViewports?.()[0] ? { w: deck.getViewports()[0].width, h: deck.getViewports()[0].height } : null,
             };
           } catch (e) {
@@ -1500,6 +1516,33 @@ export function App() {
               for (const k of KEYS) if (p[k] !== undefined) out[k] = p[k];
               return out;
             }),
+            window: (() => {
+              const st = window.__gsMapState;
+              if (!st) return null;
+              const FK = ['filterEnabled', 'filterProperty', 'filterCategories', 'hoverCategory',
+                'displayMode', 'generationVisible', 'capacityVisible'];
+              const per = {};
+              for (const lc of st.configs || []) {
+                const ls = st.localStyle?.[lc.id] || {};
+                const o = { visible: st.visibility?.[lc.id] !== false, hasGeo: !!st.geo?.[lc.id] };
+                for (const k of FK) if (ls[k] !== undefined) o[k] = ls[k];
+                const ds = layerToDatasetsRef.current.get(lc.id);
+                if (ds) {
+                  o.buffers = Object.fromEntries([...ds].map(([role, dsId]) => {
+                    const b = timeseriesBuffersRef.current.get(dsId);
+                    return [role, b ? { dsId, hasIndex: b.getTimestampAtIndex?.(window.__gsClockIndex) != null } : null];
+                  }));
+                }
+                per[lc.id] = o;
+              }
+              const dd = window.__gsDrillDown;
+              return {
+                clockIndex: window.__gsClockIndex,
+                drillDown: dd ? { hiddenLayers: [...(dd.hiddenLayers || [])], shownLayers: [...(dd.shownLayers || [])],
+                  filteredLayers: [...(dd.filteredLayers || [])], zoomThreshold: dd.zoomThreshold } : null,
+                layers: per,
+              };
+            })(),
           };
           const g = window.__GRIDSIGHT__;
           const q = g?.apiKey ? `?api_key=${encodeURIComponent(g.apiKey)}` : '';

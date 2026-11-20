@@ -42,10 +42,12 @@ import { getViewportFitBounds } from '../../lib/viewportSyncMode.js';
 import { useDisplayScale } from '../../lib/DisplayScaleContext.jsx';
 import { fetchGeometryData, fetchDatasetData } from '../../lib/loaders.js';
 import { createGenericLayer, buildDataIndex } from '../../lib/layer_generators.js';
+import { useApplyDeckLayers } from '../../lib/useApplyDeckLayers.js';
 
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
+  useApplyDeckLayers(overlay, props.layers);
   return null;
 }
 

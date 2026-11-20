@@ -8,6 +8,14 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 load_dotenv()
+# The desktop app starts the server from inside its bundle and does not pass
+# shell variables (an app started from Finder has none), so also read a
+# user-editable .env in the data folder, e.g.
+# ~/Library/Application Support/GridSight/.env with CUSTOM_LLM_BASE_URL for a
+# local LiteLLM or vLLM server. Variables already set are not overridden.
+_data_dir = os.environ.get("GRIDSIGHT_DATA_DIR") or os.environ.get("DATA_DIR")
+if _data_dir:
+    load_dotenv(os.path.join(_data_dir, ".env"), override=False)
 
 # ---------------------------------------------------------------------------
 # Logging — configure once at import time so all modules inherit the format.
