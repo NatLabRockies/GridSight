@@ -43,7 +43,7 @@ concurrency:
 jobs:
   build-macos:
     name: macOS aarch64 build
-    runs-on: macos-14  # Apple Silicon. macos-13 is Intel if we ever need it.
+    runs-on: macos-15  # Apple Silicon (macos-14 images are retired).
     steps:
       - name: Checkout gridsight
         uses: actions/checkout@v4
