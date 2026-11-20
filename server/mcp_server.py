@@ -289,7 +289,7 @@ def install_extension(spec: str) -> dict:
 
     `spec` is anything `uv pip install` accepts, or a bundle zip:
       - a PyPI requirement, e.g. "gridsight-gat"
-      - a git requirement, e.g. "gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3#subdirectory=gridsight-ext"
+      - a git requirement, e.g. "gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.4#subdirectory=gridsight-ext"
       - several requirements separated by " ; " (installed in one call)
       - an absolute path to a .whl, or to a .zip of wheels (GAT's
         `make gridsight-bundle` output)

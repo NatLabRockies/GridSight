@@ -56,8 +56,8 @@ gridsight-seds @ git+https://github.com/NatLabRockies/GridSight.git@main#subdire
 # instead (see docker-build.sh + .env.example).
 
 # GAT — Grid Analysis Toolkit.
-# nlr-gat[sienna,server] @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3
-# gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3#subdirectory=gridsight-ext
+# nlr-gat[sienna,server] @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.4
+# gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.4#subdirectory=gridsight-ext
 
 # DemandTldr — demand forecasting (Demand100 pipeline). Staged locally by
 # docker-build.sh from $DEMANDTLDR_PATH; leave commented (no git auth needed).

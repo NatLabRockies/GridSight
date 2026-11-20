@@ -241,7 +241,7 @@ cd web && bun install && cd ..
 Open http://localhost:5173 in your browser.
 
 `setup-extensions.sh` clones GAT to `../GAT` (relative to the gridsight
-repo) at tag `nlr-gat-v0.1.3` by default. Override with flags:
+repo) at tag `nlr-gat-v0.1.4` by default. Override with flags:
 
 ```bash
 ./scripts/setup-extensions.sh --gat-ref v1.2.3 --parent-dir ~/code

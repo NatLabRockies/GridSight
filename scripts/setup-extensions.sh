@@ -41,7 +41,7 @@ cd "$(dirname "$0")/.."
 GRIDSIGHT_DIR="$(pwd)"
 
 # ── Defaults ──────────────────────────────────────────────────────────────
-GAT_REF="${GAT_REF:-nlr-gat-v0.1.3}"
+GAT_REF="${GAT_REF:-nlr-gat-v0.1.4}"
 GAT_REPO_URL="${GAT_REPO_URL:-https://github.com/NatLabRockies/GridAnalysisToolkit.git}"
 PARENT_DIR="${PARENT_DIR:-$(cd .. && pwd)}"
 SKIP_GAT=0

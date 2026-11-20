@@ -152,8 +152,8 @@ a PyPI name or a `git+https://…` URL pointing at a tag or commit:
 ```
 # core deps...
 gridsight-sdk          @ git+https://github.com/NatLabRockies/GridSight.git@v1.2.3#subdirectory=sdk
-gridsight-gat          @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3#subdirectory=gridsight-ext
-nlr-gat[sienna,server] @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3
+gridsight-gat          @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.4#subdirectory=gridsight-ext
+nlr-gat[sienna,server] @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.4
 gridsight-demand-tldr  @ git+https://github.com/YOUR_ORG/DemandTldr.git@v0.1.0#subdirectory=gridsight-ext
 ```
 
