@@ -20,6 +20,7 @@ import CallSplitIcon from '@mui/icons-material/CallSplit';
 import { useTheme } from '@mui/material/styles';
 
 import { fetchChartData, fetchExtensionCharts, setInputControl } from '../../lib/loaders.js';
+import { reportError } from '../../lib/errorReporter.js';
 import { getChartComponent } from '../../lib/chartRegistry.js';
 
 // Process-level cache for scenario chart data. Re-mounts (e.g. docking a
@@ -112,6 +113,8 @@ export default function ScenarioChartBody({
           console.warn('[ScenarioChartBody fetch]', spec.name,
             'server error:', rows.error);
           setError(rows.error);
+          reportError('chart', `Chart "${spec.name}" (${extensionName}) failed: ${rows.error}`,
+            { extension: extensionName, chart: spec.name, project, scenario, entityId });
           return;
         }
         const n = Array.isArray(rows) ? rows.length : 0;
@@ -137,6 +140,8 @@ export default function ScenarioChartBody({
         console.warn('[ScenarioChartBody fetch]', spec.name,
           'network/parse error:', e);
         setError(String(e));
+        reportError('chart', `Chart "${spec.name}" (${extensionName}) failed: ${String(e)}`,
+          { extension: extensionName, chart: spec.name, project, scenario, entityId });
       });
     return () => {
       cancelled = true;

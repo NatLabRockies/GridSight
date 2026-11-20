@@ -84,3 +84,97 @@ async def inject_bus_message(
     _check_key(header_key, api_key)
     sent = await sync_manager.inject(body.channel, body.payload, body.action)
     return {"sent": sent, "channel": body.channel}
+
+
+@router.post("/internal/restart")
+async def restart_backend(
+    header_key: str | None = Depends(api_key_header),
+    api_key: str = Query(default=""),
+) -> dict:
+    """Exit this process shortly after replying. The desktop watchdog
+    respawns the sidecar (new port, written to backend.json), which then
+    rediscovers extensions through their entry points. Use after installing
+    or removing an extension. Desktop only: this router is mounted only when
+    GRIDSIGHT_DESKTOP=1."""
+    _check_key(header_key, api_key)
+    asyncio.get_running_loop().call_later(0.5, os._exit, 0)
+    return {"restarting": True}
+
+
+# ── capture_view: the window renders itself to PNG for an agent ───────────
+# The MCP tool injects {"type": "capture-view", "requestId": ...} on the
+# "mcp" channel, the window POSTs the PNG here, and the tool polls GET.
+_captures: dict[str, dict[str, Any]] = {}
+
+
+class CaptureResult(BaseModel):
+    png: str | None = None
+    width: int | None = None
+    height: int | None = None
+    notes: list[str] = []
+    error: str | None = None
+
+
+@router.post("/internal/capture/result/{request_id}")
+async def put_capture(
+    request_id: str,
+    body: CaptureResult,
+    header_key: str | None = Depends(api_key_header),
+    api_key: str = Query(default=""),
+) -> dict:
+    _check_key(header_key, api_key)
+    if len(_captures) > 8:  # keep only a few recent captures in memory
+        for k in list(_captures)[: len(_captures) - 8]:
+            _captures.pop(k, None)
+    _captures[request_id] = body.model_dump()
+    return {"stored": True}
+
+
+@router.get("/internal/capture/result/{request_id}")
+async def get_capture(
+    request_id: str,
+    header_key: str | None = Depends(api_key_header),
+    api_key: str = Query(default=""),
+) -> dict:
+    _check_key(header_key, api_key)
+    if request_id not in _captures:
+        raise HTTPException(status_code=404, detail="not ready")
+    return _captures.pop(request_id)
+
+
+# ── Layer tools for MCP: reuse the in-app AI's layer tools ────────────────
+# The in-app chat and MCP agents should have the same layer verbs. These
+# tools run in the server process (database + DuckDB), so MCP calls them here.
+_LAYER_TOOLS = {
+    "list_layers",          # with style ids and geometry_properties
+    "style_layer",
+    "update_layer_style",
+    "filter_layer",
+    "set_visible_layers",
+    "set_category_colors",
+}
+
+
+@router.post("/internal/tools/{tool_name}")
+async def run_layer_tool(
+    tool_name: str,
+    request: Request,
+    header_key: str | None = Depends(api_key_header),
+    api_key: str = Query(default=""),
+) -> Any:
+    _check_key(header_key, api_key)
+    if tool_name not in _LAYER_TOOLS:
+        raise HTTPException(status_code=404, detail=f"unknown tool {tool_name!r}; allowed: {sorted(_LAYER_TOOLS)}")
+    import db as _db
+    from lib.ai.tools import execute_tool
+
+    args = await request.json() if (await request.body()) else {}
+    out = await asyncio.to_thread(
+        execute_tool, tool_name, args,
+        request.app.state.duckdb_engine, request.app.state.extension_registry,
+        db=_db,
+    )
+    try:
+        return json.loads(out)
+    except (TypeError, ValueError):
+        return {"result": out}

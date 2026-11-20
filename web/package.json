@@ -36,6 +36,7 @@
     "deck.gl": "^9.0.12",
     "file-saver": "^2.0.5",
     "hammerjs": "^2.0.8",
+    "html-to-image": "1.11.13",
     "jsqr": "^1.4.0",
     "maplibre-gl": "^4.7.1",
     "plotly.js-basic-dist-min": "^3.4.0",

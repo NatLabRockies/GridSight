@@ -37,6 +37,7 @@ export function captureViewState({
   aiAnchorModes,
   sidebarMode,
   expandedExt,
+  legendOpen,
   extensions,
   controls,
 } = {}) {
@@ -97,6 +98,7 @@ export function captureViewState({
     ui: {
       sidebarMode: sidebarMode ?? null,
       expandedExt: expandedExt ?? null,
+      legendOpen: legendOpen ?? false,
     },
     // Per-extension on/off. Captures only the names that were enabled at
     // capture time; on apply, every extension not in this list is forced
@@ -131,7 +133,7 @@ export function applyViewState(blob, dispatchers = {}) {
     setViewState, setBaseLayer, updateScenarioState,
     setGenericLayerVisibility, setGenericLayerLocalStyle,
     updateClockState, setOpenScenarioCharts, setAiAnchorModes,
-    setSidebarMode, setExpandedExt, mapRef,
+    setSidebarMode, setExpandedExt, setLegendOpen, mapRef,
     applyExtensionStates, applyInputControls,
     flyDurationMs = 1000,
   } = dispatchers;
@@ -211,6 +213,7 @@ export function applyViewState(blob, dispatchers = {}) {
     if (blob.ui.expandedExt !== undefined && setExpandedExt) {
       setExpandedExt(blob.ui.expandedExt);
     }
+    if (setLegendOpen) setLegendOpen(!!blob.ui.legendOpen);
   }
 
   // Map viewport last — animated `flyTo` if the map is mounted and the

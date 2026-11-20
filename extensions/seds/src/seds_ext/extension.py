@@ -2,9 +2,9 @@
 SEDS GridSight extension — EIA State Energy Data System historical data.
 
 State-level annual energy statistics, 1960–present, indexed by MSN codes
-(fuel × sector × unit). Ships alongside the DemandTldr forecast extension
-in the same repo but is fully self-contained: users who want only historical
-data can disable the forecast extension and still use SEDS.
+(fuel × sector × unit). Self-contained: it does not depend on any other
+extension. Click actions across layers (for example, drill from a state into
+a county layer) are user configuration, not defaults of this extension.
 
 Data is fetched on demand from eia.gov and cached locally as Parquet; no
 data ships with the extension.
@@ -331,21 +331,6 @@ class SedsExtension(GridSightExtensionBase):
                     "interaction": {
                         "hoverContent": [],
                         "clickContent": ["infocard", "charts"],
-                        # Drill from the SEDS state choropleth into the
-                        # DemandTldr county-demand layer: clicking a state
-                        # filters the county layer to that STATEFP, shows it,
-                        # hides this state layer, and flies to the bounds.
-                        # Targets demand-county-choropleth (DemandTldr) — both
-                        # extensions must be enabled for the drill to land.
-                        "crossLayerActions": [
-                            {"action": "filter",
-                             "targetLayerName": "demand-county-choropleth",
-                             "filterProperty": "STATEFP", "sourceProperty": "STATEFP"},
-                            {"action": "show",
-                             "targetLayerName": "demand-county-choropleth"},
-                            {"action": "hide_self"},
-                            {"action": "fly_to_bounds"},
-                        ],
                     },
                 },
             ),

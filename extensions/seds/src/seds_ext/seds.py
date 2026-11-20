@@ -22,7 +22,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-logger = logging.getLogger("demand_tldr_ext.seds")
+logger = logging.getLogger("seds_ext.seds")
 
 CACHE_FILE_NAME = "complete_seds.parquet"
 CACHE_TTL_DAYS = 180

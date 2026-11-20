@@ -4,6 +4,7 @@ import { createDirectionalLineLayer } from './DirectionalLineLayer.js';
 import { createTransmissionLayer, resolveLowUsagePalette } from './TransmissionLayer.js';
 import { createGeneratorLayer } from './GeneratorLayer.js';
 import { sampleColormap, normalise } from './colormaps.js';
+import { NO_DEPTH } from './drawParams.js';
 
 /**
  * Build an index from the dataset rows: { joinKeyValue → { column → value } }
@@ -37,7 +38,7 @@ export function createHighlightLayer(coordinates) {
     stroked: true,
     filled: false,
     pickable: false,
-    parameters: { depthTest: false },
+    parameters: NO_DEPTH,
   });
 }
 
@@ -434,7 +435,7 @@ export function createGenericLayer(layerConfig, geoData, dataIndex, localStyle =
       }),
       ...(onHover && { onHover: (info) => onHover({ ...info, layerId: layerConfig.id }) }),
       ...(onClick && { onClick: (info) => onClick({ ...info, layerId: layerConfig.id }) }),
-      parameters: { depthTest: false },
+      parameters: NO_DEPTH,
       ...filterProps,
     });
   }
@@ -483,7 +484,7 @@ export function createGenericLayer(layerConfig, geoData, dataIndex, localStyle =
       }),
       ...(onHover && { onHover: (info) => onHover({ ...info, layerId: layerConfig.id }) }),
       ...(onClick && { onClick: (info) => onClick({ ...info, layerId: layerConfig.id }) }),
-      parameters: { depthTest: false },
+      parameters: NO_DEPTH,
       ...filterProps,
     });
   }
@@ -492,7 +493,11 @@ export function createGenericLayer(layerConfig, geoData, dataIndex, localStyle =
     // GeneratorLayer: dual-radius scatterplot for generators with inner (generation)
     // and outer (capacity/availability) circles in a single shader pass.
     const genBuf = timeseriesBuffers?.primary ?? timeseriesBuffer;
-    const capBuf = timeseriesBuffers?.availability ?? null;
+    // capacitySource 'nameplate': size capacity circles by the static
+    // capacityProperty (installed MW) instead of hourly availability, so a
+    // capacity view shows solar at night too. Default 'availability'.
+    const useNameplate = localStyle.capacitySource === 'nameplate' && !!localStyle.capacityProperty;
+    const capBuf = useNameplate ? null : (timeseriesBuffers?.availability ?? null);
     const genIndex = genBuf?.currentValues?.size ? genBuf.currentValues : dataIndex;
     const capIndex = capBuf?.currentValues?.size ? capBuf.currentValues : null;
 
@@ -627,6 +632,11 @@ export function createGenericLayer(layerConfig, geoData, dataIndex, localStyle =
       filterProperty: filterActive ? filterProp : null,
       filterCategories: filterActive && filterCategories.length > 0 ? filterCategories : null,
       tsVersion,
+      displayMode: localStyle.displayMode ?? 'flow',
+      colorProperty: localStyle.colorProperty ?? null,
+      categoryColors: localStyle.categoryColors ?? null,
+      staticColor: localStyle.staticLineColor ?? undefined,
+      capacityWidthFactor: localStyle.capacityWidthFactor ?? 0.3,
     });
   }
 
@@ -639,7 +649,7 @@ export function createGenericLayer(layerConfig, geoData, dataIndex, localStyle =
     getFillColor: staticFillColor,
     ...(onHover && { onHover: (info) => onHover({ ...info, layerId: layerConfig.id }) }),
     ...(onClick && { onClick: (info) => onClick({ ...info, layerId: layerConfig.id }) }),
-    parameters:   { depthTest: false },
+    parameters:   NO_DEPTH,
     ...filterProps,
   });
 }

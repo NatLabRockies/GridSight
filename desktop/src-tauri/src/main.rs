@@ -83,6 +83,9 @@ async fn open_window(
     WebviewWindowBuilder::new(&app, &label, WebviewUrl::External(parsed))
         .title(title.as_deref().unwrap_or("GridSight"))
         .inner_size(width.unwrap_or(1200.0), height.unwrap_or(800.0))
+        // Keep pop-out windows (chart trays, wall views) running while
+        // hidden, like the main window: agents drive and capture them.
+        .background_throttling(tauri::utils::config::BackgroundThrottlingPolicy::Disabled)
         .build()
         .map_err(|e| format!("create window: {e}"))?;
     Ok(())
@@ -203,8 +206,18 @@ fn main() {
                 }
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running GridSight desktop");
+        .build(tauri::generate_context!())
+        .expect("error while building GridSight desktop")
+        .run(|app, event| {
+            // Quit (⌘Q, menu, osascript) can end the process before the main
+            // window's Destroyed event runs; stop the sidecar here as well so
+            // it is not left running on its port.
+            if let tauri::RunEvent::Exit = event {
+                if let Some(state) = app.try_state::<AppState>() {
+                    state.backend.lock().shutdown();
+                }
+            }
+        });
 }
 
 async fn bootstrap(app: AppHandle) {

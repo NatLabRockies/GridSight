@@ -41,7 +41,7 @@ cd "$(dirname "$0")/.."
 GRIDSIGHT_DIR="$(pwd)"
 
 # ── Defaults ──────────────────────────────────────────────────────────────
-GAT_REF="${GAT_REF:-mw/v1.0.0}"
+GAT_REF="${GAT_REF:-nlr-gat-v0.1.3}"
 GAT_REPO_URL="${GAT_REPO_URL:-https://github.com/NatLabRockies/GridAnalysisToolkit.git}"
 PARENT_DIR="${PARENT_DIR:-$(cd .. && pwd)}"
 SKIP_GAT=0
@@ -129,11 +129,9 @@ cat <<EOF
 
    # Open http://localhost:5173
 
-If you want to ingest a GAT scenario (Sienna PCM/CEM results):
-
-   gat ingest --project demo --scenario base \\
-       --system /path/to/system.json \\
-       --simulation /path/to/simulation_store.h5
+To load a Sienna scenario (system.json + simulation_store.h5), use the
+GAT extension's upload in GridSight. For demo data, see
+examples/cats-sienna/README.md.
 
 ──────────────────────────────────────────────────────────
 EOF

@@ -59,7 +59,7 @@ fn provision_dev<F: FnMut(&str)>(paths: &Paths, progress: &mut F) -> Result<()> 
 
 fn provision_bundled<F: FnMut(&str)>(paths: &Paths, progress: &mut F) -> Result<()> {
     // Bundled mode: the .app/.exe ships a frozen server tree, a generated
-    // requirements.txt, and pre-built wheels for sdk + gat + gridsight-gat.
+    // requirements.txt, and pre-built wheels for gridsight-sdk + gridsight-seds.
     // The target machine has no copy of the repo and no live source.
     let req = paths.requirements.as_ref().context("bundled requirements path")?;
     let wheels = paths.wheels_dir.as_ref().context("bundled wheels path")?;

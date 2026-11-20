@@ -800,12 +800,12 @@ export default function GenericLayerStyler({
         <Tooltip title={TIPS.radiusMinPixels} placement="top" arrow>
           <TextField label="Min Pixels" type="number" size="small"
             value={localStyle.radiusMinPixels ?? 0}
-            onChange={e => update({ radiusMinPixels: parseInt(e.target.value) || 0 })} sx={{ flex: 1 }} />
+            onChange={e => update({ radiusMinPixels: parseFloat(e.target.value) || 0 })} sx={{ flex: 1 }} />
         </Tooltip>
         <Tooltip title={TIPS.radiusMaxPixels} placement="top" arrow>
           <TextField label="Max Pixels" type="number" size="small"
             value={localStyle.radiusMaxPixels ?? 100}
-            onChange={e => update({ radiusMaxPixels: parseInt(e.target.value) || 100 })} sx={{ flex: 1 }} />
+            onChange={e => update({ radiusMaxPixels: parseFloat(e.target.value) || 100 })} sx={{ flex: 1 }} />
         </Tooltip>
       </Stack>
       <FormControl component="fieldset">
@@ -846,12 +846,12 @@ export default function GenericLayerStyler({
           <Tooltip title={TIPS.lineWidthMinPixels} placement="top" arrow>
             <TextField label="Min Pixels" type="number" size="small"
               value={localStyle.lineWidthMinPixels ?? 0}
-              onChange={e => update({ lineWidthMinPixels: parseInt(e.target.value) || 0 })} sx={{ flex: 1 }} />
+              onChange={e => update({ lineWidthMinPixels: parseFloat(e.target.value) || 0 })} sx={{ flex: 1 }} />
           </Tooltip>
           <Tooltip title={TIPS.lineWidthMaxPixels} placement="top" arrow>
             <TextField label="Max Pixels" type="number" size="small"
               value={localStyle.lineWidthMaxPixels ?? 20}
-              onChange={e => update({ lineWidthMaxPixels: parseInt(e.target.value) || 20 })} sx={{ flex: 1 }} />
+              onChange={e => update({ lineWidthMaxPixels: parseFloat(e.target.value) || 20 })} sx={{ flex: 1 }} />
           </Tooltip>
         </Stack>
         <FormControl component="fieldset">
@@ -869,7 +869,72 @@ export default function GenericLayerStyler({
         </FormControl>
       </>)}
 
+      {layerType === 'GeneratorLayer' && localStyle.capacityProperty && (<>
+        <SectionHeader>Capacity source</SectionHeader>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+          What the capacity circle shows. Available capacity changes every hour
+          (solar is 0 at night); installed capacity is the nameplate rating
+          ({localStyle.capacityProperty}) and does not change.
+        </Typography>
+        <RadioGroup row value={localStyle.capacitySource ?? 'availability'}
+          onChange={e => update({ capacitySource: e.target.value })}>
+          <FormControlLabel value="availability" control={<Radio size="small" />}
+            label={<Typography variant="caption">Available (hourly)</Typography>} />
+          <FormControlLabel value="nameplate" control={<Radio size="small" />}
+            label={<Typography variant="caption">Installed (nameplate)</Typography>} />
+        </RadioGroup>
+      </>)}
+
       {layerType === 'TransmissionLayer' && (<>
+        <SectionHeader>Line display</SectionHeader>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+          Flow animates loading and direction over time. Capacity shows the
+          network itself: width from the line rating, color from a property.
+        </Typography>
+        <RadioGroup row value={localStyle.displayMode ?? 'flow'}
+          onChange={e => update({ displayMode: e.target.value })}>
+          <FormControlLabel value="flow" control={<Radio size="small" />}
+            label={<Typography variant="caption">Flow (animated)</Typography>} />
+          <FormControlLabel value="capacity" control={<Radio size="small" />}
+            label={<Typography variant="caption">Capacity (static)</Typography>} />
+        </RadioGroup>
+        {(localStyle.displayMode ?? 'flow') === 'capacity' && (<>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1, mb: 1 }}>
+            <Typography variant="caption" sx={{ minWidth: 72 }}>Color by</Typography>
+            <Select size="small" value={localStyle.colorProperty ?? ''} displayEmpty sx={{ flex: 1 }}
+              onChange={e => update({ colorProperty: e.target.value || null, categoryColors: null })}>
+              <MenuItem value=""><em>One color</em></MenuItem>
+              {geoProps.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+            </Select>
+          </Stack>
+          {localStyle.colorProperty && (
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
+              {extractPropValues(geoData, localStyle.colorProperty).slice(0, 12).map((v) => {
+                const cur = localStyle.categoryColors?.[v];
+                const hex = Array.isArray(cur)
+                  ? '#' + cur.slice(0, 3).map(c => c.toString(16).padStart(2, '0')).join('')
+                  : (typeof cur === 'string' ? cur : '#78aadc');
+                return (
+                  <Stack key={v} direction="row" alignItems="center" spacing={0.5}>
+                    <input type="color" value={hex} style={{ width: 22, height: 18, border: 0, padding: 0 }}
+                      onChange={e => update({ categoryColors: { ...(localStyle.categoryColors || {}), [v]: e.target.value } })} />
+                    <Typography variant="caption">{v}</Typography>
+                  </Stack>
+                );
+              })}
+            </Stack>
+          )}
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="caption" sx={{ minWidth: 72 }}>Width / √MW</Typography>
+            <CommittedSlider size="small" value={localStyle.capacityWidthFactor ?? 0.3}
+              min={0.02} max={1} step={0.01}
+              onChange={(_, v) => update({ capacityWidthFactor: v })} sx={{ flex: 1 }} />
+            <Typography variant="caption" sx={{ minWidth: 40, textAlign: 'right' }}>
+              {(localStyle.capacityWidthFactor ?? 0.3).toFixed(2)}
+            </Typography>
+          </Stack>
+        </>)}
+
         <SectionHeader>Low-usage color</SectionHeader>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
           Color of idle / barely-loaded lines. Steel blue keeps them distinct

@@ -115,6 +115,14 @@ pub fn spawn(paths: &Paths) -> Result<(BackendHandle, u16)> {
         &port.to_string(),
     ])
     .current_dir(&paths.server_dir)
+    // The sidecar must import only from its own venv. A PYTHONPATH or
+    // PYTHONHOME inherited from the launching shell (another Python's
+    // site-packages) breaks imports such as pydantic_core.
+    .env_remove("PYTHONPATH")
+    .env_remove("PYTHONHOME")
+    // The backend exits by itself when this process is gone (see
+    // server/app.py), even after a kill that skips our shutdown code.
+    .env("GRIDSIGHT_PARENT_PID", std::process::id().to_string())
     .env("GRIDSIGHT_DESKTOP", "1")
     // The webview reaches the protocol handler via different URL forms
     // depending on the host OS (see desktopBridge.js for the same logic).

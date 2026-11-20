@@ -4,14 +4,16 @@
 # Produces under desktop/src-tauri/resources/:
 #   server/             — frozen copy of the server/ source tree (no .venv,
 #                          no __pycache__, no tests)
-#   wheels/             — pre-built wheels: gridsight-sdk, gat, gridsight-gat
+#   wheels/             — pre-built wheels: gridsight-sdk, gridsight-seds
 #   requirements.txt    — pinned PyPI deps derived from server/pyproject.toml
 #                          (with the local packages stripped)
 #
-# Source locations are configurable via env vars so the script works on a
-# fresh build machine where the repos live somewhere other than ~/code.
+# Only first-party packages from this repo go into the app. External
+# extensions (GAT, DemandTldr, ...) are never bundled, even when a sibling
+# checkout exists: users install them from the app (side-load a wheel or
+# bundle zip, or a PyPI/git spec).
+#
 #   GRIDSIGHT_REPO       — defaults to two levels up from this script
-#   GAT_SOURCE_DIR      — defaults to $GRIDSIGHT_REPO/../GAT
 
 set -euo pipefail
 
@@ -21,8 +23,6 @@ RESOURCES="$DESKTOP_DIR/src-tauri/resources"
 WHEELS="$RESOURCES/wheels"
 
 GRIDSIGHT_REPO="${GRIDSIGHT_REPO:-$(cd "$DESKTOP_DIR/.." && pwd)}"
-GAT_SOURCE_DIR="${GAT_SOURCE_DIR:-$GRIDSIGHT_REPO/../GAT}"
-DEMAND_TLDR_SOURCE_DIR="${DEMAND_TLDR_SOURCE_DIR:-$GRIDSIGHT_REPO/../DemandTldr/gridsight-ext}"
 
 UV="${UV:-$DESKTOP_DIR/src-tauri/binaries/uv}"
 if [ ! -x "$UV" ]; then
@@ -34,31 +34,14 @@ if [ -z "$UV" ] || [ ! -x "$UV" ]; then
 fi
 
 echo "→ gridsight repo:  $GRIDSIGHT_REPO"
-echo "→ GAT source:     $GAT_SOURCE_DIR"
-echo "→ DemandTldr ext: $DEMAND_TLDR_SOURCE_DIR"
 echo "→ uv:             $UV"
 
-for d in "$GRIDSIGHT_REPO/server" "$GRIDSIGHT_REPO/sdk"; do
+for d in "$GRIDSIGHT_REPO/server" "$GRIDSIGHT_REPO/sdk" "$GRIDSIGHT_REPO/extensions/seds"; do
   if [ ! -d "$d" ]; then
     echo "missing required source dir: $d" >&2
     exit 1
   fi
 done
-
-HAS_GAT=true
-for d in "$GAT_SOURCE_DIR" "$GAT_SOURCE_DIR/gridsight-ext"; do
-  if [ ! -d "$d" ]; then
-    echo "→ GAT not found at $d — skipping GAT wheels (extension unavailable at runtime)"
-    HAS_GAT=false
-    break
-  fi
-done
-
-HAS_DEMAND_TLDR=true
-if [ ! -d "$DEMAND_TLDR_SOURCE_DIR" ]; then
-  echo "→ DemandTldr not found at $DEMAND_TLDR_SOURCE_DIR — skipping (extension unavailable at runtime)"
-  HAS_DEMAND_TLDR=false
-fi
 
 echo "→ cleaning $RESOURCES"
 rm -rf "$RESOURCES"
@@ -82,22 +65,16 @@ echo "→ exporting requirements.txt (local packages stripped)"
   --format requirements-txt \
   --no-emit-project \
   --no-emit-package gridsight-sdk \
-  --no-emit-package gridsight-gat \
-  --no-emit-package gridsight-demand-tldr \
-  --no-emit-package gat \
+  --no-emit-package gridsight-seds \
   --no-hashes \
   --no-dev \
   -o "$RESOURCES/requirements.txt"
 
 echo "→ building wheels"
 "$UV" build --wheel --out-dir "$WHEELS" "$GRIDSIGHT_REPO/sdk"
-if [ "$HAS_GAT" = "true" ]; then
-  "$UV" build --wheel --out-dir "$WHEELS" "$GAT_SOURCE_DIR"
-  "$UV" build --wheel --out-dir "$WHEELS" "$GAT_SOURCE_DIR/gridsight-ext"
-fi
-if [ "$HAS_DEMAND_TLDR" = "true" ]; then
-  "$UV" build --wheel --out-dir "$WHEELS" "$DEMAND_TLDR_SOURCE_DIR"
-fi
+# SEDS is a first-party extension in this repo (server dep via a relative
+# path). Ship it as a wheel; the relative path does not exist in the app.
+"$UV" build --wheel --out-dir "$WHEELS" "$GRIDSIGHT_REPO/extensions/seds"
 
 echo
 echo "✓ Resources prepared:"

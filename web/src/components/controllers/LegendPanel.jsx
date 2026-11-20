@@ -28,6 +28,39 @@ import { formatFieldLabel } from '../../lib/formatFieldLabel.js';
  * rather than a declarative style_mapping — without this synthesis it would
  * show no legend despite being visually driven by a colormap.
  */
+function toRgbaArray(c) {
+  if (Array.isArray(c)) return c.length >= 4 ? c : [...c.slice(0, 3), 220];
+  if (typeof c === 'string' && /^#?[0-9a-f]{6}$/i.test(c.trim())) {
+    const h = c.trim().replace('#', '');
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 220];
+  }
+  return [120, 120, 120, 220];
+}
+
+function clampPx(v, lo, hi) {
+  return Math.max(lo ?? 0, Math.min(hi ?? Infinity, v));
+}
+
+function SizeLegend({ label, samples, shape }) {
+  return (
+    <Box sx={{ px: 1.25, py: 0.75, my: 0.5, bgcolor: 'rgba(20,20,20,0.85)', backdropFilter: 'blur(6px)',
+      border: '1px solid rgba(255,255,255,0.12)', borderRadius: 1.5 }}>
+      <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.5 }}>{label}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1.5 }}>
+        {samples.map(({ value, px }) => (
+          <Box key={value} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {shape === 'line'
+              ? <Box sx={{ width: 28, height: Math.max(1, px), bgcolor: 'text.secondary', borderRadius: 1 }} />
+              : <Box sx={{ width: Math.max(2, 2 * px), height: Math.max(2, 2 * px), borderRadius: '50%',
+                  border: '1px solid', borderColor: 'text.secondary', bgcolor: 'action.selected' }} />}
+            <Typography variant="caption" sx={{ fontSize: 10, mt: 0.25 }}>{value.toLocaleString()}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 function deriveLegends(layerConfigs, visibility, localStyles) {
   const legends = [];
   for (const lc of layerConfigs) {
@@ -36,7 +69,34 @@ function deriveLegends(layerConfigs, visibility, localStyles) {
     const overrides = ls.styleOverrides ?? {};
 
     // TransmissionLayer — synthesize a Line Loading (%) legend entry.
-    if (lc.deck_layer_type === 'TransmissionLayer') {
+    const groupName = ls.group_display_name || lc.display_name || lc.name;
+
+    if (lc.deck_layer_type === 'TransmissionLayer' && ls.displayMode === 'capacity') {
+      // Static capacity view: colors by a property, width by rating.
+      if (ls.colorProperty && ls.categoryColors && Object.keys(ls.categoryColors).length) {
+        const active = ls.filterEnabled && ls.filterProperty === ls.colorProperty
+          ? new Set((ls.filterCategories || []).map(String)) : null;
+        const cats = Object.keys(ls.categoryColors)
+          .filter((c) => !active || active.has(String(c)))
+          .sort((a, b) => (Number(b) - Number(a)) || String(a).localeCompare(String(b)));
+        const colors = {};
+        for (const c of cats) colors[c] = toRgbaArray(ls.categoryColors[c]);
+        legends.push({
+          layerId: lc.id, layerName: lc.display_name || lc.name,
+          filterProperty: ls.colorProperty, label: ls.colorLabel || formatFieldLabel(ls.colorProperty),
+          categoryColors: colors, categories: cats, type: 'categorical',
+        });
+      }
+      const f = ls.capacityWidthFactor ?? 0.3;
+      legends.push({
+        layerId: lc.id, layerName: lc.display_name || lc.name,
+        label: 'Line rating (MW), width', type: 'size', shape: 'line',
+        samples: [250, 1000, 4000].map((mw) => ({
+          value: mw,
+          px: clampPx(Math.sqrt(mw) * f, ls.lineWidthMinPixels ?? 0.5, ls.lineWidthMaxPixels ?? 14),
+        })),
+      });
+    } else if (lc.deck_layer_type === 'TransmissionLayer') {
       legends.push({
         layerId: lc.id,
         layerName: lc.display_name || lc.name,
@@ -49,7 +109,35 @@ function deriveLegends(layerConfigs, visibility, localStyles) {
       });
     }
 
-    for (const sm of lc.style_mappings ?? []) {
+    if (lc.deck_layer_type === 'GeneratorLayer' && (ls.radiusUnits ?? 'meters') === 'pixels') {
+      // Circle size in MW (pixel units only; meter radii change with zoom).
+      const showCap = ls.capacityVisible ?? true;
+      const showGen = ls.generationVisible ?? true;
+      const what = !showGen ? (ls.capacitySource === 'nameplate' ? 'Installed capacity' : 'Available capacity')
+        : showCap ? 'Generation in available capacity' : 'Generation';
+      const scale = ls.radiusScale ?? 1;
+      legends.push({
+        layerId: ls.group_key || lc.id, layerName: groupName,
+        label: `${what} (MW)`, type: 'size', shape: 'circle',
+        samples: [100, 500, 1000].map((mw) => ({
+          value: mw, px: clampPx(mw * scale, ls.radiusMinPixels ?? 0, ls.radiusMaxPixels ?? 100),
+        })),
+      });
+    }
+
+    if (ls.legendLabel) {
+      // A single-color layer (e.g. an overlay): one swatch with its label.
+      const c = toRgbaArray(ls.staticLineColor ?? ls.staticFillColor ?? [100, 149, 237, 180]);
+      legends.push({
+        layerId: lc.id, layerName: lc.display_name || lc.name, label: 'Layer',
+        filterProperty: null, categoryColors: { [ls.legendLabel]: [c[0], c[1], c[2], 220] },
+        categories: [ls.legendLabel], type: 'categorical',
+      });
+    }
+
+    // TransmissionLayer colors come from its own loading/capacity logic
+    // (legends above), not from the raw time-series style mapping.
+    for (const sm of lc.deck_layer_type === 'TransmissionLayer' ? [] : (lc.style_mappings ?? [])) {
       // Only color mappings produce legends
       if (sm.visual_property !== 'fill_color' && sm.visual_property !== 'get_color'
           && sm.visual_property !== 'getColor' && sm.visual_property !== 'getFillColor') continue;
@@ -101,8 +189,10 @@ function deriveLegends(layerConfigs, visibility, localStyles) {
       const catColors = m.categoryColors ?? {};
       if (Object.keys(catColors).length === 0) continue;
       legends.push({
-        layerId: lc.id,
-        layerName: lc.display_name || lc.name,
+        // Grouped layers (GAT renewable + thermal) share one legend.
+        layerId: ls.group_key || lc.id,
+        filterLayerId: lc.id,
+        layerName: groupName,
         filterProperty: m.property,
         label: m.label ?? (m.property === '__category' ? 'Category' : formatFieldLabel(m.property)),
         categoryColors: catColors,
@@ -130,6 +220,8 @@ export default function LegendPanel({
   localStyles,
   onFilterChange,
   bottomOffset = 0,    // room to clear a bottom ChartDock
+  forceOpen = false,   // story chapters / agents: keep the legend visible
+  rightOffset = 0,     // room to clear the chart tray on the right
 }) {
   const legends = useMemo(
     () => deriveLegends(layerConfigs, visibility, localStyles),
@@ -141,7 +233,8 @@ export default function LegendPanel({
   // Pinned = stay open at a fixed spot regardless of hover. Dragging the panel
   // auto-pins it (otherwise it hides the moment the cursor leaves the
   // bottom-right hover zone, and can't be reached at its new position).
-  const [pinned, setPinned] = useState(false);
+  const [pinnedState, setPinned] = useState(false);
+  const pinned = pinnedState || forceOpen;
   const panelRef = useRef(null);
   const posRef = useRef({ x: 0, y: 0 });
 
@@ -197,7 +290,7 @@ export default function LegendPanel({
       sx={{
         position: 'fixed',
         bottom: 48 + bottomOffset,
-        right: 0,
+        right: rightOffset,
         zIndex: 1400,
         width: 340,
         display: 'flex',
@@ -306,6 +399,14 @@ export default function LegendPanel({
         {/* Legend entries */}
         {!panelCollapsed && legends.map((legend) => {
           const key = `${legend.layerId}-${legend.label}`;
+          if (legend.type === 'size') {
+            return (
+              <Box key={key}>
+                <SizeLegend label={`${legend.layerName}: ${legend.label}`}
+                  samples={legend.samples} shape={legend.shape} />
+              </Box>
+            );
+          }
           return (
             <Box key={key}>
               <ColorMapLegend
@@ -317,7 +418,7 @@ export default function LegendPanel({
                 label={`${legend.layerName}: ${legend.label}`}
                 collapsed={collapsedEntries.has(key)}
                 onCollapsedChange={() => toggleEntry(key)}
-                onFilterChange={onFilterChange ? (filter) => onFilterChange(legend.layerId, legend.filterProperty, filter) : undefined}
+                onFilterChange={onFilterChange && legend.filterProperty ? (filter) => onFilterChange(legend.filterLayerId ?? legend.layerId, legend.filterProperty, filter) : undefined}
               />
             </Box>
           );

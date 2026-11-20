@@ -17,7 +17,7 @@ spawns a Python (`uvicorn`) sidecar as a child process. The bundle includes:
 | Resource | Source | Notes |
 |---|---|---|
 | `resources/server/` | `gridsight/server/` | Frozen copy of the FastAPI app |
-| `resources/wheels/` | `sdk/`, `GAT/`, `GAT/gridsight-ext/` | Locally-built wheels for sibling packages |
+| `resources/wheels/` | `sdk/`, `extensions/seds/` | Wheels for the first-party packages. External extensions (GAT, DemandTldr) are never bundled; users install them from the app. |
 | `resources/requirements.txt` | `server/pyproject.toml` (via `uv export`) | Pinned PyPI deps, local packages stripped |
 | `binaries/uv` (or `uv.exe`) | astral-sh release | Used at first launch to provision the venv |
 | Webview UI | `web/dist/` | Built by `bun run build` via Tauri's `beforeBuildCommand` |
@@ -46,13 +46,9 @@ cross-compile; a macOS host produces a `.dmg`, a Windows host produces an
 
 - **Rust** stable toolchain via [rustup](https://rustup.rs)
 - **Bun** ([install](https://bun.sh)) — frontend build + dev server
-- **Git** with access to the GridSight and sibling repos checked out side by side:
-  ```
-  ~/code/gridsight/        ← this repo
-  ~/code/GAT/             ← GAT repo (contains gat/ and gridsight-ext/)
-  ```
-  Paths can be overridden via `GRIDSIGHT_REPO` / `GAT_SOURCE_DIR` env vars
-  when running `prepare-resources.sh`.
+- **Git** and a checkout of this repo. No sibling repos are needed: the
+  build bundles only the SDK and SEDS from this repo. Override the repo
+  path with `GRIDSIGHT_REPO` when running `prepare-resources.sh`.
 
 The build pulls `uv` from the official release archive automatically; you
 do **not** need uv on PATH (though it's fine if it's there).

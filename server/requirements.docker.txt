@@ -47,8 +47,8 @@ gridsight-sdk @ git+https://github.com/NatLabRockies/GridSight.git@main#subdirec
 gridsight-seds @ git+https://github.com/NatLabRockies/GridSight.git@main#subdirectory=extensions/seds
 
 # ── External extensions (own repos) ──────────────────────────────────────
-# GAT ships via git URL once private-repo auth is wired into the build host
-# (GITHUB_TOKEN build-arg or mounted SSH key). DemandTldr is instead STAGED
+# GAT ships via git URL from its public repo (uncomment the lines below and
+# pin a release tag). DemandTldr is instead STAGED
 # LOCALLY by scripts/docker-build.sh (its gridsight-ext isn't pushed to the
 # private repo yet), the same mechanism as sdk/seds — so its git line below
 # stays commented and no auth is needed. Its reference data (forecast.parquet +
@@ -56,8 +56,8 @@ gridsight-seds @ git+https://github.com/NatLabRockies/GridSight.git@main#subdire
 # instead (see docker-build.sh + .env.example).
 
 # GAT — Grid Analysis Toolkit.
-# gat @ git+https://github.com/NatLabRockies/GAT.git@v1.0.0
-# gridsight-gat @ git+https://github.com/NatLabRockies/GAT.git@v1.0.0#subdirectory=gridsight-ext
+# nlr-gat[sienna,server] @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3
+# gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3#subdirectory=gridsight-ext
 
 # DemandTldr — demand forecasting (Demand100 pipeline). Staged locally by
 # docker-build.sh from $DEMANDTLDR_PATH; leave commented (no git auth needed).

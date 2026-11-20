@@ -21,6 +21,7 @@ import { ScatterplotLayer, LayerExtension } from 'deck.gl';
 import { DataFilterExtension } from '@deck.gl/extensions';
 import * as WorkerCache from './workers/LayerWorkerCache.js';
 import { GpuGeneratorLayer } from './shaders/GeneratorStylesExtension.js';
+import { NO_DEPTH } from './drawParams.js';
 
 // ─── Static-geometry cache ──────────────────────────────────────────────────
 // Per-feature position + entityId + static-property capacity are invariant
@@ -566,7 +567,7 @@ export function createGeneratorLayer({
       },
       ...(onHover && { onHover }),
       ...(onClick && { onClick }),
-      parameters: { depthTest: false },
+      parameters: NO_DEPTH,
     });
   }
 
@@ -624,6 +625,6 @@ export function createGeneratorLayer({
 
     ...(onHover && { onHover }),
     ...(onClick && { onClick }),
-    parameters: { depthTest: false },
+    parameters: NO_DEPTH,
   });
 }

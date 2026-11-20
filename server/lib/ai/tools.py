@@ -959,6 +959,10 @@ def _exec_list_layers(db: Any | None, duckdb_engine: Any | None = None) -> str:
 _GEOM_PROPS_CACHE: dict[str, list[dict]] = {}
 
 
+# Set by app.py at startup (ExtensionStorageAdapter), for extension geometries.
+EXTENSION_STORAGE: Any | None = None
+
+
 def _layer_geometry_props(lyr, session, duckdb_engine) -> list[dict]:
     """Styleable feature-property descriptors for a layer's geometry:
     ``[{name, numeric, sample}]``. Spatial layers read the ingested DuckDB
@@ -976,7 +980,11 @@ def _layer_geometry_props(lyr, session, duckdb_engine) -> list[dict]:
     if not geo:
         return []
 
-    cache_key = geo.spatial_table if getattr(geo, "is_spatial", False) else geo.content_hash
+    is_ext = bool(getattr(geo, "extension_name", None) and getattr(geo, "extension_ref", None))
+    if is_ext:
+        cache_key = f"ext:{geo.extension_name}:{geo.extension_ref}"
+    else:
+        cache_key = geo.spatial_table if getattr(geo, "is_spatial", False) else geo.content_hash
     if cache_key and cache_key in _GEOM_PROPS_CACHE:
         return _GEOM_PROPS_CACHE[cache_key]
 
@@ -993,9 +1001,17 @@ def _layer_geometry_props(lyr, session, duckdb_engine) -> list[dict]:
                 for c in cols:
                     samples[c] = [r.get(c) for r in rows if r.get(c) is not None]
         else:
-            from lib.state import storage
+            if is_ext:
+                # Extension layers (e.g. GAT generators/lines) build their
+                # GeoJSON on demand; read it through the extension adapter so
+                # agents can see properties like voltage_kv or nameplate_mw.
+                if EXTENSION_STORAGE is None:
+                    return []
+                raw = EXTENSION_STORAGE.get_geometry_bytes(geo.extension_name, geo.extension_ref)
+            else:
+                from lib.state import storage
 
-            raw = storage.read_file_bytes(geo.content_hash)
+                raw = storage.read_file_bytes(geo.content_hash)
             gj = json.loads(raw)
             feats = gj.get("features", []) if isinstance(gj, dict) else []
             for f in feats[:20]:

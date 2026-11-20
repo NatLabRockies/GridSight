@@ -9,12 +9,17 @@ import Login from "./auth/Login.jsx";
 import { App } from "./components/App.jsx";
 import { initDesktopBridge, isTauri } from "./lib/desktopBridge.js";
 import { installChartDebug } from "./lib/chartDebug.js";
+import { installErrorReporter } from "./lib/errorReporter.js";
 import gridsightIconSvg from "./gridsight_icon.svg?raw";
 import "./styles/globals.css";
 
 // Enrich Plotly's context-free "Too many auto-margin redraws" warning with a
 // per-plot dump (component, container vs figure size, zoom) — see chartDebug.js.
 installChartDebug();
+
+// Send console errors, uncaught exceptions and failed renders to the backend,
+// where agents read them (MCP get_errors) to correct themselves.
+installErrorReporter();
 
 // ChartTrayApp is a lightweight root for the dedicated chart-tray tab.
 // Lazy-loaded so the primary bundle doesn't carry it for users who never

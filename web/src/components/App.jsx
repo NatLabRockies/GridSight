@@ -6,6 +6,7 @@ import {
 } from '../lib/basemaps.js';
 import "./app.css";
 import MapView, { useControl, AttributionControl } from "react-map-gl/maplibre";
+import { reportError } from '../lib/errorReporter.js';
 import { MapboxOverlay as DeckOverlay } from "@deck.gl/mapbox";
 // _StatsWidget is the FPS / GPU-stats HUD. Underscore prefix is the
 // deck.gl convention for "experimental but stable" — they ship the
@@ -146,6 +147,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 // DeckGL overlay bridge
 // ---------------------------------------------------------------------------
 
+// deck.gl reports layer failures (shader compile, attribute update,
+// layer-class swap) through onError, and by default only logs them. A
+// failing layer can stop the whole overlay from drawing, so send these to
+// the agent-readable error log (MCP get_errors).
+function handleDeckError(error, layer) {
+  reportError('deck', `deck.gl error${layer ? ` in layer ${layer.id}` : ''}: ${error?.message || error}`,
+    { stack: String(error?.stack || '').slice(0, 1500) });
+  return true;
+}
+
 function DeckGLOverlay({ showStats, ...props }) {
   // The StatsWidget instance is created once and reused — instantiating
   // it inside setProps on every render leaks WebGL contexts. We swap
@@ -167,6 +178,7 @@ function DeckGLOverlay({ showStats, ...props }) {
   const widgets = showStats && statsRef.current ? [statsRef.current] : [];
   const overlay = useControl(() => new DeckOverlay({ ...props, widgets }));
   overlay.setProps({ ...props, widgets });
+  if (typeof window !== 'undefined') window.__gsOverlay = overlay;
   return null;
 }
 
@@ -176,6 +188,11 @@ function DeckGLOverlay({ showStats, ...props }) {
 
 export function App() {
   const theme = useTheme();
+  // Legend shown open (not only on hover). Saved with perspectives so a
+  // story chapter can show its legend; MCP set_legend_open toggles it.
+  const [legendOpen, setLegendOpen] = useState(false);
+  const legendOpenRef = useRef(false);
+  legendOpenRef.current = legendOpen;
 
   // Window role and view mode from URL params
   const [windowRole] = useState(() => {
@@ -828,6 +845,20 @@ export function App() {
   // Enforce the vertical-fill minimum zoom (see lib/mapCamera.js) on load and
   // on every resize, so a tall viewport can't lock the camera to the pole.
   function handleMapLoad(evt) {
+    // Tell agents (get_errors) when the map breaks: a lost WebGL context or a
+    // style/tile error freezes the canvas without any visible error.
+    try {
+      const m = evt?.target;
+      if (m && !m.__gsHealthHooks) {
+        m.__gsHealthHooks = true;
+        m.getCanvas().addEventListener('webglcontextlost', () =>
+          reportError('map', 'WebGL context lost; the map is frozen until the window reloads'));
+        m.getCanvas().addEventListener('webglcontextrestored', () =>
+          reportError('map', 'WebGL context restored'));
+        m.on('error', (e) => reportError('map', `MapLibre error: ${e?.error?.message || e?.error || 'unknown'}`,
+          { sourceId: e?.sourceId ?? null }));
+      }
+    } catch { /* never block map load */ }
     const m = evt?.target;
     if (!m) return;
     // Apply the operator's basemap feature toggles now, and re-apply on every
@@ -1050,7 +1081,11 @@ export function App() {
         map.state.localStyle[lc.id] ?? {},
         tsBuf,
         versions.state.tsVersion,
-        hasAnyBuf ? clockState.frequency : 0,
+        // Transitions only while the clock plays. When paused, style and
+        // index changes apply at once: deck.gl transitions need continuous
+        // frames, which a hidden window (background agent) does not get,
+        // so a paused change could stay half-applied indefinitely.
+        hasAnyBuf && clockState.animate ? clockState.frequency : 0,
         stableLayerHover,
         stableLayerClick,
         tsBufs,
@@ -1088,6 +1123,8 @@ export function App() {
   }
 
   const layers = [...genericDeckLayers, highlightLayer].filter(Boolean);
+  // Exposed for MCP inspect_layers (what deck.gl is really asked to draw).
+  if (typeof window !== 'undefined') window.__gsDeckLayers = layers;
 
   // Derive current timestamp label from the first active TimeseriesBuffer.
   const currentTime = useMemo(() => {
@@ -1321,6 +1358,7 @@ export function App() {
       aiAnchorModes,
       sidebarMode: ui.state.sidebarMode,
       expandedExt: ui.state.expandedExt,
+      legendOpen: legendOpenRef.current,
       extensions,
       controls,
     });
@@ -1426,6 +1464,72 @@ export function App() {
           // basemapById falls back to the default for an unknown id, so the
           // resolved .id is always valid.
           updateBaseLayer(basemapById(payload.basemap).id);
+        } else if (payload.type === 'inspect-layers' && payload.requestId) {
+          // MCP inspect_layers: summarize the deck.gl layers drawn right now.
+          const KEYS = ['radiusScale', 'radiusMinPixels', 'radiusMaxPixels', 'radiusUnits',
+            'widthScale', 'widthMinPixels', 'widthMaxPixels', 'opacity', 'visible',
+            'generationVisible', 'capacityVisible', 'filterEnabled', 'filterRange'];
+          const ov = window.__gsOverlay;
+          const deck = ov?._deck;
+          const m = ov?._map;
+          let deckInfo = null;
+          try {
+            const managed = deck?.layerManager?.getLayers?.() ?? [];
+            deckInfo = {
+              initialized: !!deck?.isInitialized,
+              metrics: deck?.metrics ? { fps: deck.metrics.fps, framesRedrawn: deck.metrics.framesRedrawn,
+                redrawCount: deck.metrics.redraw } : null,
+              needsRedraw: deck?.needsRedraw?.({ clearRedrawFlags: false }) ?? null,
+              managed: managed.filter((l) => !l.parent).map((l) => ({
+                id: l.id, loaded: l.isLoaded, visible: l.props.visible,
+                numInstances: l.getNumInstances?.() ?? null,
+                sublayers: (l.getSubLayers?.() || []).length,
+              })),
+              mapCustomLayers: m ? (m.getStyle()?.layers || []).filter((x) => x.type === 'custom').map((x) => x.id) : null,
+              viewport: deck?.getViewports?.()[0] ? { w: deck.getViewports()[0].width, h: deck.getViewports()[0].height } : null,
+            };
+          } catch (e) {
+            deckInfo = { error: String(e?.message || e) };
+          }
+          const result = {
+            deck: deckInfo,
+            layers: (window.__gsDeckLayers || []).map((l) => {
+              const p = l.props || {};
+              const out = { id: l.id, class: l.constructor?.name,
+                count: Array.isArray(p.data) ? p.data.length : (p.data?.length ?? null) };
+              for (const k of KEYS) if (p[k] !== undefined) out[k] = p[k];
+              return out;
+            }),
+          };
+          const g = window.__GRIDSIGHT__;
+          const q = g?.apiKey ? `?api_key=${encodeURIComponent(g.apiKey)}` : '';
+          await fetch(`${g?.backendUrl || ''}/internal/capture/result/${encodeURIComponent(payload.requestId)}${q}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: [JSON.stringify(result)] }),
+          }).catch((e) => console.error('[inspect-layers] upload failed', e));
+        } else if (payload.type === 'set-legend-open') {
+          setLegendOpen(!!payload.open);
+        } else if (payload.type === 'capture-view' && payload.requestId) {
+          // MCP capture_view: render the window to a PNG and hand it back.
+          const { captureView } = await import('../lib/captureView.js');
+          let result;
+          try {
+            result = await captureView({
+              map: mapRef.current?.getMap?.(),
+              includeUi: payload.includeUi !== false,
+              maxWidth: payload.maxWidth || 1600,
+            });
+          } catch (e) {
+            result = { error: String(e?.message || e) };
+          }
+          const g = window.__GRIDSIGHT__;
+          const base = g?.backendUrl || '';
+          const q = g?.apiKey ? `?api_key=${encodeURIComponent(g.apiKey)}` : '';
+          await fetch(`${base}/internal/capture/result/${encodeURIComponent(payload.requestId)}${q}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(result),
+          }).catch((e) => console.error('[capture-view] upload failed', e));
         } else if (payload.type === 'capture-perspective') {
           const capture = captureLiveStateRef.current;
           const blob = capture ? await capture() : null;
@@ -1500,6 +1604,7 @@ export function App() {
     setAiAnchorModes,
     setSidebarMode: ui.setSidebarMode,
     setExpandedExt: ui.setExpandedExt,
+    setLegendOpen,
     mapRef,
     applyExtensionStates: async (enabledNames) => {
       // Diff the desired enabled-set against current state. Toggle only
@@ -1584,24 +1689,6 @@ export function App() {
         transition: 'outline 0.3s ease',
       } : {}),
     }}>
-      <Box
-        sx={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 99999,
-          pointerEvents: 'none',
-          color: '#ff0000',
-          fontSize: '12vw',
-          fontWeight: 900,
-          letterSpacing: '0.05em',
-          textShadow: '0 0 20px rgba(0,0,0,0.6)',
-          userSelect: 'none',
-        }}
-      >
-        TEST
-      </Box>
       <BusSyncHost
         map={map}
         layout={layout}
@@ -1628,6 +1715,9 @@ export function App() {
       />
       <MapView
         ref={mapRef}
+        // Keep the last frame readable so MCP capture_view can copy the map
+        // even when the window is in the background and not repainting.
+        preserveDrawingBuffer
         initialViewState={{
           latitude: viewState.latitude,
           longitude: viewState.longitude,
@@ -1737,6 +1827,7 @@ export function App() {
             interleaved
             showStats={stats.show}
             useDevicePixelRatio={forceDpr1.enabled ? 1 : undefined}
+            onError={handleDeckError}
           />
 
           <Suspense fallback={null}>
@@ -1924,24 +2015,38 @@ export function App() {
         }}
       />
       <LegendPanel
+        forceOpen={legendOpen}
+        rightOffset={trayWidth}
         layerConfigs={map.state.configs}
         visibility={map.state.visibility}
         localStyles={map.state.localStyle}
         bottomOffset={legendBottomOffset}
         onFilterChange={(layerId, filterProperty, { enabledCategories, hoverCategory }) => {
-          if (!enabledCategories && !hoverCategory) {
-            const ls = map.state.localStyle[layerId] ?? {};
-            map.setLayerStyle(layerId, { ...ls, filterEnabled: false, filterProperty: null, filterCategories: [] });
-          } else {
-            const ls = map.state.localStyle[layerId] ?? {};
-            map.setLayerStyle(layerId, {
-              ...ls,
-              filterEnabled: true,
-              filterProperty,
-              filterCategories: enabledCategories ? [...enabledCategories] : [],
-              hoverCategory: hoverCategory ?? null,
-            });
+          // A legend can stand for a layer group (GAT renewable + thermal
+          // share one): filter every member that has the property.
+          const all = map.state.localStyle;
+          const groupKey = all[layerId]?.group_key;
+          const ids = groupKey
+            ? Object.keys(all).filter((id) => all[id]?.group_key === groupKey).map(Number)
+            : [layerId];
+          const next = { ...all };
+          for (const id of ids) {
+            const ls = all[id] ?? {};
+            if (!enabledCategories && !hoverCategory) {
+              next[id] = { ...ls, filterEnabled: false, filterProperty: null, filterCategories: [] };
+            } else {
+              next[id] = {
+                ...ls,
+                filterEnabled: true,
+                filterProperty,
+                // Hover isolates the hovered category (like the classic
+                // legend); otherwise show the enabled categories.
+                filterCategories: hoverCategory ? [hoverCategory] : [...(enabledCategories ?? [])],
+                hoverCategory: hoverCategory ?? null,
+              };
+            }
           }
+          map.replaceLocalStyleMap(next);
         }}
       />
 

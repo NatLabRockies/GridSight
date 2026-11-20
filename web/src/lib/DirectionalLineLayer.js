@@ -61,6 +61,7 @@
  */
 
 import { PathLayer, LayerExtension } from 'deck.gl';
+import { NO_DEPTH } from './drawParams.js';
 
 // Default colors
 const DEFAULT_SOURCE_COLOR = [80, 80, 80, 60];     // dim gray, low alpha (origin)
@@ -318,7 +319,7 @@ export function createDirectionalLineLayer({
       getTargetColor: [dataIndex, gradientMode],
       getWidth: [dataIndex, widthScale],
     },
-    parameters: { depthTest: false },
+    parameters: NO_DEPTH,
   });
 }
 

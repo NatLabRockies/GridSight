@@ -25,6 +25,7 @@ import { DataFilterExtension } from '@deck.gl/extensions';
 import { sampleColormap, COLORMAPS } from './colormaps.js';
 import * as WorkerCache from './workers/LayerWorkerCache.js';
 import { GpuTransmissionLayer } from './shaders/StylesTextureExtension.js';
+import { NO_DEPTH } from './drawParams.js';
 
 // ─── Directional gradient shader extension ───────────────────────────────────
 //
@@ -414,6 +415,75 @@ function getStaticTransmissionData(geoData, joinKey, capacityProperty) {
   return entry;
 }
 
+// ─── Static capacity view ────────────────────────────────────────────────────
+
+function toRgba(c, fallback) {
+  if (Array.isArray(c)) return c.length === 4 ? c : [...c.slice(0, 3), 220];
+  if (typeof c === 'string' && /^#?[0-9a-f]{6}$/i.test(c.trim())) {
+    const h = c.trim().replace('#', '');
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 220];
+  }
+  return fallback;
+}
+
+function createCapacityPathLayer({
+  id, paths, capacities, colorProperty, categoryColors, staticColor,
+  capacityWidthFactor, widthScale, widthMinPixels, widthMaxPixels, widthUnits,
+  opacity, pickable, onHover, onClick, filterProperty, filterCategories,
+}) {
+  const base = toRgba(staticColor, [120, 170, 220, 220]);
+  const colors = {};
+  if (colorProperty && !(categoryColors && Object.keys(categoryColors).length)) {
+    // No colors chosen yet: give each value a distinct color. Numeric values
+    // (e.g. voltage_kv) are ranked high to low, so the highest class gets
+    // the warmest color.
+    const PALETTE = [[255, 107, 107], [255, 169, 77], [255, 212, 59], [105, 219, 124],
+      [77, 171, 247], [151, 117, 250], [240, 101, 149], [134, 142, 150]];
+    const vals = [...new Set(paths.map((d) => String(d.feature?.properties?.[colorProperty] ?? '')))];
+    const allNum = vals.every((v) => v !== '' && Number.isFinite(Number(v)));
+    vals.sort(allNum ? (x, y) => Number(y) - Number(x) : undefined);
+    vals.forEach((v, i) => { colors[v] = [...PALETTE[i % PALETTE.length], 220]; });
+  }
+  for (const [k, v] of Object.entries(categoryColors || {})) colors[String(k)] = toRgba(v, base);
+  const colorOf = (d) => {
+    if (!colorProperty) return base;
+    return colors[String(d.feature?.properties?.[colorProperty])] ?? base;
+  };
+  const filterActive = !!(filterProperty && filterCategories?.length);
+  const filterSet = new Set((filterCategories || []).map(String));
+  const colorSig = `${colorProperty}|${JSON.stringify(colors)}|${base.join(',')}`;
+  return new PathLayer({
+    id,
+    data: paths,
+    getPath: (d) => d.path,
+    getColor: colorOf,
+    getWidth: (d) => Math.sqrt(Math.max(0, capacities[d._idx])) * capacityWidthFactor,
+    widthScale,
+    widthMinPixels,
+    widthMaxPixels,
+    widthUnits,
+    opacity,
+    pickable,
+    autoHighlight: true,
+    jointRounded: true,
+    capRounded: true,
+    extensions: [new DataFilterExtension({ filterSize: 1 })],
+    getFilterValue: filterActive
+      ? (d) => (filterSet.has(String(d.feature?.properties?.[filterProperty] ?? '')) ? 1 : 0)
+      : () => 1,
+    filterRange: [1, 1],
+    filterEnabled: true,
+    updateTriggers: {
+      getColor: colorSig,
+      getWidth: capacityWidthFactor,
+      getFilterValue: [filterProperty, (filterCategories || []).join(',')],
+    },
+    parameters: NO_DEPTH,
+    ...(onHover && { onHover }),
+    ...(onClick && { onClick }),
+  });
+}
+
 // ─── Layer factory ────────────────────────────────────────────────────────────
 
 /**
@@ -485,11 +555,32 @@ export function createTransmissionLayer({
   // Falls back to the Phase 2 path if texture creation fails or the
   // worker frame isn't ready yet.
   useGpuTexture = false,
+  // displayMode 'capacity': a static view of the network itself, no flows.
+  // Width = sqrt(capacity MW) * capacityWidthFactor (same scale as flow
+  // width, so the two views compare); color = categoryColors[colorProperty]
+  // or staticColor. The time series, worker and GPU paths are not used.
+  displayMode = 'flow',
+  colorProperty = null,
+  categoryColors = null,
+  staticColor = [120, 170, 220, 220],
+  capacityWidthFactor = 0.3,
 } = {}) {
   if (!geoData) return null;
 
   const staticData = getStaticTransmissionData(geoData, joinKey, capacityProperty);
   if (!staticData.n) return null;
+
+  if (displayMode === 'capacity') {
+    return createCapacityPathLayer({
+      // Own id: deck.gl does not rebuild a layer whose `extensions` change,
+      // so reusing the flow layer's id leaves mismatched shaders/attributes
+      // and the overlay stops drawing after a capacity -> flow switch.
+      id: `${id}--capacity`, paths: staticData.paths, capacities: staticData.capacities,
+      colorProperty, categoryColors, staticColor, capacityWidthFactor,
+      widthScale, widthMinPixels, widthMaxPixels, widthUnits, opacity, pickable,
+      onHover, onClick, filterProperty, filterCategories,
+    });
+  }
 
   const { paths, capacities, entityIds, n, totalSegments, featureIndices } = staticData;
 
@@ -720,7 +811,7 @@ export function createTransmissionLayer({
         // isn't needed; deck.gl picks up scalar prop changes directly.
         getFilterValue: [filterProperty, (filterCategories || []).join(',')],
       },
-      parameters: { depthTest: false },
+      parameters: NO_DEPTH,
     });
   }
 
@@ -751,7 +842,7 @@ export function createTransmissionLayer({
       getWidth:       tickKey,
       getFilterValue: [filterProperty, (filterCategories || []).join(',')],
     },
-    parameters: { depthTest: false },
+    parameters: NO_DEPTH,
   };
 
   return new PathLayer({

@@ -34,6 +34,30 @@ for _noisy in ("python_multipart", "multipart", "urllib3", "httpx", "httpcore"):
     logging.getLogger(_noisy).setLevel(logging.WARNING)
 
 logger = logging.getLogger("gridsight")
+
+# Desktop: exit when the app that started this sidecar is gone, so a killed
+# or crashed app does not leave an orphan backend running on its port.
+if os.environ.get("GRIDSIGHT_PARENT_PID"):
+    import threading as _threading
+    import time as _time
+
+    def _watch_parent(pid: int) -> None:
+        while True:
+            _time.sleep(2.0)
+            try:
+                os.kill(pid, 0)  # signal 0: existence check only
+            except ProcessLookupError:
+                logger.warning("desktop app (pid %s) is gone; backend exiting", pid)
+                os._exit(0)
+            except PermissionError:
+                pass  # exists, owned by someone else
+
+    _threading.Thread(target=_watch_parent, args=(int(os.environ["GRIDSIGHT_PARENT_PID"]),),
+                      daemon=True, name="parent-watch").start()
+
+# Copy ERROR+ log records into the agent-readable error buffer (GET /api/errors).
+from lib import error_log  # noqa: E402
+logging.getLogger().addHandler(error_log.BufferHandler())
 logger.info("Logging initialised at level %s", _log_level_name)
 
 import db  # noqa: E402 — must follow logging.basicConfig so S3 download failures are visible
@@ -136,6 +160,8 @@ async def lifespan(app: FastAPI):
     app.state.extension_registry = registry
     app.state.duckdb_engine = duckdb_engine
     app.state.extension_storage = ExtensionStorageAdapter(registry)
+    import lib.ai.tools as _ai_tools
+    _ai_tools.EXTENSION_STORAGE = app.state.extension_storage
     app.state.lineage_manager = lineage_manager
 
     yield
@@ -158,6 +184,29 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.middleware("http")
+async def record_error_responses(request, call_next):
+    """Record every API response with status >= 400 for agents
+    (GET /api/errors, MCP get_errors), with an excerpt of the body."""
+    response = await call_next(request)
+    path = request.url.path
+    if (response.status_code >= 400 and path not in ("/api/errors", "/api/client-errors")
+            and not path.startswith("/internal/capture/")):
+        body = b""
+        async for chunk in response.body_iterator:
+            body += chunk
+        from starlette.responses import Response as _Resp
+        error_log.record(
+            "http",
+            f"{request.method} {path} -> {response.status_code}",
+            {"query": str(request.url.query)[:500], "body": body[:2000].decode("utf-8", "replace")},
+            level="error" if response.status_code >= 500 else "warning",
+        )
+        return _Resp(content=body, status_code=response.status_code,
+                     headers=dict(response.headers), media_type=response.media_type)
+    return response
 
 # When running embedded in the Tauri desktop shell, the webview origin differs
 # from the sidecar's localhost host, so the browser requires CORS. The flag is
@@ -206,6 +255,8 @@ if os.environ.get("GRIDSIGHT_DESKTOP") == "1":
     app.include_router(internal.router)
 
 # More-specific routers first; catch-all last.
+from routes import errors as errors_routes  # noqa: E402
+app.include_router(errors_routes.router)
 app.include_router(projects.router)
 app.include_router(geometry.router)
 app.include_router(datasets.router)

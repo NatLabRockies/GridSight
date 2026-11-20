@@ -13,7 +13,7 @@
 
 const UNIT_TOKENS = {
   mwh: 'MWh', mw: 'MW', gwh: 'GWh', gw: 'GW', twh: 'TWh', tw: 'TW',
-  kwh: 'kWh', kw: 'kW', btu: 'BTU', pct: '%', usd: 'USD',
+  kwh: 'kWh', kw: 'kW', btu: 'BTU', pct: '%', usd: 'USD', kv: 'kV',
 };
 
 const ACRONYMS = {

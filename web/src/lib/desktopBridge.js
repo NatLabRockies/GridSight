@@ -141,6 +141,20 @@ export async function initDesktopBridge({ onProgress } = {}) {
 
   window.__GRIDSIGHT__ = { backendUrl, apiKey };
 
+  // The sidecar can come back on a NEW port: the watchdog respawns it after
+  // a crash, and the MCP restart_backend tool (after install_extension)
+  // exits it on purpose. Every cached URL, WebSocket and the MCP SSE stream
+  // above still point at the old port, so reload — the same thing the
+  // Settings "Restart backend" button does.
+  listen('backend-status', (event) => {
+    const st = event.payload;
+    if (st?.phase === 'ready' && Number.isInteger(st.port)
+        && `http://127.0.0.1:${st.port}` !== backendUrl) {
+      console.info('[desktopBridge] backend moved to port', st.port, '— reloading');
+      setTimeout(() => window.location.reload(), 300);
+    }
+  }).catch(() => { /* no event API: nothing to do */ });
+
   _installed = true;
   return { tauri: true, backendUrl };
 }

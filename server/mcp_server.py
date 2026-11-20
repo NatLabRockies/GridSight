@@ -252,6 +252,229 @@ mcp = FastMCP(
 # ── Read tools ───────────────────────────────────────────────────────────────
 
 
+# ---------------------------------------------------------------------------
+# Extensions and data intake
+# ---------------------------------------------------------------------------
+
+def _uv_binary() -> str | None:
+    """The uv that manages this venv: $GRIDSIGHT_UV, the desktop bundle's
+    copy (…/Resources/binaries/uv next to resources/server), or uv on PATH."""
+    import shutil
+    env = os.environ.get("GRIDSIGHT_UV")
+    if env and Path(env).exists():
+        return env
+    here = Path(__file__).resolve()
+    for cand in (here.parents[2] / "binaries" / "uv", here.parents[2] / "binaries" / "uv.exe"):
+        if cand.exists():
+            return str(cand)
+    return shutil.which("uv")
+
+
+@mcp.tool()
+def list_extensions() -> list[dict]:
+    """List the extensions that the running GridSight backend has loaded
+    (name, display name, version). Call after install_extension and
+    restart_backend to check that a new extension loaded."""
+    r = _call("get", "/api/extensions")
+    r.raise_for_status()
+    data = r.json()
+    items = data if isinstance(data, list) else data.get("extensions", data)
+    return [{k: x.get(k) for k in ("name", "display_name", "version", "description") if k in x}
+            for x in items]
+
+
+@mcp.tool()
+def install_extension(spec: str) -> dict:
+    """Install a GridSight extension into the backend's Python environment.
+
+    `spec` is anything `uv pip install` accepts, or a bundle zip:
+      - a PyPI requirement, e.g. "gridsight-gat"
+      - a git requirement, e.g. "gridsight-gat @ git+https://github.com/NatLabRockies/GridAnalysisToolkit.git@nlr-gat-v0.1.3#subdirectory=gridsight-ext"
+      - several requirements separated by " ; " (installed in one call)
+      - an absolute path to a .whl, or to a .zip of wheels (GAT's
+        `make gridsight-bundle` output)
+    The new extension loads only after restart_backend()."""
+    import subprocess
+    import sys
+    import tempfile
+    import zipfile
+
+    uv = _uv_binary()
+    if not uv:
+        return {"ok": False, "error": "uv not found; set GRIDSIGHT_UV"}
+    spec = spec.strip()
+    args: list[str] = []
+    if spec.lower().endswith(".zip"):
+        tmp = tempfile.mkdtemp(prefix="gridsight-bundle-")
+        with zipfile.ZipFile(spec) as z:
+            for name in z.namelist():
+                if name.lower().endswith(".whl"):
+                    args.append(z.extract(name, tmp))
+        if not args:
+            return {"ok": False, "error": f"no wheels in {spec}"}
+    else:
+        args = [part.strip() for part in spec.split(" ; ") if part.strip()]
+    proc = subprocess.run(
+        [uv, "pip", "install", "--python", sys.executable, *args],
+        capture_output=True, text=True,
+    )
+    return {
+        "ok": proc.returncode == 0,
+        "installed": args,
+        "stdout": proc.stdout[-3000:],
+        "stderr": proc.stderr[-3000:],
+        "next": "call restart_backend() so the backend loads the extension",
+    }
+
+
+@mcp.tool()
+def restart_backend(wait_seconds: float = 90.0) -> dict:
+    """Restart the GridSight desktop backend (for example after
+    install_extension) and wait until it answers again. The app window
+    reconnects by itself. Desktop app only."""
+    import time
+    global _client
+    try:
+        _call("post", "/internal/restart")
+    except Exception:
+        pass  # the process may exit before the reply arrives
+    time.sleep(4.0)
+    deadline = time.time() + wait_seconds
+    last = ""
+    while time.time() < deadline:
+        _client = None  # rediscover the new port from backend.json
+        try:
+            r = _call("get", "/api/extensions")
+            if r.status_code == 200:
+                return {"ok": True, "extensions": list_extensions()}
+            last = f"HTTP {r.status_code}"
+        except Exception as e:  # still starting
+            last = str(e)
+        time.sleep(2.0)
+    return {"ok": False, "error": f"backend did not come back: {last}"}
+
+
+@mcp.tool()
+def list_upload_specs(extension: str) -> list[dict]:
+    """Describe the data uploads an extension accepts: each spec's name,
+    its file groups (with accepted types) and its form fields. Use these
+    names with upload_local_files."""
+    r = _call("get", f"/api/extensions/{extension}/upload-specs")
+    r.raise_for_status()
+    data = r.json()
+    return data if isinstance(data, list) else data.get("specs", data)
+
+
+@mcp.tool()
+def upload_local_files(
+    extension: str,
+    spec_name: str,
+    file_paths: dict[str, list[str]],
+    form_data: dict[str, str] | None = None,
+    wait_seconds: float = 900.0,
+) -> dict:
+    """Load local files into GridSight through an extension's upload spec
+    (the same path as the app's upload dialog) and wait for the job.
+
+    `file_paths` maps each file group to absolute paths; `form_data` holds
+    the spec's fields. Call list_upload_specs(extension) first to get the
+    names. Example: a Sienna scenario for the GAT extension is the system
+    JSON plus the simulation_store.h5 file(s), and project/scenario names."""
+    import time
+    r = _call("post", f"/api/extensions/{extension}/upload-local/{spec_name}",
+              json={"file_paths": file_paths, "form_data": form_data or {}})
+    if r.status_code >= 400:
+        return {"ok": False, "status": r.status_code, "error": r.text[:2000]}
+    job_id = r.json()["job_id"]
+    deadline = time.time() + wait_seconds
+    job: dict = {}
+    while time.time() < deadline:
+        time.sleep(2.0)
+        j = _call("get", f"/api/extensions/upload-jobs/{job_id}")
+        if j.status_code != 200:
+            continue
+        job = j.json()
+        if job.get("status") in ("success", "error"):
+            break
+    return {"ok": job.get("status") == "success", "job": job}
+
+@mcp.tool()
+def get_errors(since: int = 0, limit: int = 50) -> dict:
+    """Recent errors in GridSight, oldest first: failed API calls (for
+    example a chart whose SQL does not parse), server errors, and errors
+    that the app window reported (render failures, uncaught exceptions).
+
+    Call this after you change the view (set_scenario, open_chart,
+    create_chart, load_dataset, ...) to check that it worked, and fix what
+    it reports. Pass the returned `next_since` as `since` next time to get
+    only new errors."""
+    r = _call("get", "/api/errors", params={"since": since, "limit": limit})
+    r.raise_for_status()
+    return r.json()
+
+@mcp.tool()
+def capture_view(include_ui: bool = True, max_width: int = 1600):
+    """Take a screenshot of the GridSight window as the user sees it: the
+    map with all deck.gl layers, plus the panels, charts and legends on top
+    (include_ui=False gives the map only). Use it to check what a change
+    looks like, then correct it; pair it with get_errors().
+
+    Returns the PNG image and a short note. The window must be open."""
+    import base64
+    import time
+    import uuid
+
+    from mcp.server.fastmcp import Image
+
+    req = uuid.uuid4().hex
+    sent = _inject("mcp", {"type": "capture-view", "requestId": req,
+                           "includeUi": include_ui, "maxWidth": max_width}, "update")
+    if sent.startswith("Sent to 0 "):
+        return "No GridSight window is listening (Sent to 0 clients). Open the app or reload the window."
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        time.sleep(0.5)
+        r = _call("get", f"/internal/capture/result/{req}")
+        if r.status_code == 200:
+            d = r.json()
+            if d.get("error") or not d.get("png"):
+                return f"Capture failed: {d.get('error') or 'no image'}"
+            note = f"{d.get('width')}x{d.get('height')} px"
+            if d.get("notes"):
+                note += "; " + "; ".join(d["notes"])
+            return [Image(data=base64.b64decode(d["png"]), format="png"), note]
+    return "The window did not answer within 30 s."
+
+@mcp.tool()
+def inspect_layers() -> Any:
+    """List the deck.gl layers the window draws RIGHT NOW, with their class,
+    feature count and size/opacity props (radiusScale, radiusMaxPixels,
+    widthScale, ...). Use it when capture_view shows a style change did not
+    take effect: it tells you whether the window got the change."""
+    import json as _json
+    import time
+    import uuid
+
+    req = uuid.uuid4().hex
+    sent = _inject("mcp", {"type": "inspect-layers", "requestId": req}, "update")
+    if sent.startswith("Sent to 0 "):
+        return "No GridSight window is listening."
+    deadline = time.time() + 15
+    while time.time() < deadline:
+        time.sleep(0.3)
+        r = _call("get", f"/internal/capture/result/{req}")
+        if r.status_code == 200:
+            notes = r.json().get("notes") or ["{}"]
+            return _json.loads(notes[0])
+    return "The window did not answer within 15 s."
+
+@mcp.tool()
+def set_legend_open(open: bool = True) -> str:
+    """Show the map legend panel open (True) or only on hover (False).
+    The setting is saved with save_view, so story chapters show their
+    legend. Legends follow the visible layers' styles automatically."""
+    return _inject("mcp", {"type": "set-legend-open", "open": bool(open)})
+
 @mcp.tool()
 def list_scenarios() -> list[dict]:
     """List all projects and their scenarios currently loaded in GridSight.
@@ -928,7 +1151,47 @@ def set_clock_year(year: int) -> str:
     Args:
         year: Four-digit year to display (e.g. 2030)
     """
-    return _inject("clock", {"index": year, "playing": False})
+    return _clock_payload(index=year, animate=False)
+
+
+def _clock_payload(index: int | None = None, animate: bool | None = None,
+                   frequency: int | None = None, start_index: int | None = None,
+                   end_index: int | None = None) -> str:
+    """Publish a clock anchor in the shape useClockEngine reads: the window
+    ignores `index`; it snaps to `startIndex` when paused, and plays from
+    (`startIndex`, `startWallTime`) when `animate` is true."""
+    import time as _t
+    now = int(_t.time() * 1000)
+    p: dict[str, Any] = {"senderTime": now, "startWallTime": now}
+    if index is not None:
+        p["startIndex"] = int(index)
+    if animate is not None:
+        p["animate"] = bool(animate)
+    if frequency is not None:
+        p["frequency"] = int(frequency)
+    if start_index is not None:
+        p["start_index"] = int(start_index)
+    if end_index is not None:
+        p["end_index"] = int(end_index)
+    return _inject("clock", p)
+
+
+@mcp.tool()
+def set_clock(index: int | None = None, animate: bool | None = None,
+              frequency_ms: int | None = None, start_index: int | None = None,
+              end_index: int | None = None) -> str:
+    """Control the time clock that drives animated layers and charts.
+
+    Args:
+        index:        Time step to show (0 = first step of the scenario,
+                      e.g. hour 0 of an hourly week; for annual data use the
+                      year's index or set_clock_year).
+        animate:      True plays the animation from `index`; False pauses.
+        frequency_ms: Milliseconds per step while playing (default 750).
+        start_index / end_index: Loop range while playing.
+    The clock state is saved with save_view, so a story chapter can play an
+    animation. Check with capture_view()."""
+    return _clock_payload(index, animate, frequency_ms, start_index, end_index)
 
 
 @mcp.tool()
@@ -1108,6 +1371,196 @@ def arrange_charts(anchor: str = "right") -> str:
         return f"Invalid anchor '{anchor}'. Choose one of: {', '.join(sorted(valid))}."
     return _inject("charts", {"type": "chart:reanchor-all", "anchorMode": anchor})
 
+
+# ── Layer styling and filtering (same verbs as the in-app AI) ─────────────
+
+
+def _layer_tool(name: str, args: dict) -> Any:
+    r = _call("post", f"/internal/tools/{name}", json={k: v for k, v in args.items() if v is not None})
+    r.raise_for_status()
+    return r.json()
+
+
+@mcp.tool()
+def list_layer_details() -> Any:
+    """List map layers with their style mappings (style_id, visual property,
+    column, colormap, domain) and geometry_properties (feature properties with
+    sample values). Use it before style_layer, update_layer_style or
+    filter_layer."""
+    return _layer_tool("list_layers", {})
+
+
+@mcp.tool()
+def style_layer(layer_id: int, visual_property: str, column: str,
+                scale_type: str | None = None, colormap: str | None = None,
+                domain_min: float | None = None, domain_max: float | None = None,
+                units: str | None = None, scale: float | None = None,
+                min_pixels: float | None = None, max_pixels: float | None = None,
+                category_colors: dict[str, str] | None = None) -> Any:
+    """Create a NEW style mapping: drive a visual property of a layer from a
+    data column or feature property (for example color transmission lines by
+    voltage, size generators by capacity).
+
+    visual_property: getColor | getFillColor | getLineColor | getLineWidth |
+      getPointRadius | getElevation.
+    scale_type: linear | log | quantile | categorical. colormap: viridis |
+      plasma | coolwarm | rdylgn. For categorical, call once without
+      category_colors to get the category values, then again with
+      {value: '#RRGGBB'}.
+    Size properties: units meters|pixels, scale (multiplier), min/max_pixels.
+    See list_layer_details for columns; check with capture_view()."""
+    return _layer_tool("style_layer", dict(
+        layer_id=layer_id, visual_property=visual_property, column=column,
+        scale_type=scale_type, colormap=colormap, domain_min=domain_min,
+        domain_max=domain_max, units=units, scale=scale, min_pixels=min_pixels,
+        max_pixels=max_pixels, category_colors=category_colors))
+
+
+@mcp.tool()
+def update_layer_style(layer_id: int, style_id: int, colormap: str | None = None,
+                       scale_type: str | None = None, domain_min: float | None = None,
+                       domain_max: float | None = None, column: str | None = None) -> Any:
+    """Change an EXISTING style mapping (colormap viridis/plasma/coolwarm/rdylgn,
+    scale linear/log/quantile/categorical, value domain, column). Get style_id
+    from list_layer_details."""
+    return _layer_tool("update_layer_style", dict(
+        layer_id=layer_id, style_id=style_id, colormap=colormap,
+        scale_type=scale_type, domain_min=domain_min, domain_max=domain_max, column=column))
+
+
+@mcp.tool()
+def filter_layer(layer_id: int, property: str = "", values: list[str] | None = None,
+                 enabled: bool = True) -> Any:
+    """Draw only the features of a layer whose property matches one of the
+    values (for example transmission lines with voltage '500'). enabled=False
+    clears the filter. Unknown values are refused and the real ones returned."""
+    return _layer_tool("filter_layer", dict(layer_id=layer_id, property=property,
+                                            values=values, enabled=enabled))
+
+
+@mcp.tool()
+def set_visible_layers(layer_ids: list[int]) -> Any:
+    """Show exactly these layers and hide all others."""
+    return _layer_tool("set_visible_layers", dict(layer_ids=layer_ids))
+
+@mcp.tool()
+def set_layer_options(layer_id: int, options: dict) -> str:
+    """Set display options on a layer (merged into its local style), live.
+
+    Common keys (all optional):
+      Any layer:     opacity (0-1), filled, stroked, staticFillColor /
+                     staticLineColor ([r,g,b,a] or '#rrggbb'), legendLabel
+                     (adds a one-swatch legend entry for a single-color layer),
+                     lineWidthMinPixels, lineWidthMaxPixels, lineWidthUnits.
+      GeneratorLayer: generationVisible, capacityVisible, curtailmentVisible,
+                     capacityProperty (e.g. 'nameplate_mw'), capacitySource
+                     'availability' (default: hourly available MW, so solar
+                     is 0 at night) | 'nameplate' (installed MW from
+                     capacityProperty), radiusScale (px per MW),
+                     radiusMinPixels, radiusMaxPixels.
+      TransmissionLayer: displayMode 'flow' (default, animated loading) |
+                     'capacity' (static: width = sqrt(capacity MW) *
+                     capacityWidthFactor, color = categoryColors[colorProperty]
+                     or staticLineColor), colorProperty (e.g. 'voltage_kv'),
+                     categoryColors ({value: '#rrggbb'}), capacityWidthFactor.
+    Check the result with capture_view()."""
+    opts = dict(options or {})
+    for k, v in list(opts.items()):
+        if isinstance(v, str) and k.endswith("Color") and v.startswith("#") and len(v) == 7:
+            opts[k] = [int(v[1:3], 16), int(v[3:5], 16), int(v[5:7], 16), 220]
+    return _inject("mcp", {"type": "set-layer-geo-mapping", "layerId": layer_id, "style": opts})
+
+
+@mcp.tool()
+def create_geojson_layer(path: str, name: str, display_name: str = "",
+                         description: str = "", options: dict | None = None) -> dict:
+    """Add a local GeoJSON file (points, lines or polygons) as a new map layer,
+    for example public data from another source to lay over the grid.
+
+    The file is uploaded as a geometry and a layer is made from it; numeric
+    properties get a default color mapping. Then style it with
+    set_layer_options (e.g. {"staticFillColor": "#ff6a00", "opacity": 0.4}),
+    style_layer or filter_layer, and check with capture_view().
+
+    Args:
+        path:         Absolute path to a .geojson / .json file.
+        name:         Short name (used as the geometry and layer name).
+        display_name: Label shown in the layer panel.
+        description:  What the data is and where it came from (source, date).
+        options:      Optional set_layer_options keys to apply at once.
+    Returns: {"layer_id", "geometry_id", "name"} or {"error"}.
+    """
+    if not os.path.isfile(path):
+        return {"error": f"file not found: {path}"}
+    form = {"name": name, "format": "geojson", "scope": "global"}
+    if display_name:
+        form["display_name"] = display_name
+    if description:
+        form["description"] = description
+    with open(path, "rb") as fh:
+        r = _call("post", "/api/geometry", data=form,
+                  files={"file": (os.path.basename(path), fh, "application/geo+json")})
+    if r.status_code >= 400:
+        return {"error": f"geometry upload: {r.status_code} {r.text[:300]}"}
+    geo = r.json()
+    r2 = _call("post", f"/api/geometry/{geo['id']}/quick-layer")
+    if r2.status_code >= 400:
+        return {"error": f"quick-layer: {r2.status_code} {r2.text[:300]}"}
+    layer = r2.json()
+    layer_id = layer.get("id") or layer.get("layer_id")
+    try:
+        _inject("mcp", {"type": "reload-layers"})
+        if options and layer_id is not None:
+            import time as _t
+            _t.sleep(1.5)  # let the window fetch the new layer first
+            set_layer_options(layer_id, options)
+    except Exception:
+        pass
+    return {"layer_id": layer_id, "geometry_id": geo["id"], "name": name}
+
+
+@mcp.tool()
+def create_story(name: str, chapters: list[dict], description: str = "",
+                 project: str = "") -> dict:
+    """Make a story (guided tour) from saved perspectives, in order.
+
+    Typical loop per chapter: set up the view -> capture_view() to check it
+    -> save_view(name) -> list_perspectives() for its id. Then call this once.
+
+    Args:
+        name:        Story name.
+        chapters:    [{"perspective_id": int, "narration": "markdown text",
+                       "auto_advance_ms": optional int,
+                       "transition_duration_ms": optional int}, ...]
+        description: One-line summary of the story.
+        project:     Optional project name to attach the story to.
+    Returns: {"story_id", "steps": [step ids]} or {"error"}.
+    """
+    body: dict[str, Any] = {"name": name, "description": description, "owner": "agent"}
+    if project:
+        try:
+            for p in _call("get", "/api/projects").raise_for_status().json():
+                if p.get("name") == project:
+                    body["project_id"] = p.get("id")
+        except Exception:
+            pass
+    r = _call("post", "/api/stories", json=body)
+    if r.status_code >= 400:
+        return {"error": r.text[:300]}
+    sid = r.json()["id"]
+    steps = []
+    for i, ch in enumerate(chapters, start=1):
+        rs = _call("post", f"/api/stories/{sid}/steps", json={
+            "perspective_id": ch["perspective_id"],
+            "narration": ch.get("narration"),
+            "auto_advance_ms": ch.get("auto_advance_ms"),
+            "transition_duration_ms": ch.get("transition_duration_ms", 1000),
+            "sort_order": i,
+        })
+        if rs.status_code >= 400:
+            return {"story_id": sid, "steps": steps, "error": f"chapter {i}: {rs.text[:300]}"}
+        steps.append(rs.json()["id"])
+    return {"story_id": sid, "steps": steps}
 
 # ── Stories, perspectives & memory (agent learning over time) ──────────────────
 
