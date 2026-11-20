@@ -1,0 +1,2808 @@
+{
+  "format": "gridsight.story",
+  "version": 2,
+  "story": {
+    "name": "CATS: a summer-peak week in California",
+    "description": "Generation, the transmission network by voltage, wildfire exposure and a week of dispatch, built by an agent through MCP.",
+    "guiding_prompt": null
+  },
+  "steps": [
+    {
+      "sort_order": 1,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**CATS, the California Test System**, is a synthetic grid on California's real geography: 8,870 buses and 3,892 generators, built from public data. Each circle is a power plant, sized by installed capacity and colored by technology: about 55 GW of thermal, hydro and other plants, plus 18 GW of wind and solar.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 1. Generation capacity",
+        "description": "Generators sized by installed MW, colored by technology.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.3,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.5,
+                "lineWidthMaxPixels": 14
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        85
+                      ],
+                      "Tier 2 - Elevated": [
+                        250,
+                        204,
+                        21,
+                        40
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "year",
+                    "colormap": "viridis",
+                    "scale_type": "linear",
+                    "domain_min": 2019,
+                    "domain_max": 2019
+                  }
+                },
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  60
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  230
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 750,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 2,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**500 kV: 123 lines, about 7,500 km.** Line width shows the thermal rating. The 500 kV backbone runs the length of the state and carries the largest ratings in the system, up to 8.4 GW per line.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 2. Lines, 500 kV",
+        "description": "500 kV lines; width shows the thermal rating.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.29999999999997,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.7,
+                "lineWidthMaxPixels": 7,
+                "displayMode": "capacity",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.12,
+                "opacity": 0.9,
+                "filterEnabled": true,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "500"
+                ]
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        85
+                      ],
+                      "Tier 2 - Elevated": [
+                        250,
+                        204,
+                        21,
+                        40
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "year",
+                    "colormap": "viridis",
+                    "scale_type": "linear",
+                    "domain_min": 2019,
+                    "domain_max": 2019
+                  }
+                },
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  60
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  230
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 750,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 3,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**230 kV: 1,258 lines, about 13,300 km.** The 230 kV network ties the backbone to the large load centers around the Bay Area, the Central Valley and Southern California.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 3. Lines, 230 kV",
+        "description": "230 kV lines; width shows the thermal rating.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.29999999999997,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.7,
+                "lineWidthMaxPixels": 7,
+                "displayMode": "capacity",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.12,
+                "opacity": 0.9,
+                "filterEnabled": true,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "230"
+                ]
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        85
+                      ],
+                      "Tier 2 - Elevated": [
+                        250,
+                        204,
+                        21,
+                        40
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "year",
+                    "colormap": "viridis",
+                    "scale_type": "linear",
+                    "domain_min": 2019,
+                    "domain_max": 2019
+                  }
+                },
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  60
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  230
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 750,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 4,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**115 kV: 2,209 lines, about 13,000 km.** 115 kV lines distribute power within each region.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 4. Lines, 115 kV",
+        "description": "115 kV lines; width shows the thermal rating.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.29999999999997,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.7,
+                "lineWidthMaxPixels": 7,
+                "displayMode": "capacity",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.12,
+                "opacity": 0.9,
+                "filterEnabled": true,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "115"
+                ]
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        85
+                      ],
+                      "Tier 2 - Elevated": [
+                        250,
+                        204,
+                        21,
+                        40
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "year",
+                    "colormap": "viridis",
+                    "scale_type": "linear",
+                    "domain_min": 2019,
+                    "domain_max": 2019
+                  }
+                },
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  60
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  230
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 750,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 5,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**66 kV: 6,565 lines, about 20,300 km.** The sub-transmission network is the densest layer: more than half of all lines, with the smallest ratings.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 5. Lines, 66 kV",
+        "description": "66 kV lines; width shows the thermal rating.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.29999999999997,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": false,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "nameplate",
+                "radiusMinPixels": 1.5,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.7,
+                "lineWidthMaxPixels": 7,
+                "displayMode": "capacity",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.12,
+                "opacity": 0.9,
+                "filterEnabled": true,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "66"
+                ]
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        85
+                      ],
+                      "Tier 2 - Elevated": [
+                        250,
+                        204,
+                        21,
+                        40
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "year",
+                    "colormap": "viridis",
+                    "scale_type": "linear",
+                    "domain_min": 2019,
+                    "domain_max": 2019
+                  }
+                },
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  60
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  230
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 750,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 6,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**Data from another source, added by an agent.** The agent loaded the CPUC High Fire-Threat District map (red: Tier 3 Extreme, orange: Tier 2 Elevated) and CAL FIRE's 2019 fire perimeters (white), and laid them over the grid. About 10% of CATS line length is in Tier 3 and 22% in Tier 2, including 1,036 km of 500 kV lines (14%).",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 6. Wildfire exposure",
+        "description": "CPUC fire-threat tiers and CAL FIRE 2019 perimeters over the network.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.29999999999997,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": true,
+              "_catalog::default::calfire_2019": true
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24,
+                "filterEnabled": false,
+                "filterProperty": null,
+                "filterCategories": [],
+                "hoverCategory": "Biopower"
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.7,
+                "lineWidthMaxPixels": 4,
+                "displayMode": "capacity",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.06,
+                "opacity": 0.9,
+                "filterEnabled": false,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "66"
+                ]
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        120
+                      ],
+                      "Tier 2 - Elevated": [
+                        251,
+                        146,
+                        60,
+                        55
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1,
+                "filterEnabled": true,
+                "filterProperty": "tier_label",
+                "filterCategories": [
+                  "Tier 3 - Extreme",
+                  "Tier 2 - Elevated"
+                ],
+                "hoverCategory": "Tier 3 - Extreme"
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {},
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  70
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  240
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1.2,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 0,
+            "animate": false,
+            "frequency": 400,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 7,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**12\u201318 August 2019, hour by hour**, from a PowerSimulations (Sienna) economic dispatch. Circles show generation inside available capacity; lines show loading from green to red. The chart tray follows the clock: watch solar ramp up and down each day while demand peaks in the late afternoon.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 7. A week of summer peak",
+        "description": "Hourly dispatch and line loading, 12-18 Aug 2019, with generation and demand charts.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 37.3,
+            "longitude": -119.30000000000001,
+            "zoom": 5.85,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24,
+                "filterEnabled": false,
+                "filterProperty": null,
+                "filterCategories": [],
+                "hoverCategory": "Biopower"
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 0.5,
+                "lineWidthMaxPixels": 6,
+                "displayMode": "flow",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.06,
+                "opacity": 0.85,
+                "filterEnabled": false,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "66"
+                ],
+                "colorMode": "loading"
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        120
+                      ],
+                      "Tier 2 - Elevated": [
+                        251,
+                        146,
+                        60,
+                        55
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1,
+                "filterEnabled": false,
+                "filterProperty": null,
+                "filterCategories": [],
+                "hoverCategory": "Tier 2 - Elevated"
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {},
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  70
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  240
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1.2,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 6,
+            "animate": true,
+            "frequency": 400,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [
+            {
+              "kind": "scenario",
+              "anchorMode": "tray",
+              "charts": [
+                {
+                  "extName": "gat",
+                  "chartName": "CATS_Summer_peak_2019__system_generation_stacked",
+                  "chartSpec": {
+                    "name": "CATS_Summer_peak_2019__system_generation_stacked",
+                    "display_name": "System Generation by Tech (Summer peak 2019)",
+                    "chart_type": "scrubber-stacked-area",
+                    "sql_template": "WITH gen_by_dg AS (  SELECT cm.category AS display_group,          SUM(COLUMNS(* EXCLUDE (entity_id, category)))   FROM ext_gat.CATS_Summer_peak_2019__generation g   JOIN ext_gat.CATS_Summer_peak_2019__catmap__display_group cm     ON g.entity_id = cm.entity_id   GROUP BY cm.category), gen_long AS (  SELECT * FROM gen_by_dg   UNPIVOT (mw FOR timestamp IN (COLUMNS(* EXCLUDE display_group)))), vre_entities AS (  SELECT entity_id FROM ext_gat.CATS_Summer_peak_2019__catmap__display_group   WHERE category IN ('Land-based Wind', 'Offshore Wind', 'Onshore Wind', 'PV', 'UPV', 'VRE', 'Wind', 'dPV')), gen_unpivot AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__generation   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))   WHERE entity_id IN (SELECT entity_id FROM vre_entities)), avail_unpivot AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__availability   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))   WHERE entity_id IN (SELECT entity_id FROM vre_entities)), curt_long AS (  SELECT 'Curtailment' AS display_group,          g.ts AS timestamp,          SUM(GREATEST(0, a.val - g.val))::DOUBLE AS mw   FROM gen_unpivot g   JOIN avail_unpivot a     ON g.entity_id = a.entity_id AND g.ts = a.ts   GROUP BY g.ts) SELECT display_group, timestamp, mw FROM gen_long UNION ALL SELECT display_group, timestamp, mw FROM curt_long ORDER BY timestamp, display_group",
+                    "chart_options": {
+                      "time_axis": "timestamp",
+                      "category_axis": "display_group",
+                      "value_axis": "mw",
+                      "category_colors": {
+                        "Biopower": "#5B9844",
+                        "Coal": "#222222",
+                        "Gas-CC": "#52216B",
+                        "Gas-CT": "#C2A1DB",
+                        "Geothermal": "#A96235",
+                        "Hydro": "#187F94",
+                        "Land-based Wind": "#00B6EF",
+                        "Nuclear": "#820000",
+                        "Other": "#FF7FBB",
+                        "PV": "#FFC903",
+                        "o-g-s": "#3D3376",
+                        "Curtailment": "#E1E1E1"
+                      },
+                      "category_order": [
+                        "Nuclear",
+                        "Coal",
+                        "Gas-CC",
+                        "Gas-CT",
+                        "o-g-s",
+                        "Geothermal",
+                        "Biopower",
+                        "Other",
+                        "Hydro",
+                        "Land-based Wind",
+                        "PV",
+                        "Curtailment"
+                      ]
+                    },
+                    "width": 600,
+                    "height": 300,
+                    "datasets": [
+                      "generation",
+                      "availability"
+                    ],
+                    "format": "custom",
+                    "scope": "scenario",
+                    "project": "CATS",
+                    "scenario": "Summer peak 2019"
+                  },
+                  "entityId": null,
+                  "entityName": null
+                }
+              ]
+            },
+            {
+              "kind": "scenario",
+              "anchorMode": "tray",
+              "charts": [
+                {
+                  "extName": "gat",
+                  "chartName": "CATS_Summer_peak_2019__system_demand",
+                  "chartSpec": {
+                    "name": "CATS_Summer_peak_2019__system_demand",
+                    "display_name": "System Demand (Summer peak 2019)",
+                    "chart_type": "scrubber-multi-line",
+                    "sql_template": "WITH load_long AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__load   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))), gen_long AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__generation   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))), total_demand AS (  SELECT ts, -SUM(val) AS demand_mw   FROM load_long GROUP BY ts), vre_gen AS (  SELECT g.ts, SUM(g.val) AS vre_mw   FROM gen_long g   JOIN ext_gat.CATS_Summer_peak_2019__catmap__display_group cm     ON g.entity_id = cm.entity_id   WHERE cm.category IN ('Land-based Wind', 'Offshore Wind', 'Onshore Wind', 'PV', 'UPV', 'VRE', 'Wind', 'dPV')   GROUP BY g.ts) SELECT ts AS timestamp, 'Native Load' AS series, demand_mw::DOUBLE AS mw FROM total_demand UNION ALL SELECT d.ts AS timestamp, 'Net Load' AS series,        (d.demand_mw - COALESCE(v.vre_mw, 0))::DOUBLE AS mw FROM total_demand d LEFT JOIN vre_gen v ON d.ts = v.ts ORDER BY timestamp, series",
+                    "chart_options": {
+                      "time_axis": "timestamp",
+                      "value_axis": "mw",
+                      "series_axis": "series",
+                      "value_unit": "MW",
+                      "series_colors": {
+                        "Native Load": "#000000",
+                        "Charging Load": "#FF4A88",
+                        "Net Load": "#3F51B5"
+                      }
+                    },
+                    "width": 600,
+                    "height": 260,
+                    "datasets": [
+                      "load",
+                      "generation"
+                    ],
+                    "format": "custom",
+                    "scope": "scenario",
+                    "project": "CATS",
+                    "scenario": "Summer peak 2019"
+                  },
+                  "entityId": null,
+                  "entityName": null
+                }
+              ]
+            }
+          ],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    },
+    {
+      "sort_order": 8,
+      "transition_type": "fade",
+      "transition_duration_ms": 1200,
+      "narration": "**Thursday 15 August, 16:00: the week's peak, 39.7 GW.** The Los Angeles basin holds most of the heavily loaded lines: across the system, 69 branches are at 90% of their rating or more. The average loading chart shows the same daily rhythm all week.",
+      "auto_advance_ms": null,
+      "suggested_prompts": [],
+      "perspective": {
+        "name": "CATS 8. The peak hour",
+        "description": "Thursday 15 Aug 2019 16:00, 39.7 GW; the Los Angeles basin, where most heavily loaded lines are.",
+        "config": {
+          "version": 1,
+          "view": {
+            "latitude": 34,
+            "longitude": -117.85000000000002,
+            "zoom": 8.6,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemap": "dark-matter",
+          "scenario": {
+            "project": "CATS",
+            "scenario": "Summer peak 2019"
+          },
+          "layers": {
+            "visibility": {
+              "seds-historical::all::seds-states-layer": false,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": true,
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": false,
+              "_catalog::default::cpuc_hftd": false,
+              "_catalog::default::calfire_2019": false
+            },
+            "localStyle": {
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "curtailmentVisible": false,
+                "curtailmentApplicable": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "renewable",
+                "group_role_label": "R",
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24,
+                "filterEnabled": false,
+                "filterProperty": null,
+                "filterCategories": [],
+                "hoverCategory": "Biopower"
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "display_group",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Biopower": [
+                        91,
+                        152,
+                        68,
+                        220
+                      ],
+                      "Coal": [
+                        34,
+                        34,
+                        34,
+                        220
+                      ],
+                      "Gas-CC": [
+                        82,
+                        33,
+                        107,
+                        220
+                      ],
+                      "Gas-CT": [
+                        194,
+                        161,
+                        219,
+                        220
+                      ],
+                      "Geothermal": [
+                        169,
+                        98,
+                        53,
+                        220
+                      ],
+                      "Hydro": [
+                        24,
+                        127,
+                        148,
+                        220
+                      ],
+                      "Land-based Wind": [
+                        0,
+                        182,
+                        239,
+                        220
+                      ],
+                      "Nuclear": [
+                        130,
+                        0,
+                        0,
+                        220
+                      ],
+                      "PV": [
+                        255,
+                        201,
+                        3,
+                        220
+                      ],
+                      "o-g-s": [
+                        61,
+                        51,
+                        118,
+                        220
+                      ],
+                      "Other": [
+                        120,
+                        120,
+                        120,
+                        110
+                      ]
+                    }
+                  }
+                },
+                "capacityProperty": "nameplate_mw",
+                "radiusUnits": "pixels",
+                "radiusScale": 0.02,
+                "generationVisible": true,
+                "capacityVisible": true,
+                "group_key": "cats__summer_peak_2019__emulator__generation",
+                "group_display_name": "Generation (Summer peak 2019)",
+                "group_role": "thermal",
+                "group_role_label": "T",
+                "curtailmentVisible": false,
+                "capacitySource": "availability",
+                "radiusMinPixels": 1,
+                "radiusMaxPixels": 24
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission": {
+                "capacityProperty": "capacity",
+                "lineWidthMinPixels": 1,
+                "lineWidthMaxPixels": 8,
+                "displayMode": "flow",
+                "colorProperty": "voltage_kv",
+                "categoryColors": {
+                  "66": "#4dabf7",
+                  "115": "#69db7c",
+                  "230": "#ffa94d",
+                  "500": "#ff6b6b"
+                },
+                "capacityWidthFactor": 0.06,
+                "opacity": 0.85,
+                "filterEnabled": false,
+                "filterProperty": "voltage_kv",
+                "filterCategories": [
+                  "66"
+                ],
+                "colorMode": "loading"
+              },
+              "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers": {
+                "radiusMinPixels": 2,
+                "radiusMaxPixels": 12,
+                "radiusScale": 1,
+                "radiusUnits": "pixels"
+              },
+              "_catalog::default::cpuc_hftd": {
+                "geoMappings": {
+                  "getFillColor": {
+                    "property": "tier_label",
+                    "label": "CPUC fire-threat tier",
+                    "scale_type": "categorical",
+                    "categoryColors": {
+                      "Tier 3 - Extreme": [
+                        239,
+                        68,
+                        68,
+                        120
+                      ],
+                      "Tier 2 - Elevated": [
+                        251,
+                        146,
+                        60,
+                        55
+                      ]
+                    }
+                  }
+                },
+                "stroked": false,
+                "opacity": 1,
+                "filterEnabled": false,
+                "filterProperty": null,
+                "filterCategories": [],
+                "hoverCategory": "Tier 2 - Elevated"
+              },
+              "_catalog::default::calfire_2019": {
+                "geoMappings": {},
+                "staticFillColor": [
+                  255,
+                  255,
+                  255,
+                  70
+                ],
+                "staticLineColor": [
+                  255,
+                  255,
+                  255,
+                  240
+                ],
+                "stroked": true,
+                "lineWidthMinPixels": 1.2,
+                "opacity": 1,
+                "legendLabel": "CAL FIRE perimeter, 2019"
+              }
+            }
+          },
+          "clock": {
+            "index": 88,
+            "animate": false,
+            "frequency": 400,
+            "start_index": 0,
+            "end_index": 167,
+            "showClock": false
+          },
+          "chartFrames": [
+            {
+              "kind": "scenario",
+              "anchorMode": "tray",
+              "charts": [
+                {
+                  "extName": "gat",
+                  "chartName": "CATS_Summer_peak_2019__loading_avg",
+                  "chartSpec": {
+                    "name": "CATS_Summer_peak_2019__loading_avg",
+                    "display_name": "Avg Transmission Loading (Summer peak 2019)",
+                    "chart_type": "scrubber-line",
+                    "sql_template": "WITH flow_long AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__line_flow   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))) SELECT f.ts AS timestamp,        (AVG(ABS(f.val) / r.rating_mw) * 100)::DOUBLE AS pct FROM flow_long f JOIN ext_gat.CATS_Summer_peak_2019__branch_ratings r ON f.entity_id = r.name WHERE r.rating_mw > 0 GROUP BY f.ts ORDER BY f.ts",
+                    "chart_options": {
+                      "time_axis": "timestamp",
+                      "value_axis": "pct",
+                      "value_unit": "%",
+                      "value_label": "Avg Loading",
+                      "y_axis_name": "Loading %",
+                      "line_color": "#FF7043"
+                    },
+                    "width": 600,
+                    "height": 240,
+                    "datasets": [
+                      "line_flow"
+                    ],
+                    "format": "custom",
+                    "scope": "scenario",
+                    "project": "CATS",
+                    "scenario": "Summer peak 2019"
+                  },
+                  "entityId": null,
+                  "entityName": null
+                }
+              ]
+            },
+            {
+              "kind": "scenario",
+              "anchorMode": "tray",
+              "charts": [
+                {
+                  "extName": "gat",
+                  "chartName": "CATS_Summer_peak_2019__system_generation_stacked",
+                  "chartSpec": {
+                    "name": "CATS_Summer_peak_2019__system_generation_stacked",
+                    "display_name": "System Generation by Tech (Summer peak 2019)",
+                    "chart_type": "scrubber-stacked-area",
+                    "sql_template": "WITH gen_by_dg AS (  SELECT cm.category AS display_group,          SUM(COLUMNS(* EXCLUDE (entity_id, category)))   FROM ext_gat.CATS_Summer_peak_2019__generation g   JOIN ext_gat.CATS_Summer_peak_2019__catmap__display_group cm     ON g.entity_id = cm.entity_id   GROUP BY cm.category), gen_long AS (  SELECT * FROM gen_by_dg   UNPIVOT (mw FOR timestamp IN (COLUMNS(* EXCLUDE display_group)))), vre_entities AS (  SELECT entity_id FROM ext_gat.CATS_Summer_peak_2019__catmap__display_group   WHERE category IN ('Land-based Wind', 'Offshore Wind', 'Onshore Wind', 'PV', 'UPV', 'VRE', 'Wind', 'dPV')), gen_unpivot AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__generation   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))   WHERE entity_id IN (SELECT entity_id FROM vre_entities)), avail_unpivot AS (  SELECT entity_id, ts, val FROM ext_gat.CATS_Summer_peak_2019__availability   UNPIVOT (val FOR ts IN (COLUMNS(* EXCLUDE entity_id)))   WHERE entity_id IN (SELECT entity_id FROM vre_entities)), curt_long AS (  SELECT 'Curtailment' AS display_group,          g.ts AS timestamp,          SUM(GREATEST(0, a.val - g.val))::DOUBLE AS mw   FROM gen_unpivot g   JOIN avail_unpivot a     ON g.entity_id = a.entity_id AND g.ts = a.ts   GROUP BY g.ts) SELECT display_group, timestamp, mw FROM gen_long UNION ALL SELECT display_group, timestamp, mw FROM curt_long ORDER BY timestamp, display_group",
+                    "chart_options": {
+                      "time_axis": "timestamp",
+                      "category_axis": "display_group",
+                      "value_axis": "mw",
+                      "category_colors": {
+                        "Biopower": "#5B9844",
+                        "Coal": "#222222",
+                        "Gas-CC": "#52216B",
+                        "Gas-CT": "#C2A1DB",
+                        "Geothermal": "#A96235",
+                        "Hydro": "#187F94",
+                        "Land-based Wind": "#00B6EF",
+                        "Nuclear": "#820000",
+                        "Other": "#FF7FBB",
+                        "PV": "#FFC903",
+                        "o-g-s": "#3D3376",
+                        "Curtailment": "#E1E1E1"
+                      },
+                      "category_order": [
+                        "Nuclear",
+                        "Coal",
+                        "Gas-CC",
+                        "Gas-CT",
+                        "o-g-s",
+                        "Geothermal",
+                        "Biopower",
+                        "Other",
+                        "Hydro",
+                        "Land-based Wind",
+                        "PV",
+                        "Curtailment"
+                      ]
+                    },
+                    "width": 600,
+                    "height": 300,
+                    "datasets": [
+                      "generation",
+                      "availability"
+                    ],
+                    "format": "custom",
+                    "scope": "scenario",
+                    "project": "CATS",
+                    "scenario": "Summer peak 2019"
+                  },
+                  "entityId": null,
+                  "entityName": null
+                }
+              ]
+            }
+          ],
+          "aiAnchorModes": {},
+          "ui": {
+            "sidebarMode": "icons",
+            "expandedExt": null,
+            "legendOpen": true
+          },
+          "extensions": {
+            "enabled": [
+              "gat"
+            ]
+          },
+          "controls": {
+            "extName": "gat",
+            "project": "CATS",
+            "scenario": "Summer peak 2019",
+            "values": {}
+          }
+        }
+      }
+    }
+  ],
+  "requirements": {
+    "extensions": [
+      {
+        "name": "gat",
+        "version": "0.1.0",
+        "distribution": "gridsight-gat",
+        "dist_version": "0.1.0"
+      }
+    ],
+    "scenarios": [
+      {
+        "project": "CATS",
+        "scenario": "Summer peak 2019"
+      }
+    ],
+    "layers": [
+      "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__renewable",
+      "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__thermal",
+      "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transformers",
+      "CATS::Summer peak 2019::cats__summer_peak_2019__emulator__transmission",
+      "_catalog::default::calfire_2019",
+      "_catalog::default::cpuc_hftd",
+      "seds-historical::all::seds-states-layer"
+    ]
+  }
+}

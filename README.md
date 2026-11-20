@@ -1,30 +1,107 @@
 # GridSight
 
-**An extensible geospatial analytics and animation platform.**
+**Let an AI agent build your grid visualizations. Keep the result as a story anyone can replay.**
 
-GridSight is a desktop app (also available as a Docker deployment) for visualizing, animating, and analyzing geospatial timeseries data. Built on a plugin architecture, it supports pip-installable Python extensions that provide data, interactive controls, SQL-driven charts, and custom shaders. An integrated AI chat assistant lets users query data with natural language via DuckDB, and a data lineage system tracks provenance across every query and control change.
+GridSight is a desktop app for power-system data on a map: generators, lines, loads and their
+hourly results, animated over time. It is built for agents. Claude, or any other
+[MCP](https://modelcontextprotocol.io) client, can load a scenario, style every layer, bring in
+data from other sources, check its own work with screenshots and error logs, and save each view
+as a chapter of a story. You get the configuration-heavy, publication-quality view without the
+configuration.
 
-While designed with energy and infrastructure modeling in mind, the platform's extension system makes it suitable for any domain that combines geospatial data with temporal analysis.
-
+<p align="center">
+  <img src="docs/images/cats/cats-story.webp" width="900"
+       alt="The CATS story, chapter by chapter: generation capacity, transmission lines by voltage, wildfire exposure, a week of hourly dispatch with charts, and the peak hour">
+  <br><sub>An agent-built story about CATS, the California Test System. Chapters change every 4 seconds;
+  <a href="#a-story-built-by-an-agent-one-week-of-summer-peak-in-california">see all chapters below</a>.</sub>
+</p>
 
 > **Looking for GridSight classic?** The original GridSight lives on the
 > [`classic`](https://github.com/NatLabRockies/GridSight/tree/classic) branch
 > and the [`v0-classic`](https://github.com/NatLabRockies/GridSight/tree/v0-classic) tag.
 
+## A story built by an agent: one week of summer peak in California
 
-## Key Features
+This story uses [CATS](https://github.com/WISPO-POP/CATS-CaliforniaTestSystem), a synthetic grid on
+California's real geography (8,870 buses, 10,823 branches, 3,892 generators), with one week of
+hourly economic dispatch from [Sienna](https://github.com/NREL-Sienna) (PowerSimulations.jl).
+An agent built every chapter through GridSight's MCP tools: it styled the layers, opened the
+charts, checked each view with `capture_view`, and saved it. Every option it used is also in the
+layer styler, so you can change any chapter by hand.
 
-- **Extension system** — Pip-installable Python plugins provide data, controls, charts, and shaders. Discovered automatically at startup via Python entry points.
-- **AI chat assistant** — Provider-agnostic LLM integration (Ollama, OpenAI, Anthropic) with tool use. The AI can query DuckDB, create charts, and update controls.
-- **DuckDB analytical engine** — In-memory SQL engine. Extensions register tables; users and AI query them freely.
-- **Geospatial visualization** — deck.gl + MapLibre GL for high-performance map rendering with configurable layer styling and colormaps.
-- **Timeseries animation** — Play through timesteps with transport-style controls. Data partitions drive animated choropleth, scatter, and arc layers.
-- **Interactive controls** — Extensions expose per-entity controls (sliders, dropdowns, toggles) and project-level input controls that can trigger re-simulation.
-- **Plotly charts** — Extension-defined SQL-template charts rendered inline. Support for bar, line, scatter, and custom Plotly layouts.
-- **Custom shaders** — Extensions can provide GLSL vertex/fragment shaders and deck.gl layer extensions.
-- **Data lineage** — Every data source, SQL query, control change, and saved perspective is tracked in a provenance DAG with review status.
-- **Cross-project analysis** — Tag-based search across projects and extensions. Cross-perspectives let users compose views spanning multiple data sources.
+| | |
+|---|---|
+| ![Generation capacity](docs/images/cats/1-generation-capacity.png) | ![500 kV lines](docs/images/cats/2-line-capacity-500-kv.png) |
+| **1. Generation capacity.** Each circle is a plant, sized by installed MW and colored by technology. | **2–5. Lines by voltage.** One chapter per class (500, 230, 115, 66 kV); width shows the thermal rating. |
+| ![Wildfire exposure](docs/images/cats/6-wildfire-exposure.png) | ![A week of summer peak](docs/images/cats/7-a-week-of-summer-peak.png) |
+| **6. Data from another source.** The agent added the CPUC High Fire-Threat District map and CAL FIRE's 2019 fire perimeters: about 10% of CATS line length is in Tier 3. | **7. The week, hour by hour.** Line loading and generation animate; the chart tray (generation by technology, demand) follows the clock. |
 
+<details>
+<summary>More chapters: 230, 115 and 66 kV, and the peak hour</summary>
+
+| | |
+|---|---|
+| ![230 kV lines](docs/images/cats/3-line-capacity-230-kv.png) | ![115 kV lines](docs/images/cats/4-line-capacity-115-kv.png) |
+| **3. 230 kV:** 1,258 lines tie the backbone to the load centers. | **4. 115 kV:** 2,209 lines distribute power within each region. |
+| ![66 kV lines](docs/images/cats/5-line-capacity-66-kv.png) | ![The peak hour](docs/images/cats/8-the-peak-hour.png) |
+| **5. 66 kV:** 6,565 lines, more than half of the network. | **8. The peak hour:** Thursday 15 August, 16:00, 39.7 GW. Most heavily loaded lines are in the Los Angeles basin. |
+
+</details>
+
+**Try it:** [`examples/cats-sienna`](examples/cats-sienna) makes the simulation data with Docker. Load
+it with the GAT extension, then import
+[`examples/cats-sienna/story/cats-summer-peak.json`](examples/cats-sienna/story/cats-summer-peak.json)
+with **Import** under the story picker in the sidebar (or ask your agent to `import_story` and play
+it).
+
+## How it works
+
+1. **Load a scenario.** Extensions bring in data: [GAT](https://github.com/NatLabRockies/GridAnalysisToolkit)
+   reads Sienna and PLEXOS results; you can also add GeoJSON, CSV or Parquet files.
+2. **Connect an agent.** In the app, open **Settings → Agent Integration** and choose
+   **Set up agent integration**. It adds GridSight to Claude Desktop (or shows the configuration for
+   other MCP clients). The app also has a built-in AI chat that works with local models
+   (Ollama) or cloud models.
+3. **Ask for what you want to see.** "Show installed capacity by technology." "Only the 500 kV
+   lines, width by rating." "Add the CPUC fire-threat map and tell me which lines cross Tier 3."
+4. **The agent checks its own work.** It can see the map (`capture_view`), what the map draws
+   (`inspect_layers`) and every error from the app, including failed charts and SQL errors
+   (`get_errors`). It corrects itself before it shows you the result.
+5. **Save it as a story.** Each view becomes a perspective; a story puts them in order with
+   narration. Stories replay without AI and can be exported as one JSON file to share.
+
+## Key features
+
+- **Agent-first, through MCP.** About 50 tools: load data, query it with SQL, style and filter
+  layers, control the map and the clock, make charts, and save perspectives and stories.
+- **Power-system layers.** Generators with generation inside available capacity; transmission
+  lines with animated loading and flow direction, or a static capacity view colored by voltage.
+- **Time-series animation.** Hourly results stream by day and play smoothly, with optional worker and GPU paths for large systems.
+- **Your data, your models.** Local DuckDB engine; the AI chat works with local models, so data
+  can stay on your machine.
+- **Extensions.** Pip-installable Python packages add data sources, controls, charts and shaders.
+- **Data lineage.** Every query, control change and saved view is tracked.
+
+## Install the desktop app
+
+The desktop app is the main way to use GridSight. It bundles the server and the web UI; at first
+launch it sets up its own Python environment.
+
+1. Download the installer for your platform from
+   [Releases](https://github.com/NatLabRockies/GridSight/releases/latest):
+   `.dmg` (macOS, Apple Silicon), `.exe` or `.msi` (Windows).
+2. **macOS:** open the `.dmg` and drag **GridSight.app** to Applications.
+   The app is not signed with an Apple Developer ID, so on first launch:
+   - macOS 14 or earlier: right-click GridSight, choose **Open**, then **Open**.
+   - macOS 15 or later: run `xattr -dr com.apple.quarantine /Applications/GridSight.app` once, then open it.
+3. **Windows:** run the installer. SmartScreen warns that the publisher is
+   unknown; click **More info → Run anyway**.
+4. **Power-system data:** install the GAT extension from **Extensions** in the app (see
+   [`docs/extensions.md`](docs/extensions.md)).
+
+To build the desktop app from source, see
+[`docs/desktop-building.md`](docs/desktop-building.md). To serve GridSight to a team from one
+host, see [Run with Docker](#run-with-docker).
 
 ## Architecture
 
@@ -62,24 +139,6 @@ At startup, the server discovers all installed extensions, calls `get_manifest()
 | **Perspective** | A collection of paintings, plots, map state, and animation state that captures an analytical view. |
 | **Story** | A sequence of perspectives with transitions and narration for guided analysis. |
 
-
-## Install the Desktop App
-
-The desktop app is the main way to use GridSight. It bundles the server and
-the web UI; at first launch it sets up its own Python environment.
-
-1. Download the installer for your platform from
-   [Releases](https://github.com/NatLabRockies/GridSight/releases/latest):
-   `.dmg` (macOS, Apple Silicon), `.exe` or `.msi` (Windows).
-2. **macOS:** open the `.dmg` and drag **GridSight.app** to Applications.
-   The app is not signed with an Apple Developer ID, so on first launch:
-   - macOS 14 or earlier: right-click GridSight, choose **Open**, then **Open**.
-   - macOS 15 or later: run `xattr -dr com.apple.quarantine /Applications/GridSight.app` once, then open it.
-3. **Windows:** run the installer. SmartScreen warns that the publisher is
-   unknown; click **More info → Run anyway**.
-
-To build the desktop app from source, see
-[`docs/desktop-building.md`](docs/desktop-building.md).
 
 ## Run with Docker
 
@@ -135,7 +194,7 @@ cd web && bun install && cd ..
 Open http://localhost:5173 in your browser.
 
 `setup-extensions.sh` clones GAT to `../GAT` (relative to the gridsight
-repo) at branch `mw/v1.0.0` by default. Override with flags:
+repo) at tag `nlr-gat-v0.1.3` by default. Override with flags:
 
 ```bash
 ./scripts/setup-extensions.sh --gat-ref v1.2.3 --parent-dir ~/code
