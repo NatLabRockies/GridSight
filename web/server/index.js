@@ -950,6 +950,17 @@ async function handleRequest(req, server) {
   if (pathname === "/internal/bus/stream" && req.method === "GET") {
     return proxyToBackend(pathname + url.search, req);
   }
+  // capture_view / inspect_layers results: the page renders the view and POSTs
+  // the result back for the waiting MCP call. The desktop app posts to the
+  // sidecar directly; in a browser the page only reaches this proxy, so
+  // forward these POSTs too (the proxy adds the API key, as for the stream).
+  // Only signed-in pages (operator or guest window) may post a result.
+  if (pathname.startsWith("/internal/capture/result/") && req.method === "POST") {
+    if (!getSession(getSessionToken(req)) && !guestSessions.get(getGuestToken(req))) {
+      return json({ error: "Unauthorized" }, 401, corsHeaders(req));
+    }
+    return proxyToBackend(pathname + url.search, req);
+  }
 
   // ── API proxy routes ───────────────────────────────────────────────────────
   if (pathname.startsWith("/api/")) {
